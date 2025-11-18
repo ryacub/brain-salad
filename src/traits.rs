@@ -438,7 +438,7 @@ pub trait EventSubscriber<E: Event + Send + Sync> {
 #[cfg(test)]
 mod tests {
     use super::*;
-    use std::collections::HashMap;
+    
 
     // Example implementation for testing
     #[derive(Debug, Clone)]

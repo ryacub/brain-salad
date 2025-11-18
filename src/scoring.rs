@@ -72,6 +72,7 @@ impl Recommendation {
 #[derive(Clone)]
 pub struct ScoringEngine {
     telos_config: TelosConfig,
+    #[allow(dead_code)]
     patterns: ScoringPatterns,
 }
 
@@ -86,6 +87,7 @@ pub struct TelosConfig {
 }
 
 #[derive(Debug, Clone)]
+#[allow(dead_code)]
 struct ScoringPatterns {
     ai_positive: Vec<Regex>,
     ai_negative: Vec<Regex>,
@@ -511,6 +513,7 @@ impl ScoringEngine {
         }
     }
 
+    #[allow(dead_code)]
     fn score_dimension(
         &self,
         positive_patterns: &[Regex],
@@ -1348,207 +1351,207 @@ impl ScoringEngine {
         explanations
     }
 
-    fn explain_domain_expertise(&self, _idea: &str, idea_lower: &str, score: f64) -> String {
+    fn explain_domain_expertise(&self, _idea: &str, _idea_lower: &str, score: f64) -> String {
         if score >= 0.9 {
-            format!("High domain expertise leverage ({} points): Idea directly leverages 80%+ of existing skills like n8n, Python, AI automation, or Android dev concepts.",
-                    format!("{:.2}", score))
+            format!("High domain expertise leverage ({:.2} points): Idea directly leverages 80%+ of existing skills like n8n, Python, AI automation, or Android dev concepts.",
+                    score)
         } else if score >= 0.6 {
-            format!("Medium domain expertise leverage ({} points): Idea uses 50-79% of existing skills; minor learning required.",
-                    format!("{:.2}", score))
+            format!("Medium domain expertise leverage ({:.2} points): Idea uses 50-79% of existing skills; minor learning required.",
+                    score)
         } else if score >= 0.3 {
-            format!("Low domain expertise leverage ({} points): Idea uses 30-49% of existing skills; significant new learning needed.",
-                    format!("{:.2}", score))
+            format!("Low domain expertise leverage ({:.2} points): Idea uses 30-49% of existing skills; significant new learning needed.",
+                    score)
         } else {
-            format!("Minimal domain expertise leverage ({} points): Idea requires mostly new skills outside current domain.",
-                    format!("{:.2}", score))
+            format!("Minimal domain expertise leverage ({:.2} points): Idea requires mostly new skills outside current domain.",
+                    score)
         }
     }
 
-    fn explain_ai_alignment(&self, idea_lower: &str, score: f64) -> String {
+    fn explain_ai_alignment(&self, _idea_lower: &str, score: f64) -> String {
         if score >= 1.2 {
-            format!("Core AI product ({} points): Core product IS AI automation/systems (e.g., AI agents, automation pipelines).",
-                    format!("{:.2}", score))
+            format!("Core AI product ({:.2} points): Core product IS AI automation/systems (e.g., AI agents, automation pipelines).",
+                    score)
         } else if score >= 0.8 {
-            format!("Significant AI component ({} points): AI is a significant component but not the core offering.",
-                    format!("{:.2}", score))
+            format!("Significant AI component ({:.2} points): AI is a significant component but not the core offering.",
+                    score)
         } else if score >= 0.4 {
-            format!("Auxiliary AI component ({} points): AI is auxiliary or optional to the main offering.",
-                    format!("{:.2}", score))
+            format!("Auxiliary AI component ({:.2} points): AI is auxiliary or optional to the main offering.",
+                    score)
         } else {
             format!(
-                "Minimal AI component ({} points): Little to no AI component in the idea.",
-                format!("{:.2}", score)
+                "Minimal AI component ({:.2} points): Little to no AI component in the idea.",
+                score
             )
         }
     }
 
-    fn explain_execution_support(&self, idea_lower: &str, score: f64) -> String {
+    fn explain_execution_support(&self, _idea_lower: &str, score: f64) -> String {
         if score >= 0.65 {
-            format!("Strong shipping bias ({} points): Idea has clear deliverable within 30 days; success = shipped product.",
-                    format!("{:.2}", score))
+            format!("Strong shipping bias ({:.2} points): Idea has clear deliverable within 30 days; success = shipped product.",
+                    score)
         } else if score >= 0.45 {
-            format!("Moderate shipping bias ({} points): Deliverable within 60 days with defined MVP scope.",
-                    format!("{:.2}", score))
+            format!("Moderate shipping bias ({:.2} points): Deliverable within 60 days with defined MVP scope.",
+                    score)
         } else if score >= 0.25 {
-            format!("Weak shipping bias ({} points): Longer timeline (90+ days) or unclear MVP definition.",
-                    format!("{:.2}", score))
+            format!("Weak shipping bias ({:.2} points): Longer timeline (90+ days) or unclear MVP definition.",
+                    score)
         } else {
-            format!("Learning-focused ({} points): Primarily learning-focused with no concrete deliverable.",
-                    format!("{:.2}", score))
+            format!("Learning-focused ({:.2} points): Primarily learning-focused with no concrete deliverable.",
+                    score)
         }
     }
 
-    fn explain_revenue_potential(&self, idea_lower: &str, score: f64) -> String {
+    fn explain_revenue_potential(&self, _idea_lower: &str, score: f64) -> String {
         if score >= 0.4 {
-            format!("High revenue potential ({} points): Clear monetization model; proven market willing to pay ($1K-$2.5K/month target).",
-                    format!("{:.2}", score))
+            format!("High revenue potential ({:.2} points): Clear monetization model; proven market willing to pay ($1K-$2.5K/month target).",
+                    score)
         } else if score >= 0.25 {
-            format!("Moderate revenue potential ({} points): Plausible monetization; requires validation; likely $500-$1K/month.",
-                    format!("{:.2}", score))
+            format!("Moderate revenue potential ({:.2} points): Plausible monetization; requires validation; likely $500-$1K/month.",
+                    score)
         } else if score >= 0.1 {
-            format!("Speculative revenue potential ({} points): Speculative monetization; unclear market willingness to pay.",
-                    format!("{:.2}", score))
+            format!("Speculative revenue potential ({:.2} points): Speculative monetization; unclear market willingness to pay.",
+                    score)
         } else {
-            format!("Low revenue potential ({} points): No clear revenue path or ad-based/very low revenue model.",
-                    format!("{:.2}", score))
+            format!("Low revenue potential ({:.2} points): No clear revenue path or ad-based/very low revenue model.",
+                    score)
         }
     }
 
-    fn explain_context_switching(&self, idea: &str, idea_lower: &str, score: f64) -> String {
+    fn explain_context_switching(&self, _idea: &str, _idea_lower: &str, score: f64) -> String {
         if score >= 0.95 {
-            format!("Strong tech stack continuity ({} points): Uses 90%+ current stack (n8n/Python/AI APIs); no new languages/platforms.",
-                    format!("{:.2}", score))
+            format!("Strong tech stack continuity ({:.2} points): Uses 90%+ current stack (n8n/Python/AI APIs); no new languages/platforms.",
+                    score)
         } else if score >= 0.65 {
-            format!("Moderate tech stack continuity ({} points): Uses 70-89% current stack; minor additions (new library, familiar framework).",
-                    format!("{:.2}", score))
+            format!("Moderate tech stack continuity ({:.2} points): Uses 70-89% current stack; minor additions (new library, familiar framework).",
+                    score)
         } else if score >= 0.3 {
-            format!("Weak tech stack continuity ({} points): Requires 50%+ new stack elements (new language, platform, or paradigm).",
-                    format!("{:.2}", score))
+            format!("Weak tech stack continuity ({:.2} points): Requires 50%+ new stack elements (new language, platform, or paradigm).",
+                    score)
         } else {
-            format!("Tech stack switch detected ({} points): Complete stack switch (e.g., mobile dev, game development, hardware).",
-                    format!("{:.2}", score))
+            format!("Tech stack switch detected ({:.2} points): Complete stack switch (e.g., mobile dev, game development, hardware).",
+                    score)
         }
     }
 
-    fn explain_rapid_prototyping(&self, idea_lower: &str, score: f64) -> String {
+    fn explain_rapid_prototyping(&self, _idea_lower: &str, score: f64) -> String {
         if score >= 0.8 {
-            format!("Rapid prototyping enabled ({} points): Can ship functional MVP in 1-2 weeks; inherently iterative (SaaS, automation).",
-                    format!("{:.2}", score))
+            format!("Rapid prototyping enabled ({:.2} points): Can ship functional MVP in 1-2 weeks; inherently iterative (SaaS, automation).",
+                    score)
         } else if score >= 0.55 {
-            format!("Moderate rapid prototyping ({} points): MVP possible in 3-4 weeks; some iteration possible.",
-                    format!("{:.2}", score))
+            format!("Moderate rapid prototyping ({:.2} points): MVP possible in 3-4 weeks; some iteration possible.",
+                    score)
         } else if score >= 0.25 {
-            format!("Slow rapid prototyping ({} points): Requires 6+ weeks for minimal viable version; high quality bar needed.",
-                    format!("{:.2}", score))
+            format!("Slow rapid prototyping ({:.2} points): Requires 6+ weeks for minimal viable version; high quality bar needed.",
+                    score)
         } else {
-            format!("Perfectionism risk ({} points): Inherently perfection-dependent (content creation, courses, books).",
-                    format!("{:.2}", score))
+            format!("Perfectionism risk ({:.2} points): Inherently perfection-dependent (content creation, courses, books).",
+                    score)
         }
     }
 
-    fn explain_accountability(&self, idea_lower: &str, score: f64) -> String {
+    fn explain_accountability(&self, _idea_lower: &str, score: f64) -> String {
         if score >= 0.65 {
-            format!("Strong built-in accountability ({} points): Paying customers or public commitments with consequences (e.g., pre-sales, cohort).",
-                    format!("{:.2}", score))
+            format!("Strong built-in accountability ({:.2} points): Paying customers or public commitments with consequences (e.g., pre-sales, cohort).",
+                    score)
         } else if score >= 0.45 {
-            format!("Moderate built-in accountability ({} points): Strong accountability structure (accountability partner, public building, deadlines).",
-                    format!("{:.2}", score))
+            format!("Moderate built-in accountability ({:.2} points): Strong accountability structure (accountability partner, public building, deadlines).",
+                    score)
         } else if score >= 0.2 {
-            format!("Weak built-in accountability ({} points): Weak accountability (social media updates, personal goals).",
-                    format!("{:.2}", score))
+            format!("Weak built-in accountability ({:.2} points): Weak accountability (social media updates, personal goals).",
+                    score)
         } else {
-            format!("No built-in accountability ({} points): No external accountability; purely self-motivated.",
-                    format!("{:.2}", score))
+            format!("No built-in accountability ({:.2} points): No external accountability; purely self-motivated.",
+                    score)
         }
     }
 
-    fn explain_income_anxiety(&self, idea_lower: &str, score: f64) -> String {
+    fn explain_income_anxiety(&self, _idea_lower: &str, score: f64) -> String {
         if score >= 0.4 {
-            format!("Fast income anxiety relief ({} points): First revenue possible within 30 days; path to consistent monthly income.",
-                    format!("{:.2}", score))
+            format!("Fast income anxiety relief ({:.2} points): First revenue possible within 30 days; path to consistent monthly income.",
+                    score)
         } else if score >= 0.25 {
-            format!("Moderate income anxiety relief ({} points): First revenue within 60 days; recurring revenue model.",
-                    format!("{:.2}", score))
+            format!("Moderate income anxiety relief ({:.2} points): First revenue within 60 days; recurring revenue model.",
+                    score)
         } else if score >= 0.1 {
-            format!("Slow income anxiety relief ({} points): First revenue 90+ days; project-based or unpredictable income.",
-                    format!("{:.2}", score))
+            format!("Slow income anxiety relief ({:.2} points): First revenue 90+ days; project-based or unpredictable income.",
+                    score)
         } else {
             format!(
-                "Income anxiety remains ({} points): Revenue 6+ months away or highly uncertain.",
-                format!("{:.2}", score)
+                "Income anxiety remains ({:.2} points): Revenue 6+ months away or highly uncertain.",
+                score
             )
         }
     }
 
-    fn explain_stack_compatibility(&self, idea: &str, idea_lower: &str, score: f64) -> String {
+    fn explain_stack_compatibility(&self, _idea: &str, _idea_lower: &str, score: f64) -> String {
         if score >= 0.8 {
-            format!("High execution compatibility ({} points): Enables 4+ hour flow sessions; clear systematic execution path.",
-                    format!("{:.2}", score))
+            format!("High execution compatibility ({:.2} points): Enables 4+ hour flow sessions; clear systematic execution path.",
+                    score)
         } else if score >= 0.55 {
-            format!("Moderate execution compatibility ({} points): Allows 2-3 hour focus blocks; mostly systematic with some ambiguity.",
-                    format!("{:.2}", score))
+            format!("Moderate execution compatibility ({:.2} points): Allows 2-3 hour focus blocks; mostly systematic with some ambiguity.",
+                    score)
         } else if score >= 0.25 {
-            format!("Low execution compatibility ({} points): Requires frequent context switching or has unclear execution steps.",
-                    format!("{:.2}", score))
+            format!("Low execution compatibility ({:.2} points): Requires frequent context switching or has unclear execution steps.",
+                    score)
         } else {
-            format!("Fragmented work ({} points): Inherently fragmented work or chaotic/creative process.",
-                    format!("{:.2}", score))
+            format!("Fragmented work ({:.2} points): Inherently fragmented work or chaotic/creative process.",
+                    score)
         }
     }
 
-    fn explain_shipping_habit(&self, idea_lower: &str, score: f64) -> String {
+    fn explain_shipping_habit(&self, _idea_lower: &str, score: f64) -> String {
         if score >= 0.65 {
-            format!("High compounding benefits ({} points): Creates reusable systems, code, or processes for future projects.",
-                    format!("{:.2}", score))
+            format!("High compounding benefits ({:.2} points): Creates reusable systems, code, or processes for future projects.",
+                    score)
         } else if score >= 0.45 {
-            format!("Some compounding benefits ({} points): Some reusable components; partial knowledge transfer.",
-                    format!("{:.2}", score))
+            format!("Some compounding benefits ({:.2} points): Some reusable components; partial knowledge transfer.",
+                    score)
         } else if score >= 0.2 {
-            format!("Low compounding benefits ({} points): Minimal reusability; mostly project-specific work.",
-                    format!("{:.2}", score))
+            format!("Low compounding benefits ({:.2} points): Minimal reusability; mostly project-specific work.",
+                    score)
         } else {
             format!(
-                "No compounding ({} points): Purely one-off effort with no future leverage.",
-                format!("{:.2}", score)
+                "No compounding ({:.2} points): Purely one-off effort with no future leverage.",
+                score
             )
         }
     }
 
-    fn explain_public_accountability(&self, idea_lower: &str, score: f64) -> String {
+    fn explain_public_accountability(&self, _idea_lower: &str, score: f64) -> String {
         if score >= 0.32 {
-            format!("Fast validation possible ({} points): Can validate core assumption within 1-2 weeks (landing page, calls, prototype).",
-                    format!("{:.2}", score))
+            format!("Fast validation possible ({:.2} points): Can validate core assumption within 1-2 weeks (landing page, calls, prototype).",
+                    score)
         } else if score >= 0.22 {
             format!(
-                "Moderate validation speed ({} points): Validation possible in 3-4 weeks.",
-                format!("{:.2}", score)
+                "Moderate validation speed ({:.2} points): Validation possible in 3-4 weeks.",
+                score
             )
         } else if score >= 0.1 {
             format!(
-                "Slow validation speed ({} points): Requires 6-8 weeks to validate.",
-                format!("{:.2}", score)
+                "Slow validation speed ({:.2} points): Requires 6-8 weeks to validate.",
+                score
             )
         } else {
-            format!("Slow validation speed ({} points): Validation requires 2+ months or full product build.",
-                    format!("{:.2}", score))
+            format!("Slow validation speed ({:.2} points): Validation requires 2+ months or full product build.",
+                    score)
         }
     }
 
-    fn explain_revenue_testing(&self, idea_lower: &str, score: f64) -> String {
+    fn explain_revenue_testing(&self, _idea_lower: &str, score: f64) -> String {
         if score >= 0.24 {
-            format!("High scalability potential ({} points): SaaS/product model; same work serves multiple customers.",
-                    format!("{:.2}", score))
+            format!("High scalability potential ({:.2} points): SaaS/product model; same work serves multiple customers.",
+                    score)
         } else if score >= 0.16 {
-            format!("Some scalability potential ({} points): Hybrid model; some leverage (templates, done-for-you services).",
-                    format!("{:.2}", score))
+            format!("Some scalability potential ({:.2} points): Hybrid model; some leverage (templates, done-for-you services).",
+                    score)
         } else if score >= 0.08 {
             format!(
-                "Low scalability potential ({} points): Primarily service-based; limited leverage.",
-                format!("{:.2}", score)
+                "Low scalability potential ({:.2} points): Primarily service-based; limited leverage.",
+                score
             )
         } else {
-            format!("No scalability potential ({} points): Pure time-for-money consulting with no scalability.",
-                    format!("{:.2}", score))
+            format!("No scalability potential ({:.2} points): Pure time-for-money consulting with no scalability.",
+                    score)
         }
     }
 

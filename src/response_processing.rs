@@ -1500,7 +1500,7 @@ This was a comprehensive analysis."#;
 
     #[test]
     fn test_fix_common_validation_issues() {
-        let mut invalid_result = LlmAnalysisResult {
+        let invalid_result = LlmAnalysisResult {
             scores: LlmScores {
                 mission_alignment: MissionAlignmentScores {
                     domain_expertise: 2.0, // Invalid - too high
@@ -1543,7 +1543,7 @@ This was a comprehensive analysis."#;
 
     #[test]
     fn test_weighted_totals_calculation_validation() {
-        let mut result = LlmAnalysisResult {
+        let result = LlmAnalysisResult {
             scores: LlmScores {
                 mission_alignment: MissionAlignmentScores {
                     domain_expertise: 1.00,
@@ -1584,7 +1584,7 @@ This was a comprehensive analysis."#;
 
     #[test]
     fn test_final_score_calculation_validation() {
-        let mut result = LlmAnalysisResult {
+        let result = LlmAnalysisResult {
             scores: LlmScores {
                 mission_alignment: MissionAlignmentScores {
                     domain_expertise: 1.00,
@@ -1693,7 +1693,7 @@ This was a comprehensive analysis."#;
         let validator = ResponseValidator::new();
 
         // Valid two decimal places
-        let mut valid_result = LlmAnalysisResult {
+        let valid_result = LlmAnalysisResult {
             scores: LlmScores {
                 mission_alignment: MissionAlignmentScores {
                     domain_expertise: 1.23, // Valid 2 decimals

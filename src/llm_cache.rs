@@ -916,8 +916,7 @@ mod tests {
         assert!(cached.is_none());
 
         // Cleanup expired entries
-        let removed = cache.cleanup_expired().await.unwrap();
-        assert!(removed >= 0);
+        let _removed = cache.cleanup_expired().await.unwrap();
     }
 
     #[tokio::test]

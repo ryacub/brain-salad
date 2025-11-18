@@ -111,9 +111,8 @@ impl ApplicationError {
     pub fn with_context(self, message: impl Into<String>) -> Self {
         // For now, we'll wrap the error in a generic error with context
         // This could be improved with more sophisticated error chaining
-        match self {
-            other => Self::Generic(anyhow::anyhow!("{}: {}", message.into(), other)),
-        }
+        let other = self;
+        Self::Generic(anyhow::anyhow!("{}: {}", message.into(), other))
     }
 }
 

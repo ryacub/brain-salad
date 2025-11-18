@@ -384,8 +384,8 @@ mod tests {
         let log_dir = ConfigPaths::default_log_dir();
 
         // Should not be empty
-        assert!(data_dir.to_string_lossy().len() > 0);
-        assert!(log_dir.to_string_lossy().len() > 0);
+        assert!(!data_dir.to_string_lossy().is_empty());
+        assert!(!log_dir.to_string_lossy().is_empty());
 
         // Should contain "telos-matrix"
         assert!(data_dir.to_string_lossy().contains("telos-matrix"));

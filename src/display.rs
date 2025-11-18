@@ -1,5 +1,4 @@
 use colored::*;
-use std::borrow::Cow;
 
 use crate::patterns_simple::PatternMatch;
 use crate::scoring::{Recommendation, Score};
