@@ -1,0 +1,89 @@
+# Build artifacts
+target/
+**/*.rs.bk
+*.pdb
+
+# Git and version control
+.git/
+.gitignore
+.gitattributes
+
+# GitHub specific
+.github/
+
+# Documentation (except README.md which may be needed)
+docs/
+*.md
+!README.md
+
+# IDE and editor files
+.vscode/
+.idea/
+*.swp
+*.swo
+*~
+.DS_Store
+*.iml
+
+# Test files
+tests/
+benches/
+
+# Logs and temporary files
+*.log
+*.log.*
+tmp/
+temp/
+
+# Environment and secrets
+.env
+.env.*
+*.key
+*.pem
+
+# CI/CD files
+.travis.yml
+.gitlab-ci.yml
+azure-pipelines.yml
+
+# Docker files (if building in container)
+Dockerfile*
+docker-compose*.yml
+.dockerignore
+
+# Shell scripts (development helpers)
+*.sh
+!setup-*.sh
+
+# Rust specific
+Cargo.lock
+rust-toolchain
+rust-toolchain.toml
+
+# macOS
+.DS_Store
+.AppleDouble
+.LSOverride
+
+# Linux
+*~
+.directory
+
+# Windows
+Thumbs.db
+ehthumbs.db
+Desktop.ini
+
+# Project specific
+automation.sh
+build-watcher.sh
+make.sh
+run_cleanup.sh
+setup-aliases.sh
+setup-llm.sh
+start-llm.sh
+stop-llm.sh
+tm-alias.sh
+todo-list.md
+automate.config
+telos-matrix.rb

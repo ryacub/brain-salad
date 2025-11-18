@@ -1,0 +1,24 @@
+version: '3.8'
+
+services:
+  telos-matrix:
+    build:
+      context: .
+      dockerfile: Dockerfile
+    container_name: telos-matrix
+    volumes:
+      # Mount your telos.md file
+      - ./telos.md:/config/telos.md:ro
+      # Mount data directory for persistence
+      - telos-data:/data
+      # Mount logs directory
+      - telos-logs:/logs
+    environment:
+      - TELOS_FILE=/config/telos.md
+      - RUST_LOG=info
+    stdin_open: true
+    tty: true
+
+volumes:
+  telos-data:
+  telos-logs:

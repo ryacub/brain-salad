@@ -1,0 +1,126 @@
+# Rust
+/target/
+**/*.rs.bk
+Cargo.lock
+
+# IDE
+.vscode/
+.idea/
+*.swp
+*.swo
+*~
+
+# OS
+.DS_Store
+.DS_Store?
+._*
+.Spotlight-V100
+.Trashes
+ehthumbs.db
+Thumbs.db
+
+# Application Data
+*.db
+*.sqlite
+*.sqlite3
+/data/
+/logs/
+
+# Configuration (with sensitive data)
+config.toml
+.env
+.env.local
+.env.production
+
+# Docker
+
+# Testing
+coverage/
+*.profraw
+
+# Temporary files
+*.tmp
+*.temp
+temp/
+tmp/
+
+# Backup files
+*.bak
+*.backup
+
+# Local development
+.local/
+local_data/
+
+# AI/LLM Cache
+.llm_cache/
+ollama_models/
+
+# Claude Code (development artifacts)
+.claude/
+logs/
+*.log
+
+# Build artifacts (additional)
+*.dSYM/
+*.pdb
+*.exe.stackdump
+
+# Rust analyzer
+.rust-analyzer/
+
+# Performance profiling
+perf.data*
+flamegraph.svg
+
+# Documentation build
+docs/book/
+docs/.doctrees/
+
+# Security
+*.pem
+*.key
+*.crt
+secrets/
+.private/
+
+# Distribution
+dist/
+build/
+
+# Node (if any UI components)
+node_modules/
+npm-debug.log*
+yarn-debug.log*
+yarn-error.log*
+
+# Python (if any integration scripts)
+__pycache__/
+*.py[cod]
+*$py.class
+*.so
+.Python
+env/
+venv/
+ENV/
+env.bak/
+venv.bak/
+
+# Local scripts (keep templates)
+scripts/local_*
+scripts/personal_*
+
+# Archive files
+*.zip
+*.tar.gz
+*.rar
+*.7z
+
+# Large files that shouldn't be in git
+*.iso
+*.dmg
+*.img
+
+# Test artifacts
+test_data/
+test_databases/
