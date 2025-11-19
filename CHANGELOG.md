@@ -5,6 +5,49 @@ All notable changes to this project will be documented in this file.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## [2.0.0] - 2024-11-19
+
+### Changed
+- **BREAKING:** Removed Rust implementation, transitioned to Go-only codebase
+- Migrated all features to Go with 100% parity + enhancements
+- Updated Docker configuration for Go builds
+- Updated CI/CD to Go workflows only
+- Restructured documentation (Rust docs → `docs/rust-reference/`)
+
+### Added
+- Interactive dump mode (`--interactive`) - Go exclusive feature
+- Quick dump mode (`--quick`) - Go exclusive feature
+- 5 LLM provider support (Ollama, OpenAI, Claude, Custom, Rule-based)
+- Comprehensive test suite (18 packages, 11,000+ lines)
+- Provider management with persistent configuration
+- Semantic caching for LLM responses
+- Quality metrics tracking
+
+### Removed
+- Rust source code (`src/`) - preserved in `archive/rust-implementation-2024` branch
+- Rust build artifacts (`target/`)
+- Rust configuration files (Cargo.toml, Cargo.lock, etc.)
+- Rust CI workflows
+- Rust benchmarks
+
+### Migration
+- Rust codebase archived in `archive/rust-implementation-2024` branch
+- Rust documentation preserved in `docs/rust-reference/`
+- See [MIGRATION_COMPLETE.md](docs/MIGRATION_COMPLETE.md) for full details
+
+### Performance
+- Build time improved: 5s (Go) vs 50s (Rust)
+- Binary size: Comparable (~16MB)
+- Runtime performance: Identical
+
+### Breaking Changes for Developers
+- Must use Go 1.21+ for development
+- Build command changed: `go build` instead of `cargo build`
+- Test command changed: `go test` instead of `cargo test`
+
+### Breaking Changes for Users
+- **None** - All CLI commands work identically
+
 ## [0.1.0] - 2025-11-18
 
 ### Added

@@ -1,50 +1,31 @@
 version: '3.8'
 
 services:
-  # CLI service
-  telos-cli:
+  tm:
     build:
       context: .
       dockerfile: Dockerfile
-    container_name: telos-cli
+    image: telos-matrix:latest
+    container_name: telos-matrix
     volumes:
-      # Mount your telos.md file
-      - ./telos.md:/config/telos.md:ro
-      # Mount data directory for persistence
-      - telos-data:/data
-      # Mount logs directory
-      - telos-logs:/logs
+      # Mount telos.md
+      - ./telos.md:/app/telos.md:ro
+      # Persistent database
+      - ideas-data:/app/data
     environment:
-      - TELOS_FILE=/config/telos.md
+      - TELOS_FILE=/app/telos.md
+      - DB_PATH=/app/data/ideas.db
       - TZ=UTC
-    stdin_open: true
-    tty: true
-    command: ["--help"]
-
-  # Web API service
-  telos-web:
-    build:
-      context: .
-      dockerfile: Dockerfile
-    container_name: telos-web
-    entrypoint: ["tm-web"]
-    command: []
     ports:
       - "8080:8080"
-    volumes:
-      # Mount your telos.md file
-      - ./telos.md:/config/telos.md:ro
-      # Mount data directory for persistence
-      - telos-data:/data
-      # Mount logs directory
-      - telos-logs:/logs
-    environment:
-      - TELOS_FILE=/config/telos.md
-      - PORT=8080
-      - TZ=UTC
-    stdin_open: true
-    tty: true
+    restart: unless-stopped
+    healthcheck:
+      test: ["CMD", "./tm", "health"]
+      interval: 30s
+      timeout: 3s
+      retries: 3
+      start_period: 5s
 
 volumes:
-  telos-data:
-  telos-logs:
+  ideas-data:
+    name: telos-matrix-data
