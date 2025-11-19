@@ -421,7 +421,7 @@ func TestAnalysis_JSONSerialization_RoundTrip(t *testing.T) {
 			DomainExpertise:   1.1,
 			AIAlignment:       1.4,
 			ExecutionSupport:  0.75,
-			RevenueoPotential: 0.45,
+			RevenuePotential: 0.45,
 			Total:             3.7,
 		},
 		AntiChallenge: models.AntiChallengeScores{

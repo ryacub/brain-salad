@@ -41,7 +41,7 @@ type MissionScores struct {
 	DomainExpertise   float64 `json:"domain_expertise"`   // 0-1.2 points max
 	AIAlignment       float64 `json:"ai_alignment"`       // 0-1.5 points max
 	ExecutionSupport  float64 `json:"execution_support"`  // 0-0.8 points max
-	RevenueoPotential float64 `json:"revenue_potential"`  // 0-0.5 points max
+	RevenuePotential  float64 `json:"revenue_potential"`  // 0-0.5 points max
 	Total             float64 `json:"total"`              // max 4.0 points
 }
 

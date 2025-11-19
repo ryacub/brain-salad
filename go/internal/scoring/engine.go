@@ -87,9 +87,9 @@ func (e *Engine) calculateMissionAlignment(ideaLower string) models.MissionScore
 	scores.DomainExpertise = e.calculateDomainExpertise(ideaLower)
 	scores.AIAlignment = e.calculateAIAlignment(ideaLower)
 	scores.ExecutionSupport = e.calculateExecutionSupport(ideaLower)
-	scores.RevenueoPotential = e.calculateRevenuePotential(ideaLower)
+	scores.RevenuePotential = e.calculateRevenuePotential(ideaLower)
 
-	scores.Total = scores.DomainExpertise + scores.AIAlignment + scores.ExecutionSupport + scores.RevenueoPotential
+	scores.Total = scores.DomainExpertise + scores.AIAlignment + scores.ExecutionSupport + scores.RevenuePotential
 
 	// Cap at 4.0
 	if scores.Total > 4.0 {
