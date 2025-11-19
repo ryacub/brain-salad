@@ -155,7 +155,7 @@ func TestGetProviderList(t *testing.T) {
 	}
 
 	// Should contain at least rule_based provider
-	if !contains(list, "rule_based") {
+	if !stringContains(list, "rule_based") {
 		t.Error("Provider list should contain rule_based")
 	}
 }
@@ -205,7 +205,7 @@ func TestGetFirstExplanation(t *testing.T) {
 }
 
 // Helper function for tests
-func contains(s, substr string) bool {
+func stringContains(s, substr string) bool {
 	return len(s) > 0 && len(substr) > 0 && (s == substr || len(s) >= len(substr) && (s[:len(substr)] == substr || s[len(s)-len(substr):] == substr || hasSubstring(s, substr)))
 }
 
