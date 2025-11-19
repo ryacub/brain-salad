@@ -10,6 +10,7 @@ import (
 	"github.com/go-chi/chi/v5/middleware"
 	"github.com/go-chi/cors"
 	"github.com/rayyacub/telos-idea-matrix/internal/database"
+	"github.com/rayyacub/telos-idea-matrix/internal/logging"
 	"github.com/rayyacub/telos-idea-matrix/internal/models"
 	"github.com/rayyacub/telos-idea-matrix/internal/telos"
 )
@@ -68,7 +69,7 @@ func (s *Server) setupRouter() {
 	// Middleware (order matters!)
 	r.Use(middleware.RequestID)
 	r.Use(middleware.RealIP)
-	r.Use(middleware.Logger)
+	r.Use(logging.Middleware) // Structured logging middleware
 	r.Use(middleware.Recoverer)
 	r.Use(middleware.Timeout(60 * time.Second))
 
@@ -91,6 +92,7 @@ func (s *Server) setupRouter() {
 
 	// Routes
 	r.Get("/health", s.HealthHandler)
+	r.Get("/metrics", s.MetricsHandler)
 
 	// API v1 routes
 	r.Route("/api/v1", func(r chi.Router) {
