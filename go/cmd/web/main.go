@@ -2,23 +2,45 @@ package main
 
 import (
 	"fmt"
-	"log"
 	"os"
 	"os/signal"
+	"path/filepath"
 	"syscall"
 
 	"github.com/rayyacub/telos-idea-matrix/internal/api"
 	"github.com/rayyacub/telos-idea-matrix/internal/config"
 	"github.com/rayyacub/telos-idea-matrix/internal/database"
+	"github.com/rayyacub/telos-idea-matrix/internal/logging"
+	"github.com/rs/zerolog/log"
 )
 
 func main() {
 	if err := run(); err != nil {
-		log.Fatalf("Application error: %v", err)
+		log.Fatal().Err(err).Msg("Application error")
 	}
 }
 
 func run() error {
+	// Initialize logging
+	homeDir, err := os.UserHomeDir()
+	if err != nil {
+		homeDir = "/tmp"
+	}
+	logDir := filepath.Join(homeDir, ".telos-idea-matrix", "logs")
+	os.MkdirAll(logDir, 0755)
+
+	logCfg := logging.Config{
+		Level:      "info",
+		Format:     "json",
+		OutputPath: filepath.Join(logDir, "telos-matrix.log"),
+		MaxSizeMB:  10,
+		MaxBackups: 7,
+		MaxAgeDays: 7,
+	}
+	logging.NewLogger(logCfg)
+
+	log.Info().Msg("Telos Idea Matrix starting...")
+
 	// Load configuration
 	cfg, err := config.Load()
 	if err != nil {
@@ -37,13 +59,13 @@ func run() error {
 	}
 	defer repo.Close()
 
-	log.Printf("Database initialized: %s", cfg.Database.Path)
+	log.Info().Str("database_path", cfg.Database.Path).Msg("Database initialized")
 
 	// Check if telos file exists
 	if !config.FileExists(cfg.Telos.FilePath) {
-		log.Printf("Warning: Telos file not found at %s", cfg.Telos.FilePath)
-		log.Printf("The server will start, but idea analysis may not work correctly.")
-		log.Printf("Create a telos.md file with your goals, strategies, and failure patterns.")
+		log.Warn().Str("telos_path", cfg.Telos.FilePath).Msg("Telos file not found")
+		log.Warn().Msg("The server will start, but idea analysis may not work correctly")
+		log.Warn().Msg("Create a telos.md file with your goals, strategies, and failure patterns")
 	}
 
 	// Create API server
@@ -60,20 +82,21 @@ func run() error {
 	// Start server in goroutine
 	go func() {
 		addr := cfg.Address()
-		log.Printf("Starting Telos Idea Matrix API server on %s", addr)
-		log.Printf("Health check: http://%s/health", addr)
-		log.Printf("API endpoints: http://%s/api/v1/*", addr)
+		log.Info().Str("address", addr).Msg("Starting Telos Idea Matrix API server")
+		log.Info().Str("health_check", "http://"+addr+"/health").Msg("Health check endpoint")
+		log.Info().Str("api_endpoints", "http://"+addr+"/api/v1/*").Msg("API endpoints")
+		log.Info().Str("metrics", "http://"+addr+"/metrics").Msg("Metrics endpoint")
 
 		if err := server.Start(addr); err != nil {
-			log.Fatalf("Server error: %v", err)
+			log.Fatal().Err(err).Msg("Server error")
 		}
 	}()
 
-	log.Println("Server started. Press Ctrl+C to shutdown.")
+	log.Info().Msg("Server started. Press Ctrl+C to shutdown")
 
 	// Wait for interrupt signal
 	<-done
-	log.Println("Shutting down gracefully...")
+	log.Info().Msg("Shutting down gracefully...")
 
 	return nil
 }
