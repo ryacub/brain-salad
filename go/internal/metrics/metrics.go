@@ -90,3 +90,68 @@ func GetMetrics() map[string]Metric {
 func ResetMetrics() {
 	GetGlobalCollector().Reset()
 }
+
+// ============================================================================
+// LLM-SPECIFIC METRICS
+// ============================================================================
+
+// RecordLLMRequest tracks an LLM provider request
+func RecordLLMRequest(provider string, success bool, duration time.Duration) {
+	collector := GetGlobalCollector()
+
+	// Track total requests per provider
+	collector.RecordCounter("llm_requests_total_"+provider, 1)
+
+	// Track success/failure
+	if success {
+		collector.RecordCounter("llm_requests_success_"+provider, 1)
+	} else {
+		collector.RecordCounter("llm_requests_failure_"+provider, 1)
+	}
+
+	// Track request duration (latency)
+	collector.RecordHistogram("llm_request_duration_ms_"+provider, float64(duration.Milliseconds()))
+}
+
+// RecordLLMTokens tracks token usage for cost estimation
+func RecordLLMTokens(provider string, inputTokens, outputTokens int) {
+	collector := GetGlobalCollector()
+
+	// Track input tokens
+	collector.RecordCounter("llm_input_tokens_"+provider, float64(inputTokens))
+
+	// Track output tokens
+	collector.RecordCounter("llm_output_tokens_"+provider, float64(outputTokens))
+
+	// Track total tokens
+	collector.RecordCounter("llm_total_tokens_"+provider, float64(inputTokens+outputTokens))
+}
+
+// RecordLLMError tracks specific error types
+func RecordLLMError(provider string, errorType string) {
+	collector := GetGlobalCollector()
+
+	// Track errors by type: timeout, rate_limit, auth_error, network_error, invalid_response, provider_error, unknown
+	metricName := "llm_errors_" + provider + "_" + errorType
+	collector.RecordCounter(metricName, 1)
+}
+
+// RecordLLMCacheHit tracks cache hits/misses
+func RecordLLMCacheHit(hit bool) {
+	collector := GetGlobalCollector()
+
+	if hit {
+		collector.RecordCounter("llm_cache_hits", 1)
+	} else {
+		collector.RecordCounter("llm_cache_misses", 1)
+	}
+}
+
+// RecordLLMFallback tracks when a provider fallback occurs
+func RecordLLMFallback(fromProvider, toProvider string) {
+	collector := GetGlobalCollector()
+
+	// Track fallback events
+	metricName := "llm_fallback_" + fromProvider + "_to_" + toProvider
+	collector.RecordCounter(metricName, 1)
+}
