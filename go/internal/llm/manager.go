@@ -52,7 +52,7 @@ func DefaultManagerConfig() *ManagerConfig {
 		DefaultProvider:     "",
 		FallbackEnabled:     true,
 		HealthCheckInterval: 30 * time.Second,
-		Priority:            []string{"ollama", "rule_based"},
+		Priority:            []string{"ollama", "claude", "openai", "custom", "rule_based"},
 		ProviderConfig:      DefaultProviderConfig(),
 	}
 }
@@ -93,6 +93,26 @@ func (m *Manager) registerAvailableProviders() {
 			m.config.ProviderConfig.OllamaModel,
 		)
 		m.RegisterProvider(ollama)
+	}
+
+	// Register Claude if API key is available (from config or env var)
+	claudeAPIKey := m.config.ProviderConfig.ClaudeAPIKey
+	claudeModel := m.config.ProviderConfig.ClaudeModel
+	claude := NewClaudeProvider(claudeAPIKey, claudeModel)
+	if claude.IsAvailable() {
+		m.RegisterProvider(claude)
+	}
+
+	// Register OpenAI if API key is available (reads from env var)
+	openai := NewOpenAIProvider()
+	if openai.IsAvailable() {
+		m.RegisterProvider(openai)
+	}
+
+	// Register Custom provider if endpoint is configured (reads from env var)
+	custom := NewCustomProvider()
+	if custom.IsAvailable() {
+		m.RegisterProvider(custom)
 	}
 
 	// Always register rule-based as fallback

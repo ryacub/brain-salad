@@ -24,18 +24,24 @@ The system will automatically use the best available provider unless
 you specify one with --provider.
 
 Available Providers:
-  • ollama      - Local Ollama instance (default if available)
+  • ollama      - Local Ollama instance (configure via OllamaBaseURL)
+  • claude      - Anthropic Claude API (requires ANTHROPIC_API_KEY env var)
+  • openai      - OpenAI GPT models (requires OPENAI_API_KEY env var)
+  • custom      - Custom HTTP endpoint (requires CUSTOM_LLM_ENDPOINT env var)
   • rule_based  - Rule-based scoring engine (always available)
+
+Provider Priority: ollama → claude → openai → custom → rule_based
 
 Examples:
   tm analyze-llm "Build a mobile app"
-  tm analyze-llm "Start a podcast" --provider ollama
-  tm analyze-llm "Learn Rust" --provider rule_based --verbose`,
+  tm analyze-llm "Start a podcast" --provider claude
+  tm analyze-llm "Learn Rust" --provider openai --verbose
+  tm analyze-llm "Write a book" --provider rule_based`,
 		Args: cobra.ExactArgs(1),
 		RunE: runAnalyzeLLM,
 	}
 
-	cmd.Flags().StringVarP(&llmProvider, "provider", "p", "", "LLM provider (ollama|rule_based)")
+	cmd.Flags().StringVarP(&llmProvider, "provider", "p", "", "LLM provider (ollama|claude|openai|custom|rule_based)")
 	cmd.Flags().BoolVar(&llmNoFallback, "no-fallback", false, "Disable fallback to other providers")
 	cmd.Flags().BoolVarP(&llmVerbose, "verbose", "v", false, "Verbose output")
 
