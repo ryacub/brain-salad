@@ -66,6 +66,7 @@ func setupTestCLI(t *testing.T) (*CLIContext, func()) {
 	}
 
 	cleanup := func() {
+		ClearContext()
 		os.RemoveAll(tmpDir)
 	}
 

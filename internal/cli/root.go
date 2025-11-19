@@ -83,6 +83,11 @@ you focus on what truly matters.`,
 
 // initializeCLI sets up the shared context for all commands
 func initializeCLI(cmd *cobra.Command, args []string) error {
+	// Skip initialization if context is already set (e.g., by tests)
+	if ctx != nil {
+		return nil
+	}
+
 	// Create .telos directory if it doesn't exist
 	telosDir := filepath.Dir(telosPath)
 	if err := os.MkdirAll(telosDir, 0755); err != nil {
@@ -147,4 +152,9 @@ func GetRootCmd() *cobra.Command {
 // SetContext allows setting a custom context for testing
 func SetContext(c *CLIContext) {
 	ctx = c
+}
+
+// ClearContext clears the global context (used for test cleanup)
+func ClearContext() {
+	ctx = nil
 }
