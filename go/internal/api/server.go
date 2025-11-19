@@ -16,27 +16,38 @@ import (
 
 // Server represents the API server
 type Server struct {
-	repo   *database.Repository
-	telos  *models.Telos
-	router *chi.Mux
+	repo           *database.Repository
+	telos          *models.Telos
+	router         *chi.Mux
+	cache          *Cache
+	rateLimiter    *RateLimiter
+	csrfProtection *CSRFProtection
 }
 
-// NewServer creates a new API server
-func NewServer(repo *database.Repository, telosPath string) (*Server, error) {
+// NewServer creates a new API server from a telos configuration object
+func NewServer(repo *database.Repository, telosConfig *models.Telos) *Server {
+	s := &Server{
+		repo:           repo,
+		telos:          telosConfig,
+		cache:          NewCache(5 * time.Minute),       // 5-minute cache TTL
+		rateLimiter:    NewRateLimiter(100, 10),         // 100 req/min, burst of 10
+		csrfProtection: NewCSRFProtection(1 * time.Hour), // 1-hour token TTL
+	}
+
+	s.setupRouter()
+
+	return s
+}
+
+// NewServerFromPath creates a new API server from a telos file path
+func NewServerFromPath(repo *database.Repository, telosPath string) (*Server, error) {
 	// Load telos configuration
 	telosData, err := loadTelos(telosPath)
 	if err != nil {
 		return nil, fmt.Errorf("failed to load telos: %w", err)
 	}
 
-	s := &Server{
-		repo:  repo,
-		telos: telosData,
-	}
-
-	s.setupRouter()
-
-	return s, nil
+	return NewServer(repo, telosData), nil
 }
 
 // loadTelos loads and parses the telos configuration file
@@ -54,28 +65,38 @@ func loadTelos(path string) (*models.Telos, error) {
 func (s *Server) setupRouter() {
 	r := chi.NewRouter()
 
-	// Middleware
+	// Middleware (order matters!)
 	r.Use(middleware.RequestID)
 	r.Use(middleware.RealIP)
 	r.Use(middleware.Logger)
 	r.Use(middleware.Recoverer)
 	r.Use(middleware.Timeout(60 * time.Second))
 
+	// Security middleware
+	r.Use(SecurityHeadersMiddleware)
+	r.Use(RateLimitMiddleware(s.rateLimiter))
+
 	// CORS configuration
 	r.Use(cors.Handler(cors.Options{
 		AllowedOrigins:   []string{"http://localhost:5173", "http://localhost:3000", "http://localhost:8080"},
 		AllowedMethods:   []string{"GET", "POST", "PUT", "DELETE", "OPTIONS"},
 		AllowedHeaders:   []string{"Accept", "Authorization", "Content-Type", "X-CSRF-Token"},
-		ExposedHeaders:   []string{"Link"},
+		ExposedHeaders:   []string{"Link", "X-Cache", "X-RateLimit-Limit"},
 		AllowCredentials: true,
 		MaxAge:           300,
 	}))
+
+	// Caching middleware (only for GET requests)
+	r.Use(CacheMiddleware(s.cache))
 
 	// Routes
 	r.Get("/health", s.HealthHandler)
 
 	// API v1 routes
 	r.Route("/api/v1", func(r chi.Router) {
+		// CSRF token endpoint (for clients that need it)
+		r.Get("/csrf-token", s.GetCSRFTokenHandler)
+
 		// Ideas
 		r.Post("/ideas", s.CreateIdeaHandler)
 		r.Get("/ideas", s.ListIdeasHandler)
