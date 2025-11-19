@@ -49,7 +49,7 @@ func TestE2E_AnalyzeLLM_Basic(t *testing.T) {
 
 	// Setup telos file and database
 	telosPath := setupDefaultTelos(t)
-	defer os.Remove(telosPath)
+	defer func() { _ = os.Remove(telosPath) }()
 	dbPath := setupTestDB(t)
 
 	// Build the binary
@@ -147,7 +147,7 @@ func TestE2E_AnalyzeLLM_LongIdea(t *testing.T) {
 
 	// Setup telos file and database
 	telosPath := setupDefaultTelos(t)
-	defer os.Remove(telosPath)
+	defer func() { _ = os.Remove(telosPath) }()
 	dbPath := setupTestDB(t)
 
 	binaryPath := buildBinary(t)
@@ -187,7 +187,7 @@ func TestE2E_AnalyzeLLM_Performance(t *testing.T) {
 
 	// Setup telos file and database
 	telosPath := setupDefaultTelos(t)
-	defer os.Remove(telosPath)
+	defer func() { _ = os.Remove(telosPath) }()
 	dbPath := setupTestDB(t)
 
 	binaryPath := buildBinary(t)
@@ -221,7 +221,7 @@ func TestE2E_AnalyzeLLM_MultipleRuns(t *testing.T) {
 
 	// Setup telos file (shared across subtests)
 	telosPath := setupDefaultTelos(t)
-	defer os.Remove(telosPath)
+	defer func() { _ = os.Remove(telosPath) }()
 
 	binaryPath := buildBinary(t)
 	defer func() { _ = os.Remove(binaryPath) }()
@@ -333,7 +333,7 @@ func TestE2E_AnalyzeLLM_JSONOutput(t *testing.T) {
 
 	// Setup telos file and database
 	telosPath := setupDefaultTelos(t)
-	defer os.Remove(telosPath)
+	defer func() { _ = os.Remove(telosPath) }()
 	dbPath := setupTestDB(t)
 
 	binaryPath := buildBinary(t)
@@ -369,7 +369,7 @@ func TestE2E_AnalyzeLLM_VerboseOutput(t *testing.T) {
 
 	// Setup telos file and database
 	telosPath := setupDefaultTelos(t)
-	defer os.Remove(telosPath)
+	defer func() { _ = os.Remove(telosPath) }()
 	dbPath := setupTestDB(t)
 
 	binaryPath := buildBinary(t)
@@ -451,7 +451,7 @@ func TestE2E_AnalyzeLLM_StressTest(t *testing.T) {
 
 	// Setup telos file (shared across iterations)
 	telosPath := setupDefaultTelos(t)
-	defer os.Remove(telosPath)
+	defer func() { _ = os.Remove(telosPath) }()
 
 	binaryPath := buildBinary(t)
 	defer func() { _ = os.Remove(binaryPath) }()
