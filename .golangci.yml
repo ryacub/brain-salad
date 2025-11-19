@@ -3,10 +3,6 @@ version: "2"
 run:
   timeout: 5m
   tests: true
-  modules-download-mode: readonly
-  skip-dirs:
-    - test
-    - bin
 
 linters:
   default: standard
@@ -15,18 +11,22 @@ linters:
     - goconst
     - dupl
     - revive
+  settings:
+    errcheck:
+      check-blank: true
+    revive:
+      rules:
+        - name: exported
+          severity: warning
+        - name: error-strings
+        - name: error-naming
+        - name: if-return
+        - name: var-naming
 
-settings:
-  errcheck:
-    check-blank: true
-  revive:
-    rules:
-      - name: exported
-        severity: warning
-      - name: error-strings
-      - name: error-naming
-      - name: if-return
-      - name: var-naming
+exclusions:
+  paths:
+    - test/**
+    - bin/**
 
 issues:
   max-issues-per-linter: 0
