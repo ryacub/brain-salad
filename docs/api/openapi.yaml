@@ -1,0 +1,528 @@
+openapi: 3.0.3
+info:
+  title: Telos Idea Matrix API
+  description: |
+    The Telos Idea Matrix API allows you to analyze ideas against your personal goals (telos)
+    and retrieve analysis results. This API provides endpoints for creating, reading, updating,
+    and deleting ideas, as well as getting analytics and generating CSRF tokens.
+
+    ## Features
+    - Idea analysis based on telos configuration
+    - CRUD operations for ideas
+    - Analytics and statistics
+    - Rate limiting and caching
+    - CSRF protection support
+
+  version: 1.0.0
+  contact:
+    name: API Support
+    url: https://github.com/rayyacub/telos-idea-matrix
+  license:
+    name: MIT
+    url: https://opensource.org/licenses/MIT
+
+servers:
+  - url: http://localhost:8080/api/v1
+    description: Local development server
+  - url: https://api.telos-matrix.example.com/api/v1
+    description: Production server
+
+tags:
+  - name: ideas
+    description: Operations for managing ideas
+  - name: analysis
+    description: Idea analysis operations
+  - name: analytics
+    description: Analytics and statistics
+  - name: security
+    description: Security endpoints
+
+paths:
+  /health:
+    get:
+      summary: Health check
+      description: Check if the API server is healthy
+      operationId: healthCheck
+      responses:
+        '200':
+          description: Server is healthy
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  status:
+                    type: string
+                    example: ok
+
+  /csrf-token:
+    get:
+      summary: Get CSRF token
+      description: Get a CSRF token for making state-changing requests
+      operationId: getCsrfToken
+      tags:
+        - security
+      responses:
+        '200':
+          description: CSRF token generated successfully
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  csrf_token:
+                    type: string
+                    description: The CSRF token
+                    example: "dGVzdC10b2tlbi1leGFtcGxl"
+                  expires_in:
+                    type: string
+                    description: Token expiration time in seconds
+                    example: "3600"
+
+  /analyze:
+    post:
+      summary: Analyze an idea
+      description: Analyze idea content without storing it
+      operationId: analyzeIdea
+      tags:
+        - analysis
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              required:
+                - content
+              properties:
+                content:
+                  type: string
+                  description: The idea content to analyze
+                  example: "Build a microservices platform with comprehensive testing"
+      responses:
+        '200':
+          description: Analysis completed successfully
+          headers:
+            X-Cache:
+              description: Cache status (HIT or MISS)
+              schema:
+                type: string
+                enum: [HIT, MISS]
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/AnalyzeResponse'
+        '400':
+          description: Invalid request
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+        '429':
+          description: Rate limit exceeded
+          headers:
+            Retry-After:
+              description: Seconds to wait before retrying
+              schema:
+                type: integer
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+
+  /ideas:
+    get:
+      summary: List ideas
+      description: Retrieve a list of ideas with optional filtering
+      operationId: listIdeas
+      tags:
+        - ideas
+      parameters:
+        - name: status
+          in: query
+          description: Filter by status
+          schema:
+            type: string
+            enum: [active, archived, deleted]
+        - name: limit
+          in: query
+          description: Maximum number of results to return
+          schema:
+            type: integer
+            default: 100
+            minimum: 1
+            maximum: 1000
+        - name: offset
+          in: query
+          description: Number of results to skip
+          schema:
+            type: integer
+            default: 0
+            minimum: 0
+      responses:
+        '200':
+          description: List of ideas
+          headers:
+            X-Cache:
+              description: Cache status
+              schema:
+                type: string
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ListIdeasResponse'
+        '429':
+          description: Rate limit exceeded
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+
+    post:
+      summary: Create an idea
+      description: Create and analyze a new idea
+      operationId: createIdea
+      tags:
+        - ideas
+      security:
+        - csrfToken: []
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              required:
+                - content
+              properties:
+                content:
+                  type: string
+                  description: The idea content
+                  minLength: 1
+                  example: "Implement comprehensive testing strategy"
+      responses:
+        '201':
+          description: Idea created successfully
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/IdeaResponse'
+        '400':
+          description: Invalid request
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+        '403':
+          description: Invalid CSRF token
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+        '429':
+          description: Rate limit exceeded
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+
+  /ideas/{id}:
+    get:
+      summary: Get an idea
+      description: Retrieve a single idea by ID
+      operationId: getIdea
+      tags:
+        - ideas
+      parameters:
+        - name: id
+          in: path
+          required: true
+          description: The idea ID (UUID format)
+          schema:
+            type: string
+            format: uuid
+            example: "550e8400-e29b-41d4-a716-446655440000"
+      responses:
+        '200':
+          description: Idea retrieved successfully
+          headers:
+            X-Cache:
+              description: Cache status
+              schema:
+                type: string
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/IdeaResponse'
+        '400':
+          description: Invalid idea ID format
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+        '404':
+          description: Idea not found
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+
+    put:
+      summary: Update an idea
+      description: Update an existing idea's content or status
+      operationId: updateIdea
+      tags:
+        - ideas
+      security:
+        - csrfToken: []
+      parameters:
+        - name: id
+          in: path
+          required: true
+          description: The idea ID
+          schema:
+            type: string
+            format: uuid
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              properties:
+                content:
+                  type: string
+                  description: Updated idea content
+                status:
+                  type: string
+                  enum: [active, archived, deleted]
+                  description: Updated status
+      responses:
+        '200':
+          description: Idea updated successfully
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/IdeaResponse'
+        '400':
+          description: Invalid request
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+        '404':
+          description: Idea not found
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+
+    delete:
+      summary: Delete an idea
+      description: Permanently delete an idea
+      operationId: deleteIdea
+      tags:
+        - ideas
+      security:
+        - csrfToken: []
+      parameters:
+        - name: id
+          in: path
+          required: true
+          description: The idea ID
+          schema:
+            type: string
+            format: uuid
+      responses:
+        '204':
+          description: Idea deleted successfully
+        '400':
+          description: Invalid idea ID format
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+        '404':
+          description: Idea not found
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+
+  /analytics/stats:
+    get:
+      summary: Get analytics statistics
+      description: Retrieve statistical data about ideas
+      operationId: getAnalyticsStats
+      tags:
+        - analytics
+      responses:
+        '200':
+          description: Statistics retrieved successfully
+          headers:
+            X-Cache:
+              description: Cache status
+              schema:
+                type: string
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/StatsResponse'
+
+components:
+  securitySchemes:
+    csrfToken:
+      type: apiKey
+      in: header
+      name: X-CSRF-Token
+      description: CSRF token obtained from /csrf-token endpoint
+
+  schemas:
+    Error:
+      type: object
+      properties:
+        error:
+          type: string
+          description: Error message
+          example: "Invalid request body"
+
+    Analysis:
+      type: object
+      properties:
+        raw_score:
+          type: number
+          format: float
+          description: Raw score before adjustments
+          example: 25.5
+        final_score:
+          type: number
+          format: float
+          description: Final score after pattern penalties
+          example: 23.5
+        goal_scores:
+          type: array
+          items:
+            type: object
+            properties:
+              goal:
+                type: string
+                example: "Technical Excellence"
+              score:
+                type: number
+                format: float
+                example: 10.0
+              matched_keywords:
+                type: array
+                items:
+                  type: string
+                example: ["testing", "quality"]
+        detected_patterns:
+          type: array
+          items:
+            type: object
+            properties:
+              name:
+                type: string
+                example: "Technical Debt"
+              severity:
+                type: string
+                enum: [low, medium, high]
+                example: "medium"
+              description:
+                type: string
+                example: "Detected technical debt indicators"
+
+    AnalyzeResponse:
+      type: object
+      properties:
+        analysis:
+          $ref: '#/components/schemas/Analysis'
+
+    IdeaResponse:
+      type: object
+      properties:
+        id:
+          type: string
+          format: uuid
+          example: "550e8400-e29b-41d4-a716-446655440000"
+        content:
+          type: string
+          example: "Build a comprehensive testing framework"
+        raw_score:
+          type: number
+          format: float
+          example: 25.5
+        final_score:
+          type: number
+          format: float
+          example: 23.5
+        patterns:
+          type: array
+          items:
+            type: string
+          example: ["Technical Debt"]
+        recommendation:
+          type: string
+          example: "Proceed with caution - address detected anti-patterns first"
+        analysis:
+          $ref: '#/components/schemas/Analysis'
+        created_at:
+          type: string
+          format: date-time
+          example: "2025-11-19T10:30:00Z"
+        reviewed_at:
+          type: string
+          format: date-time
+          nullable: true
+          example: null
+        status:
+          type: string
+          enum: [active, archived, deleted]
+          example: "active"
+
+    ListIdeasResponse:
+      type: object
+      properties:
+        ideas:
+          type: array
+          items:
+            $ref: '#/components/schemas/IdeaResponse'
+        total:
+          type: integer
+          description: Total number of ideas matching the filter
+          example: 42
+        limit:
+          type: integer
+          description: Maximum number of results per page
+          example: 100
+        offset:
+          type: integer
+          description: Number of results skipped
+          example: 0
+
+    StatsResponse:
+      type: object
+      properties:
+        total_ideas:
+          type: integer
+          description: Total number of ideas
+          example: 42
+        active_ideas:
+          type: integer
+          description: Number of active ideas
+          example: 35
+        average_score:
+          type: number
+          format: float
+          description: Average final score across all ideas
+          example: 7.8
+        high_score:
+          type: number
+          format: float
+          description: Highest final score
+          example: 9.5
+        low_score:
+          type: number
+          format: float
+          description: Lowest final score
+          example: 2.1

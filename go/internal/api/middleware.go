@@ -1,0 +1,291 @@
+package api
+
+import (
+	"bytes"
+	"crypto/sha256"
+	"encoding/hex"
+	"net/http"
+	"sync"
+	"time"
+)
+
+// CacheEntry represents a cached HTTP response
+type CacheEntry struct {
+	StatusCode  int
+	Headers     http.Header
+	Body        []byte
+	CachedAt    time.Time
+	TTL         time.Duration
+}
+
+// IsExpired checks if the cache entry has expired
+func (c *CacheEntry) IsExpired() bool {
+	return time.Since(c.CachedAt) > c.TTL
+}
+
+// Cache is a simple in-memory cache for HTTP responses
+type Cache struct {
+	entries map[string]*CacheEntry
+	mu      sync.RWMutex
+	ttl     time.Duration
+}
+
+// NewCache creates a new cache with the specified TTL
+func NewCache(ttl time.Duration) *Cache {
+	c := &Cache{
+		entries: make(map[string]*CacheEntry),
+		ttl:     ttl,
+	}
+
+	// Start cleanup goroutine
+	go c.cleanupExpired()
+
+	return c
+}
+
+// cleanupExpired periodically removes expired cache entries
+func (c *Cache) cleanupExpired() {
+	ticker := time.NewTicker(1 * time.Minute)
+	defer ticker.Stop()
+
+	for range ticker.C {
+		c.mu.Lock()
+		for key, entry := range c.entries {
+			if entry.IsExpired() {
+				delete(c.entries, key)
+			}
+		}
+		c.mu.Unlock()
+	}
+}
+
+// Get retrieves a cache entry by key
+func (c *Cache) Get(key string) (*CacheEntry, bool) {
+	c.mu.RLock()
+	defer c.mu.RUnlock()
+
+	entry, exists := c.entries[key]
+	if !exists || entry.IsExpired() {
+		return nil, false
+	}
+
+	return entry, true
+}
+
+// Set stores a cache entry
+func (c *Cache) Set(key string, entry *CacheEntry) {
+	c.mu.Lock()
+	defer c.mu.Unlock()
+
+	c.entries[key] = entry
+}
+
+// Clear removes all cache entries
+func (c *Cache) Clear() {
+	c.mu.Lock()
+	defer c.mu.Unlock()
+
+	c.entries = make(map[string]*CacheEntry)
+}
+
+// CacheSize returns the number of cached entries
+func (c *Cache) CacheSize() int {
+	c.mu.RLock()
+	defer c.mu.RUnlock()
+
+	return len(c.entries)
+}
+
+// cacheKey generates a cache key from request method and URL
+func cacheKey(r *http.Request) string {
+	h := sha256.New()
+	h.Write([]byte(r.Method))
+	h.Write([]byte(r.URL.String()))
+	return hex.EncodeToString(h.Sum(nil))
+}
+
+// responseWriter captures the response for caching
+type responseWriter struct {
+	http.ResponseWriter
+	statusCode int
+	body       *bytes.Buffer
+}
+
+func newResponseWriter(w http.ResponseWriter) *responseWriter {
+	return &responseWriter{
+		ResponseWriter: w,
+		statusCode:     http.StatusOK,
+		body:           &bytes.Buffer{},
+	}
+}
+
+func (rw *responseWriter) WriteHeader(code int) {
+	rw.statusCode = code
+	rw.ResponseWriter.WriteHeader(code)
+}
+
+func (rw *responseWriter) Write(b []byte) (int, error) {
+	rw.body.Write(b)
+	return rw.ResponseWriter.Write(b)
+}
+
+// CacheMiddleware is a middleware that caches GET requests
+func CacheMiddleware(cache *Cache) func(http.Handler) http.Handler {
+	return func(next http.Handler) http.Handler {
+		return http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
+			// Only cache GET requests
+			if r.Method != http.MethodGet {
+				next.ServeHTTP(w, r)
+				return
+			}
+
+			// Check cache
+			key := cacheKey(r)
+			if entry, found := cache.Get(key); found {
+				// Serve from cache
+				for k, v := range entry.Headers {
+					w.Header()[k] = v
+				}
+				w.Header().Set("X-Cache", "HIT")
+				w.WriteHeader(entry.StatusCode)
+				w.Write(entry.Body)
+				return
+			}
+
+			// Cache miss - capture response
+			rw := newResponseWriter(w)
+			next.ServeHTTP(rw, r)
+
+			// Only cache successful responses (2xx status codes)
+			if rw.statusCode >= 200 && rw.statusCode < 300 {
+				entry := &CacheEntry{
+					StatusCode:  rw.statusCode,
+					Headers:     w.Header().Clone(),
+					Body:        rw.body.Bytes(),
+					CachedAt:    time.Now(),
+					TTL:         cache.ttl,
+				}
+				cache.Set(key, entry)
+			}
+
+			w.Header().Set("X-Cache", "MISS")
+		})
+	}
+}
+
+// RateLimiter implements a simple token bucket rate limiter
+type RateLimiter struct {
+	visitors map[string]*visitor
+	mu       sync.RWMutex
+	rate     int           // requests per minute
+	burst    int           // max burst size
+}
+
+type visitor struct {
+	lastSeen time.Time
+	tokens   float64
+}
+
+// NewRateLimiter creates a new rate limiter
+func NewRateLimiter(rate, burst int) *RateLimiter {
+	rl := &RateLimiter{
+		visitors: make(map[string]*visitor),
+		rate:     rate,
+		burst:    burst,
+	}
+
+	// Cleanup old visitors every 5 minutes
+	go rl.cleanupVisitors()
+
+	return rl
+}
+
+// cleanupVisitors removes visitors that haven't been seen in 10 minutes
+func (rl *RateLimiter) cleanupVisitors() {
+	ticker := time.NewTicker(5 * time.Minute)
+	defer ticker.Stop()
+
+	for range ticker.C {
+		rl.mu.Lock()
+		for ip, v := range rl.visitors {
+			if time.Since(v.lastSeen) > 10*time.Minute {
+				delete(rl.visitors, ip)
+			}
+		}
+		rl.mu.Unlock()
+	}
+}
+
+// Allow checks if a request from the given IP should be allowed
+func (rl *RateLimiter) Allow(ip string) bool {
+	rl.mu.Lock()
+	defer rl.mu.Unlock()
+
+	now := time.Now()
+	v, exists := rl.visitors[ip]
+
+	if !exists {
+		rl.visitors[ip] = &visitor{
+			lastSeen: now,
+			tokens:   float64(rl.burst - 1),
+		}
+		return true
+	}
+
+	// Calculate tokens to add based on time elapsed
+	elapsed := now.Sub(v.lastSeen)
+	tokensToAdd := elapsed.Seconds() * (float64(rl.rate) / 60.0)
+	v.tokens = min(v.tokens+tokensToAdd, float64(rl.burst))
+	v.lastSeen = now
+
+	if v.tokens >= 1.0 {
+		v.tokens -= 1.0
+		return true
+	}
+
+	return false
+}
+
+func min(a, b float64) float64 {
+	if a < b {
+		return a
+	}
+	return b
+}
+
+// RateLimitMiddleware is a middleware that rate limits requests
+func RateLimitMiddleware(limiter *RateLimiter) func(http.Handler) http.Handler {
+	return func(next http.Handler) http.Handler {
+		return http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
+			// Get client IP (simplified - in production use X-Forwarded-For with validation)
+			ip := r.RemoteAddr
+
+			if !limiter.Allow(ip) {
+				w.Header().Set("X-RateLimit-Limit", string(rune(limiter.rate)))
+				w.Header().Set("Retry-After", "60")
+				respondError(w, http.StatusTooManyRequests, "Rate limit exceeded. Please try again later.")
+				return
+			}
+
+			next.ServeHTTP(w, r)
+		})
+	}
+}
+
+// SecurityHeadersMiddleware adds security headers to responses
+func SecurityHeadersMiddleware(next http.Handler) http.Handler {
+	return http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
+		// Prevent XSS attacks
+		w.Header().Set("X-Content-Type-Options", "nosniff")
+		w.Header().Set("X-Frame-Options", "DENY")
+		w.Header().Set("X-XSS-Protection", "1; mode=block")
+
+		// Content Security Policy
+		w.Header().Set("Content-Security-Policy", "default-src 'self'")
+
+		// Prevent MIME sniffing
+		w.Header().Set("Content-Type", "application/json; charset=utf-8")
+
+		next.ServeHTTP(w, r)
+	})
+}

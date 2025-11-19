@@ -10,6 +10,7 @@ import (
 	"github.com/go-chi/chi/v5"
 	"github.com/google/uuid"
 	"github.com/rayyacub/telos-idea-matrix/internal/database"
+	"github.com/rayyacub/telos-idea-matrix/internal/metrics"
 	"github.com/rayyacub/telos-idea-matrix/internal/models"
 	"github.com/rayyacub/telos-idea-matrix/internal/patterns"
 	"github.com/rayyacub/telos-idea-matrix/internal/scoring"
@@ -111,11 +112,24 @@ func ideaToResponse(idea *models.Idea) IdeaResponse {
 
 // HealthHandler handles health check requests
 func (s *Server) HealthHandler(w http.ResponseWriter, r *http.Request) {
-	respondJSON(w, http.StatusOK, map[string]string{"status": "ok"})
+	ctx := r.Context()
+	status := s.healthMonitor.RunAllChecks(ctx)
+
+	// Return appropriate HTTP status code based on health status
+	httpStatus := http.StatusOK
+	if status.Status == "unhealthy" {
+		httpStatus = http.StatusServiceUnavailable
+	} else if status.Status == "degraded" {
+		httpStatus = http.StatusOK // Still return 200 for degraded
+	}
+
+	respondJSON(w, httpStatus, status)
 }
 
 // AnalyzeHandler handles idea analysis requests
 func (s *Server) AnalyzeHandler(w http.ResponseWriter, r *http.Request) {
+	start := time.Now()
+
 	var req AnalyzeRequest
 	if err := json.NewDecoder(r.Body).Decode(&req); err != nil {
 		respondError(w, http.StatusBadRequest, "Invalid request body")
@@ -140,6 +154,9 @@ func (s *Server) AnalyzeHandler(w http.ResponseWriter, r *http.Request) {
 
 	// Update analysis with detected patterns
 	analysis.DetectedPatterns = detectedPatterns
+
+	// Record metrics
+	metrics.RecordScoringDuration(time.Since(start))
 
 	respondJSON(w, http.StatusOK, AnalyzeResponse{Analysis: analysis})
 }
@@ -192,6 +209,9 @@ func (s *Server) CreateIdeaHandler(w http.ResponseWriter, r *http.Request) {
 		respondError(w, http.StatusInternalServerError, fmt.Sprintf("Failed to create idea: %v", err))
 		return
 	}
+
+	// Record metrics
+	metrics.RecordIdeaCreated()
 
 	respondJSON(w, http.StatusCreated, ideaToResponse(idea))
 }
@@ -336,6 +356,9 @@ func (s *Server) UpdateIdeaHandler(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
+	// Record metrics
+	metrics.RecordIdeaUpdated()
+
 	respondJSON(w, http.StatusOK, ideaToResponse(idea))
 }
 
@@ -360,6 +383,9 @@ func (s *Server) DeleteIdeaHandler(w http.ResponseWriter, r *http.Request) {
 		respondError(w, http.StatusInternalServerError, fmt.Sprintf("Failed to delete idea: %v", err))
 		return
 	}
+
+	// Record metrics
+	metrics.RecordIdeaDeleted()
 
 	w.WriteHeader(http.StatusNoContent)
 }
@@ -407,4 +433,54 @@ func (s *Server) AnalyticsStatsHandler(w http.ResponseWriter, r *http.Request) {
 	}
 
 	respondJSON(w, http.StatusOK, stats)
+}
+
+// MetricsHandler handles requests for application metrics
+func (s *Server) MetricsHandler(w http.ResponseWriter, r *http.Request) {
+	snapshot := metrics.GetMetrics()
+
+	// Convert to a more friendly format for API responses
+	response := make(map[string]interface{})
+
+	for name, metric := range snapshot {
+		metricData := map[string]interface{}{
+			"type":      string(metric.Type),
+			"timestamp": metric.Timestamp.Format(time.RFC3339),
+		}
+
+		switch metric.Type {
+		case metrics.Counter:
+			metricData["value"] = metric.Value
+			metricData["count"] = metric.Count
+		case metrics.Gauge:
+			metricData["value"] = metric.Value
+		case metrics.Histogram:
+			metricData["count"] = metric.Count
+			if len(metric.Values) > 0 {
+				// Calculate basic stats
+				sum := 0.0
+				min := metric.Values[0]
+				max := metric.Values[0]
+				for _, v := range metric.Values {
+					sum += v
+					if v < min {
+						min = v
+					}
+					if v > max {
+						max = v
+					}
+				}
+				metricData["stats"] = map[string]interface{}{
+					"count": len(metric.Values),
+					"min":   min,
+					"max":   max,
+					"avg":   sum / float64(len(metric.Values)),
+				}
+			}
+		}
+
+		response[name] = metricData
+	}
+
+	respondJSON(w, http.StatusOK, response)
 }
