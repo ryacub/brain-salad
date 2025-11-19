@@ -739,3 +739,82 @@ func TestCreateManagerWithTelos(t *testing.T) {
 		t.Error("Expected fallback to be enabled")
 	}
 }
+
+// ============================================================================
+// CLI HELPER METHOD TESTS
+// ============================================================================
+
+func TestGetPrimaryProviderName(t *testing.T) {
+	config := DefaultManagerConfig()
+	manager := NewManager(config)
+
+	// Get primary provider name
+	name := manager.GetPrimaryProviderName()
+
+	if name == "" {
+		t.Error("Expected non-empty primary provider name")
+	}
+
+	// Should return the name of the primary provider
+	primary := manager.GetPrimaryProvider()
+	if primary != nil && primary.Name() != name {
+		t.Errorf("GetPrimaryProviderName() = %s, expected %s", name, primary.Name())
+	}
+}
+
+func TestGetAllProviders(t *testing.T) {
+	config := DefaultManagerConfig()
+	manager := NewManager(config)
+
+	// Get all providers as map
+	allProviders := manager.GetAllProviders()
+
+	if len(allProviders) == 0 {
+		t.Error("Expected at least one provider in map")
+	}
+
+	// Should contain rule_based provider
+	_, hasRuleBased := allProviders["rule_based"]
+	if !hasRuleBased {
+		t.Error("Expected rule_based provider in GetAllProviders() map")
+	}
+
+	// Verify map keys match provider names
+	for name, provider := range allProviders {
+		if provider.Name() != name {
+			t.Errorf("Map key %s doesn't match provider name %s", name, provider.Name())
+		}
+	}
+}
+
+func TestAnalyzeWithTelos(t *testing.T) {
+	config := DefaultManagerConfig()
+	manager := NewManager(config)
+
+	telos := createTestTelos()
+	ideaContent := "Build an AI-powered SaaS product"
+
+	// Set to rule_based provider (always available)
+	err := manager.SetPrimaryProvider("rule_based")
+	if err != nil {
+		t.Fatalf("Failed to set primary provider: %v", err)
+	}
+
+	// Test analysis with helper method
+	result, err := manager.AnalyzeWithTelos(ideaContent, telos)
+	if err != nil {
+		t.Fatalf("AnalyzeWithTelos failed: %v", err)
+	}
+
+	if result == nil {
+		t.Fatal("Expected analysis result, got nil")
+	}
+
+	if result.Provider != "rule_based" {
+		t.Errorf("Expected provider 'rule_based', got '%s'", result.Provider)
+	}
+
+	if result.FinalScore < 0 || result.FinalScore > 10 {
+		t.Errorf("FinalScore should be between 0 and 10, got %.2f", result.FinalScore)
+	}
+}

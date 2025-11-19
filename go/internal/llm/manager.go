@@ -529,3 +529,39 @@ func CreateManagerWithTelos(telos *models.Telos) *Manager {
 	manager := NewManager(config)
 	return manager
 }
+
+// GetPrimaryProviderName returns the name of the current primary provider
+// This is a helper method for CLI integration
+func (m *Manager) GetPrimaryProviderName() string {
+	m.mu.RLock()
+	defer m.mu.RUnlock()
+
+	if m.primary == nil {
+		return ""
+	}
+	return m.primary.Name()
+}
+
+// GetAllProviders returns a map of all registered providers (available or not)
+// This is a helper method for CLI integration
+func (m *Manager) GetAllProviders() map[string]Provider {
+	m.mu.RLock()
+	defer m.mu.RUnlock()
+
+	// Convert slice to map for CLI compatibility
+	result := make(map[string]Provider)
+	for _, provider := range m.providers {
+		result[provider.Name()] = provider
+	}
+	return result
+}
+
+// AnalyzeWithTelos is a helper that performs analysis with idea content and telos
+// This is a convenience method for CLI integration
+func (m *Manager) AnalyzeWithTelos(ideaContent string, telos *models.Telos) (*AnalysisResult, error) {
+	req := AnalysisRequest{
+		IdeaContent: ideaContent,
+		Telos:       telos,
+	}
+	return m.Analyze(req)
+}
