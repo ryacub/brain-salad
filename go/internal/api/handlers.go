@@ -2,7 +2,6 @@ package api
 
 import (
 	"encoding/json"
-	"fmt"
 	"net/http"
 	"strconv"
 	"time"
@@ -148,7 +147,9 @@ func (s *Server) AnalyzeHandler(w http.ResponseWriter, r *http.Request) {
 	scoringEngine := scoring.NewEngine(s.telos)
 	analysis, err := scoringEngine.CalculateScore(req.Content)
 	if err != nil {
-		respondError(w, http.StatusInternalServerError, fmt.Sprintf("Failed to analyze idea: %v", err))
+		// Log internal error details but don't expose to client
+		log.Error().Err(err).Msg("Failed to analyze idea")
+		respondError(w, http.StatusInternalServerError, "Failed to analyze idea")
 		return
 	}
 
@@ -181,7 +182,9 @@ func (s *Server) CreateIdeaHandler(w http.ResponseWriter, r *http.Request) {
 	scoringEngine := scoring.NewEngine(s.telos)
 	analysis, err := scoringEngine.CalculateScore(req.Content)
 	if err != nil {
-		respondError(w, http.StatusInternalServerError, fmt.Sprintf("Failed to analyze idea: %v", err))
+		// Log internal error details but don't expose to client
+		log.Error().Err(err).Msg("Failed to analyze idea")
+		respondError(w, http.StatusInternalServerError, "Failed to analyze idea")
 		return
 	}
 
@@ -209,7 +212,9 @@ func (s *Server) CreateIdeaHandler(w http.ResponseWriter, r *http.Request) {
 	}
 
 	if err := s.repo.Create(idea); err != nil {
-		respondError(w, http.StatusInternalServerError, fmt.Sprintf("Failed to create idea: %v", err))
+		// Log internal error details but don't expose to client
+		log.Error().Err(err).Str("idea_id", idea.ID).Msg("Failed to create idea")
+		respondError(w, http.StatusInternalServerError, "Failed to create idea")
 		return
 	}
 
@@ -270,7 +275,9 @@ func (s *Server) ListIdeasHandler(w http.ResponseWriter, r *http.Request) {
 
 	ideas, err := s.repo.List(options)
 	if err != nil {
-		respondError(w, http.StatusInternalServerError, fmt.Sprintf("Failed to list ideas: %v", err))
+		// Log internal error details but don't expose to client
+		log.Error().Err(err).Msg("Failed to list ideas")
+		respondError(w, http.StatusInternalServerError, "Failed to list ideas")
 		return
 	}
 
@@ -330,7 +337,9 @@ func (s *Server) UpdateIdeaHandler(w http.ResponseWriter, r *http.Request) {
 		scoringEngine := scoring.NewEngine(s.telos)
 		analysis, err := scoringEngine.CalculateScore(idea.Content)
 		if err != nil {
-			respondError(w, http.StatusInternalServerError, fmt.Sprintf("Failed to analyze idea: %v", err))
+			// Log internal error details but don't expose to client
+			log.Error().Err(err).Str("idea_id", idea.ID).Msg("Failed to analyze idea")
+			respondError(w, http.StatusInternalServerError, "Failed to analyze idea")
 			return
 		}
 
@@ -355,7 +364,9 @@ func (s *Server) UpdateIdeaHandler(w http.ResponseWriter, r *http.Request) {
 	}
 
 	if err := s.repo.Update(idea); err != nil {
-		respondError(w, http.StatusInternalServerError, fmt.Sprintf("Failed to update idea: %v", err))
+		// Log internal error details but don't expose to client
+		log.Error().Err(err).Str("idea_id", idea.ID).Msg("Failed to update idea")
+		respondError(w, http.StatusInternalServerError, "Failed to update idea")
 		return
 	}
 
@@ -383,7 +394,9 @@ func (s *Server) DeleteIdeaHandler(w http.ResponseWriter, r *http.Request) {
 	}
 
 	if err := s.repo.Delete(idStr); err != nil {
-		respondError(w, http.StatusInternalServerError, fmt.Sprintf("Failed to delete idea: %v", err))
+		// Log internal error details but don't expose to client
+		log.Error().Err(err).Str("idea_id", idStr).Msg("Failed to delete idea")
+		respondError(w, http.StatusInternalServerError, "Failed to delete idea")
 		return
 	}
 
@@ -398,14 +411,18 @@ func (s *Server) AnalyticsStatsHandler(w http.ResponseWriter, r *http.Request) {
 	// Get all ideas
 	allIdeas, err := s.repo.List(database.ListOptions{})
 	if err != nil {
-		respondError(w, http.StatusInternalServerError, fmt.Sprintf("Failed to get statistics: %v", err))
+		// Log internal error details but don't expose to client
+		log.Error().Err(err).Msg("Failed to get statistics (all ideas)")
+		respondError(w, http.StatusInternalServerError, "Failed to get statistics")
 		return
 	}
 
 	// Get active ideas
 	activeIdeas, err := s.repo.List(database.ListOptions{Status: "active"})
 	if err != nil {
-		respondError(w, http.StatusInternalServerError, fmt.Sprintf("Failed to get statistics: %v", err))
+		// Log internal error details but don't expose to client
+		log.Error().Err(err).Msg("Failed to get statistics (active ideas)")
+		respondError(w, http.StatusInternalServerError, "Failed to get statistics")
 		return
 	}
 

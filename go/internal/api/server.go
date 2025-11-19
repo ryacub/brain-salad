@@ -4,6 +4,8 @@ import (
 	"fmt"
 	"log"
 	"net/http"
+	"os"
+	"strings"
 	"time"
 
 	"github.com/go-chi/chi/v5"
@@ -45,8 +47,11 @@ func NewServer(repo *database.Repository, telosConfig *models.Telos) *Server {
 
 	// Create session manager with secure configuration
 	sessionConfig := DefaultSessionConfig()
-	// For development, allow non-HTTPS. In production, this should be true.
-	sessionConfig.SecureCookie = false // TODO: Set to true in production with HTTPS
+	// Set SecureCookie based on environment
+	// In production (ENV=production), use secure cookies (HTTPS only)
+	// In development, allow non-HTTPS cookies for easier testing
+	env := strings.ToLower(os.Getenv("ENV"))
+	sessionConfig.SecureCookie = (env == "production" || env == "prod")
 	sessionManager := NewSessionManager(repo.DB(), sessionConfig)
 
 	s := &Server{
@@ -154,7 +159,13 @@ func (s *Server) Start(addr string) error {
 	return http.ListenAndServe(addr, s.router)
 }
 
-// Close closes the database connection
+// Close closes the database connection and stops background goroutines
 func (s *Server) Close() error {
+	// Stop background cleanup goroutines
+	s.cache.Stop()
+	s.rateLimiter.Stop()
+	s.sessionManager.Stop()
+
+	// Close database connection
 	return s.repo.Close()
 }

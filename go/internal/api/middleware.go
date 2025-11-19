@@ -32,6 +32,7 @@ type Cache struct {
 	entries map[string]*CacheEntry
 	mu      sync.RWMutex
 	ttl     time.Duration
+	stopCh  chan struct{}
 }
 
 // NewCache creates a new cache with the specified TTL
@@ -39,6 +40,7 @@ func NewCache(ttl time.Duration) *Cache {
 	c := &Cache{
 		entries: make(map[string]*CacheEntry),
 		ttl:     ttl,
+		stopCh:  make(chan struct{}),
 	}
 
 	// Start cleanup goroutine
@@ -52,15 +54,25 @@ func (c *Cache) cleanupExpired() {
 	ticker := time.NewTicker(1 * time.Minute)
 	defer ticker.Stop()
 
-	for range ticker.C {
-		c.mu.Lock()
-		for key, entry := range c.entries {
-			if entry.IsExpired() {
-				delete(c.entries, key)
+	for {
+		select {
+		case <-ticker.C:
+			c.mu.Lock()
+			for key, entry := range c.entries {
+				if entry.IsExpired() {
+					delete(c.entries, key)
+				}
 			}
+			c.mu.Unlock()
+		case <-c.stopCh:
+			return
 		}
-		c.mu.Unlock()
 	}
+}
+
+// Stop gracefully stops the cache cleanup goroutine
+func (c *Cache) Stop() {
+	close(c.stopCh)
 }
 
 // Get retrieves a cache entry by key
@@ -129,7 +141,12 @@ func (rw *responseWriter) WriteHeader(code int) {
 }
 
 func (rw *responseWriter) Write(b []byte) (int, error) {
-	rw.body.Write(b)
+	// Write to buffer for caching
+	if _, err := rw.body.Write(b); err != nil {
+		// If buffer write fails, still try to write to response
+		// but this indicates a serious issue
+		return rw.ResponseWriter.Write(b)
+	}
 	return rw.ResponseWriter.Write(b)
 }
 
@@ -185,6 +202,7 @@ type RateLimiter struct {
 	mu       sync.RWMutex
 	rate     int           // requests per minute
 	burst    int           // max burst size
+	stopCh   chan struct{}
 }
 
 type visitor struct {
@@ -198,6 +216,7 @@ func NewRateLimiter(rate, burst int) *RateLimiter {
 		visitors: make(map[string]*visitor),
 		rate:     rate,
 		burst:    burst,
+		stopCh:   make(chan struct{}),
 	}
 
 	// Cleanup old visitors every 5 minutes
@@ -211,15 +230,25 @@ func (rl *RateLimiter) cleanupVisitors() {
 	ticker := time.NewTicker(5 * time.Minute)
 	defer ticker.Stop()
 
-	for range ticker.C {
-		rl.mu.Lock()
-		for ip, v := range rl.visitors {
-			if time.Since(v.lastSeen) > 10*time.Minute {
-				delete(rl.visitors, ip)
+	for {
+		select {
+		case <-ticker.C:
+			rl.mu.Lock()
+			for ip, v := range rl.visitors {
+				if time.Since(v.lastSeen) > 10*time.Minute {
+					delete(rl.visitors, ip)
+				}
 			}
+			rl.mu.Unlock()
+		case <-rl.stopCh:
+			return
 		}
-		rl.mu.Unlock()
 	}
+}
+
+// Stop gracefully stops the rate limiter cleanup goroutine
+func (rl *RateLimiter) Stop() {
+	close(rl.stopCh)
 }
 
 // Allow checks if a request from the given IP should be allowed

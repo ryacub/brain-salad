@@ -59,6 +59,7 @@ func (s *Session) IsExpired() bool {
 type SessionManager struct {
 	db     *sql.DB
 	config SessionConfig
+	stopCh chan struct{}
 }
 
 // NewSessionManager creates a new session manager
@@ -66,6 +67,7 @@ func NewSessionManager(db *sql.DB, config SessionConfig) *SessionManager {
 	sm := &SessionManager{
 		db:     db,
 		config: config,
+		stopCh: make(chan struct{}),
 	}
 
 	// Start cleanup goroutine
@@ -236,26 +238,36 @@ func (sm *SessionManager) cleanupExpired() {
 	ticker := time.NewTicker(15 * time.Minute)
 	defer ticker.Stop()
 
-	for range ticker.C {
-		// Delete sessions that have exceeded absolute timeout
-		deleteQuery := `
-			DELETE FROM sessions
-			WHERE expires_at < ?
-		`
-		now := time.Now().Format(time.RFC3339)
-		if _, err := sm.db.Exec(deleteQuery, now); err != nil {
-			// Log error but continue
-			continue
-		}
+	for {
+		select {
+		case <-ticker.C:
+			// Delete sessions that have exceeded absolute timeout
+			deleteQuery := `
+				DELETE FROM sessions
+				WHERE expires_at < ?
+			`
+			now := time.Now().Format(time.RFC3339)
+			if _, err := sm.db.Exec(deleteQuery, now); err != nil {
+				// Log error but continue
+				continue
+			}
 
-		// Delete sessions that have exceeded idle timeout
-		idleDeadline := time.Now().Add(-sm.config.IdleTimeout).Format(time.RFC3339)
-		deleteIdleQuery := `
-			DELETE FROM sessions
-			WHERE last_seen < ?
-		`
-		_, _ = sm.db.Exec(deleteIdleQuery, idleDeadline)
+			// Delete sessions that have exceeded idle timeout
+			idleDeadline := time.Now().Add(-sm.config.IdleTimeout).Format(time.RFC3339)
+			deleteIdleQuery := `
+				DELETE FROM sessions
+				WHERE last_seen < ?
+			`
+			_, _ = sm.db.Exec(deleteIdleQuery, idleDeadline)
+		case <-sm.stopCh:
+			return
+		}
 	}
+}
+
+// Stop gracefully stops the session manager cleanup goroutine
+func (sm *SessionManager) Stop() {
+	close(sm.stopCh)
 }
 
 // GetSessionFromRequest extracts the session ID from a request cookie

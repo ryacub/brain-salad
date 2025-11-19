@@ -2,6 +2,7 @@ package tasks
 
 import (
 	"context"
+	"errors"
 	"time"
 )
 
@@ -47,7 +48,7 @@ func (bt *BaseTask) Timeout() time.Duration {
 
 // Run must be implemented by tasks that embed BaseTask
 func (bt *BaseTask) Run(ctx context.Context) error {
-	panic("Run() must be implemented by tasks that embed BaseTask")
+	return errors.New("Run() must be implemented by tasks that embed BaseTask")
 }
 
 // FuncTask wraps a function as a Task
