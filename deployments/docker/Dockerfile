@@ -7,11 +7,13 @@ WORKDIR /build
 RUN apk add --no-cache git ca-certificates tzdata
 
 # Copy go mod files
-COPY go/go.mod go/go.sum ./
+COPY go.mod go.sum ./
 RUN go mod download
 
 # Copy source
-COPY go/ ./
+COPY cmd/ ./cmd/
+COPY internal/ ./internal/
+COPY pkg/ ./pkg/
 
 # Build binary
 RUN CGO_ENABLED=1 GOOS=linux go build -a -installsuffix cgo -ldflags="-w -s" -o tm ./cmd/cli

@@ -4,8 +4,8 @@ services:
   # Web API service for staging
   telos-api:
     build:
-      context: .
-      dockerfile: Dockerfile
+      context: ../..
+      dockerfile: deployments/docker/Dockerfile
     container_name: telos-api-staging
     entrypoint: ["tm-web"]
     command: []
@@ -38,7 +38,7 @@ services:
   # Frontend service for staging
   telos-frontend:
     build:
-      context: ./web
+      context: ../../web
       dockerfile: Dockerfile.staging
     container_name: telos-frontend-staging
     ports:
@@ -66,7 +66,7 @@ services:
     ports:
       - "9090:9090"
     volumes:
-      - ./monitoring/prometheus.yml:/etc/prometheus/prometheus.yml
+      - ../monitoring/prometheus.yml:/etc/prometheus/prometheus.yml
       - prometheus-data-staging:/prometheus
     command:
       - '--config.file=/etc/prometheus/prometheus.yml'
@@ -85,8 +85,8 @@ services:
       - "3001:3000"
     volumes:
       - grafana-data-staging:/var/lib/grafana
-      - ./monitoring/grafana/dashboards:/etc/grafana/provisioning/dashboards
-      - ./monitoring/grafana/datasources:/etc/grafana/provisioning/datasources
+      - ../monitoring/grafana/dashboards:/etc/grafana/provisioning/dashboards
+      - ../monitoring/grafana/datasources:/etc/grafana/provisioning/datasources
     environment:
       - GF_SECURITY_ADMIN_USER=admin
       - GF_SECURITY_ADMIN_PASSWORD=staging_admin_2024

@@ -3,8 +3,8 @@ version: '3.8'
 services:
   tm:
     build:
-      context: .
-      dockerfile: Dockerfile
+      context: ../..
+      dockerfile: deployments/docker/Dockerfile
     image: telos-matrix:latest
     container_name: telos-matrix
     volumes:

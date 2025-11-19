@@ -6,11 +6,10 @@
 *.dylib
 *.test
 *.out
-cli
-tm
-telos
-go/cli
-go/tm
+/cli
+/tm
+/telos
+bin/
 
 # Go artifacts
 go.work
@@ -83,7 +82,10 @@ temp/
 *.tmp
 *.temp
 
-# Node modules (for web UI)
+# Web Frontend
+web/node_modules/
+web/.svelte-kit/
+web/build/
 node_modules/
 .npm/
 .pnpm-store/
