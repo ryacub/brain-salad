@@ -1,3 +1,4 @@
+// Package export provides functionality for exporting ideas to various formats including CSV.
 package export
 
 import (

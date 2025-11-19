@@ -117,7 +117,7 @@ func (cp *ClaudeProvider) Analyze(req AnalysisRequest) (*AnalysisResult, error) 
 		duration := time.Since(start)
 		metrics.RecordLLMRequest(cp.Name(), false, duration)
 		metrics.RecordLLMError(cp.Name(), "auth_error")
-		return nil, fmt.Errorf("Claude provider not available (check ANTHROPIC_API_KEY)")
+		return nil, fmt.Errorf("claude provider not available (check ANTHROPIC_API_KEY)")
 	}
 
 	// Build prompt
@@ -173,7 +173,7 @@ func (cp *ClaudeProvider) Analyze(req AnalysisRequest) (*AnalysisResult, error) 
 	if lastErr != nil {
 		metrics.RecordLLMRequest(cp.Name(), false, duration)
 		metrics.RecordLLMError(cp.Name(), classifyError(lastErr))
-		return nil, fmt.Errorf("Claude request failed after %d retries: %w", cp.maxRetries, lastErr)
+		return nil, fmt.Errorf("claude request failed after %d retries: %w", cp.maxRetries, lastErr)
 	}
 
 	// Extract text from response
@@ -312,7 +312,7 @@ func (cp *ClaudeProvider) sendRequest(ctx context.Context, req *claudeRequest) (
 
 	// Check status code
 	if httpResp.StatusCode != http.StatusOK {
-		return nil, fmt.Errorf("Claude API error (status %d): %s", httpResp.StatusCode, string(respBody))
+		return nil, fmt.Errorf("claude API error (status %d): %s", httpResp.StatusCode, string(respBody))
 	}
 
 	// Unmarshal response
@@ -323,7 +323,7 @@ func (cp *ClaudeProvider) sendRequest(ctx context.Context, req *claudeRequest) (
 
 	// Check for API error
 	if resp.Error != nil {
-		return nil, fmt.Errorf("Claude API error: %s (type: %s)", resp.Error.Message, resp.Error.Type)
+		return nil, fmt.Errorf("claude API error: %s (type: %s)", resp.Error.Message, resp.Error.Type)
 	}
 
 	return &resp, nil

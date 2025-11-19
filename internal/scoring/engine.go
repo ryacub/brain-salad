@@ -1,3 +1,4 @@
+// Package scoring provides the core idea scoring engine based on telos configuration.
 package scoring
 
 import (
@@ -528,6 +529,6 @@ func (e *Engine) calculateRevenueTesting(ideaLower string) float64 {
 }
 
 // clamp ensures a value stays within min/max bounds.
-func clamp(value, min, max float64) float64 {
-	return math.Max(min, math.Min(max, value))
+func clamp(value, minVal, maxVal float64) float64 {
+	return math.Max(minVal, math.Min(maxVal, value))
 }

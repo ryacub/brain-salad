@@ -1,3 +1,4 @@
+// Package patterns provides anti-pattern and positive pattern detection for idea analysis.
 package patterns
 
 import (

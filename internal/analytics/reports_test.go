@@ -186,7 +186,7 @@ func TestGenerateCreationRateSection(t *testing.T) {
 
 // TestGenerateRecommendationsSection tests recommendations generation
 func TestGenerateRecommendationsSection(t *testing.T) {
-	t.Run("many high scoring ideas", func(t *testing.T) {
+	t.Run("many high scoring ideas", func(_ *testing.T) {
 		ideas := []*models.Idea{
 			{ID: "1", FinalScore: 9.0},
 			{ID: "2", FinalScore: 8.5},
@@ -201,7 +201,7 @@ func TestGenerateRecommendationsSection(t *testing.T) {
 		assert.Contains(t, section.Content, "high-scoring ideas")
 	})
 
-	t.Run("many low scoring ideas", func(t *testing.T) {
+	t.Run("many low scoring ideas", func(_ *testing.T) {
 		ideas := []*models.Idea{
 			{ID: "1", FinalScore: 3.0},
 			{ID: "2", FinalScore: 2.0},

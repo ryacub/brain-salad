@@ -1,3 +1,4 @@
+// Package utils provides utility functions for clipboard operations and other common tasks.
 package utils
 
 import (

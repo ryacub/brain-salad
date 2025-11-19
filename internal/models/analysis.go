@@ -1,3 +1,4 @@
+// Package models provides data structures for idea analysis, scoring, and telos configuration.
 package models
 
 import (

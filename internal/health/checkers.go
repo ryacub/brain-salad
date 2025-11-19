@@ -1,3 +1,4 @@
+// Package health provides health check functionality for database and system resource monitoring.
 package health
 
 import (
@@ -65,7 +66,7 @@ func (m *MemoryHealthChecker) Name() string {
 }
 
 // Check performs the memory health check
-func (m *MemoryHealthChecker) Check(ctx context.Context) HealthCheckResult {
+func (m *MemoryHealthChecker) Check(_ context.Context) HealthCheckResult {
 	start := time.Now()
 
 	var memStats runtime.MemStats
@@ -116,7 +117,7 @@ func (d *DiskSpaceHealthChecker) Name() string {
 }
 
 // Check performs the disk space health check
-func (d *DiskSpaceHealthChecker) Check(ctx context.Context) HealthCheckResult {
+func (d *DiskSpaceHealthChecker) Check(_ context.Context) HealthCheckResult {
 	start := time.Now()
 
 	result := HealthCheckResult{

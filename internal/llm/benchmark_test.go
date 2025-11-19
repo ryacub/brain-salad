@@ -1,3 +1,4 @@
+// Package llm provides LLM provider management and analysis capabilities for idea scoring.
 package llm
 
 import (
@@ -138,7 +139,7 @@ func BenchmarkFallbackProvider_SecondSuccess(b *testing.B) {
 
 // BenchmarkOllamaProvider_IsAvailable benchmarks health checking
 func BenchmarkOllamaProvider_IsAvailable(b *testing.B) {
-	server := httptest.NewServer(http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
+	server := httptest.NewServer(http.HandlerFunc(func(w http.ResponseWriter, _ *http.Request) {
 		w.WriteHeader(http.StatusOK)
 		_, _ = w.Write([]byte(`{"models":[]}`))
 	}))

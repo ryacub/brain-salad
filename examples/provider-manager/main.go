@@ -1,3 +1,4 @@
+// Package main demonstrates the usage of the LLM provider manager with various examples.
 package main
 
 import (

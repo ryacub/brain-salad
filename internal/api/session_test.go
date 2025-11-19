@@ -342,7 +342,7 @@ func TestGetSessionID(t *testing.T) {
 	session, err := sm.CreateSession()
 	require.NoError(t, err)
 
-	t.Run("from cookie", func(t *testing.T) {
+	t.Run("from cookie", func(_ *testing.T) {
 		req := httptest.NewRequest("GET", "/", nil)
 		req.AddCookie(&http.Cookie{
 			Name:  config.CookieName,
@@ -354,7 +354,7 @@ func TestGetSessionID(t *testing.T) {
 		assert.Equal(t, session.ID, sessionID)
 	})
 
-	t.Run("no session", func(t *testing.T) {
+	t.Run("no session", func(_ *testing.T) {
 		req := httptest.NewRequest("GET", "/", nil)
 
 		_, err := GetSessionID(req)

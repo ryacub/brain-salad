@@ -183,7 +183,7 @@ func TestCustomProvider_Analyze_Success(t *testing.T) {
 // TestCustomProvider_Analyze_AlternativeFieldNames tests JSON parsing with alternative field names
 func TestCustomProvider_Analyze_AlternativeFieldNames(t *testing.T) {
 	// Create mock server with alternative field names
-	server := httptest.NewServer(http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
+	server := httptest.NewServer(http.HandlerFunc(func(w http.ResponseWriter, _ *http.Request) {
 		w.WriteHeader(http.StatusOK)
 		_, _ = w.Write([]byte(`{
 			"missionAlignment": 3.0,
@@ -220,7 +220,7 @@ func TestCustomProvider_Analyze_AlternativeFieldNames(t *testing.T) {
 // TestCustomProvider_Analyze_TextResponse tests fallback to text parsing
 func TestCustomProvider_Analyze_TextResponse(t *testing.T) {
 	// Create mock server returning plain text
-	server := httptest.NewServer(http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
+	server := httptest.NewServer(http.HandlerFunc(func(w http.ResponseWriter, _ *http.Request) {
 		w.WriteHeader(http.StatusOK)
 		_, _ = w.Write([]byte("This idea shows promise but needs more validation."))
 	}))
@@ -285,7 +285,7 @@ func TestCustomProvider_Analyze_HTTPError(t *testing.T) {
 
 	for _, tt := range tests {
 		t.Run(tt.name, func(t *testing.T) {
-			server := httptest.NewServer(http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
+			server := httptest.NewServer(http.HandlerFunc(func(w http.ResponseWriter, _ *http.Request) {
 				w.WriteHeader(tt.statusCode)
 				_, _ = w.Write([]byte(tt.body))
 			}))
@@ -388,7 +388,7 @@ func TestCustomProvider_Analyze_WithTemplate(t *testing.T) {
 // TestCustomProvider_Analyze_Timeout tests request timeout
 func TestCustomProvider_Analyze_Timeout(t *testing.T) {
 	// Create server that delays response
-	server := httptest.NewServer(http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
+	server := httptest.NewServer(http.HandlerFunc(func(w http.ResponseWriter, _ *http.Request) {
 		time.Sleep(2 * time.Second)
 		w.WriteHeader(http.StatusOK)
 		_, _ = w.Write([]byte(`{"score": 7.0}`))
@@ -445,7 +445,7 @@ func TestCustomProvider_ScoreValidation(t *testing.T) {
 
 	for _, tt := range tests {
 		t.Run(tt.name, func(t *testing.T) {
-			server := httptest.NewServer(http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
+			server := httptest.NewServer(http.HandlerFunc(func(w http.ResponseWriter, _ *http.Request) {
 				w.WriteHeader(http.StatusOK)
 				_, _ = w.Write([]byte(tt.response))
 			}))
@@ -558,7 +558,7 @@ func TestGenerateRecommendation(t *testing.T) {
 
 // TestCustomProvider_CalculatedFinalScore tests final score calculation when not provided
 func TestCustomProvider_CalculatedFinalScore(t *testing.T) {
-	server := httptest.NewServer(http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
+	server := httptest.NewServer(http.HandlerFunc(func(w http.ResponseWriter, _ *http.Request) {
 		w.WriteHeader(http.StatusOK)
 		// No final_score in response
 		_, _ = w.Write([]byte(`{
@@ -588,7 +588,7 @@ func TestCustomProvider_CalculatedFinalScore(t *testing.T) {
 
 // TestCustomProvider_DefaultRecommendation tests default recommendation when not provided
 func TestCustomProvider_DefaultRecommendation(t *testing.T) {
-	server := httptest.NewServer(http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
+	server := httptest.NewServer(http.HandlerFunc(func(w http.ResponseWriter, _ *http.Request) {
 		w.WriteHeader(http.StatusOK)
 		// No recommendation in response
 		_, _ = w.Write([]byte(`{

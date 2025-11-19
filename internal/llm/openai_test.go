@@ -25,7 +25,7 @@ func TestOpenAIProvider_IsAvailable_NoAPIKey(t *testing.T) {
 
 func TestOpenAIProvider_Analyze_MockServer(t *testing.T) {
 	// Create mock HTTP server
-	server := httptest.NewServer(http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
+	server := httptest.NewServer(http.HandlerFunc(func(w http.ResponseWriter, _ *http.Request) {
 		w.Header().Set("Content-Type", "application/json")
 		w.WriteHeader(http.StatusOK)
 		_, _ = w.Write([]byte(`{
@@ -78,7 +78,7 @@ func TestOpenAIProvider_Analyze_MockServer(t *testing.T) {
 
 func TestOpenAIProvider_RetryLogic(t *testing.T) {
 	attempts := 0
-	server := httptest.NewServer(http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
+	server := httptest.NewServer(http.HandlerFunc(func(w http.ResponseWriter, _ *http.Request) {
 		attempts++
 		if attempts < 3 {
 			w.WriteHeader(http.StatusServiceUnavailable)
@@ -129,7 +129,7 @@ func TestOpenAIProvider_RetryLogic(t *testing.T) {
 }
 
 func TestOpenAIProvider_APIError(t *testing.T) {
-	server := httptest.NewServer(http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
+	server := httptest.NewServer(http.HandlerFunc(func(w http.ResponseWriter, _ *http.Request) {
 		w.Header().Set("Content-Type", "application/json")
 		w.WriteHeader(http.StatusUnauthorized)
 		_, _ = w.Write([]byte(`{
@@ -197,7 +197,7 @@ func TestOpenAIProvider_SetModel(t *testing.T) {
 
 func TestOpenAIProvider_RateLimit(t *testing.T) {
 	callTimes := []time.Time{}
-	server := httptest.NewServer(http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
+	server := httptest.NewServer(http.HandlerFunc(func(w http.ResponseWriter, _ *http.Request) {
 		callTimes = append(callTimes, time.Now())
 		w.Header().Set("Content-Type", "application/json")
 		w.WriteHeader(http.StatusOK)
@@ -248,7 +248,7 @@ func TestOpenAIProvider_RateLimit(t *testing.T) {
 }
 
 func TestOpenAIProvider_MalformedResponse(t *testing.T) {
-	server := httptest.NewServer(http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
+	server := httptest.NewServer(http.HandlerFunc(func(w http.ResponseWriter, _ *http.Request) {
 		w.Header().Set("Content-Type", "application/json")
 		w.WriteHeader(http.StatusOK)
 		_, _ = w.Write([]byte(`{
@@ -293,7 +293,7 @@ func TestOpenAIProvider_MalformedResponse(t *testing.T) {
 }
 
 func TestOpenAIProvider_EmptyResponse(t *testing.T) {
-	server := httptest.NewServer(http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
+	server := httptest.NewServer(http.HandlerFunc(func(w http.ResponseWriter, _ *http.Request) {
 		w.Header().Set("Content-Type", "application/json")
 		w.WriteHeader(http.StatusOK)
 		_, _ = w.Write([]byte(`{

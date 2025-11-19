@@ -1,3 +1,4 @@
+// Package main provides the web server entry point for the Telos Idea Matrix application.
 package main
 
 import (
@@ -132,7 +133,7 @@ func setupBackgroundTasks(tm *tasks.TaskManager, repo *database.Repository) {
 	cleanupTask := tasks.NewScheduledTask(
 		"database-cleanup",
 		1*time.Hour,
-		func(ctx context.Context) error {
+		func(_ context.Context) error {
 			log.Info().Msg("Running database cleanup task")
 			// Placeholder for actual cleanup logic
 			// Could vacuum, remove old records, optimize indexes, etc.
@@ -147,7 +148,7 @@ func setupBackgroundTasks(tm *tasks.TaskManager, repo *database.Repository) {
 	metricsTask := tasks.NewScheduledTask(
 		"metrics-collection",
 		5*time.Minute,
-		func(ctx context.Context) error {
+		func(_ context.Context) error {
 			log.Debug().Msg("Collecting metrics")
 			// Placeholder for metrics collection
 			// Could collect database stats, memory usage, etc.
@@ -162,7 +163,7 @@ func setupBackgroundTasks(tm *tasks.TaskManager, repo *database.Repository) {
 	healthCheckTask := tasks.NewScheduledTask(
 		"health-check",
 		30*time.Second,
-		func(ctx context.Context) error {
+		func(_ context.Context) error {
 			// Verify database connection
 			if err := repo.Ping(); err != nil {
 				log.Error().Err(err).Msg("Database health check failed")

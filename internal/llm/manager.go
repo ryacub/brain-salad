@@ -25,7 +25,6 @@ type Manager struct {
 type healthStatus struct {
 	available bool
 	lastCheck time.Time
-	lastError error
 }
 
 // providerStats tracks statistics for a provider
@@ -567,7 +566,7 @@ func (m *Manager) ResetStats() {
 
 // CreateManagerWithTelos creates a manager configured with a specific telos
 // This is a helper function for backward compatibility
-func CreateManagerWithTelos(telos *models.Telos) *Manager {
+func CreateManagerWithTelos(_ *models.Telos) *Manager {
 	config := DefaultManagerConfig()
 	manager := NewManager(config)
 	return manager

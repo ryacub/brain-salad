@@ -101,13 +101,12 @@ func watchHealth(manager *llm.Manager, intervalSec int) error {
 	displayWatchHealth(manager, intervalSec)
 
 	// Watch loop
-	for {
-		select {
-		case <-ticker.C:
-			clearScreen()
-			displayWatchHealth(manager, intervalSec)
-		}
+	for range ticker.C {
+		clearScreen()
+		displayWatchHealth(manager, intervalSec)
 	}
+
+	return nil
 }
 
 func displayWatchHealth(manager *llm.Manager, intervalSec int) {

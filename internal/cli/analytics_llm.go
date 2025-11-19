@@ -439,10 +439,3 @@ func parseLLMDuration(s string) (time.Duration, error) {
 	}
 	return time.ParseDuration(s)
 }
-
-func truncateLLMString(s string, maxLen int) string {
-	if len(s) <= maxLen {
-		return s
-	}
-	return s[:maxLen-3] + "..."
-}

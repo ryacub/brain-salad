@@ -1,3 +1,4 @@
+// Package main provides the CLI entry point for the Telos Idea Matrix application.
 package main
 
 import (

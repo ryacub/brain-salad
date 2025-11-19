@@ -16,25 +16,25 @@ func RenderSparkline(values []float64) string {
 	chars := []rune{'▁', '▂', '▃', '▄', '▅', '▆', '▇', '█'}
 
 	// Find min and max
-	min, max := values[0], values[0]
+	minVal, maxVal := values[0], values[0]
 	for _, v := range values {
-		if v < min {
-			min = v
+		if v < minVal {
+			minVal = v
 		}
-		if v > max {
-			max = v
+		if v > maxVal {
+			maxVal = v
 		}
 	}
 
 	// Handle case where all values are the same
-	if min == max {
+	if minVal == maxVal {
 		return strings.Repeat(string(chars[len(chars)/2]), len(values))
 	}
 
 	// Map values to characters
 	var result strings.Builder
 	for _, v := range values {
-		normalized := (v - min) / (max - min)
+		normalized := (v - minVal) / (maxVal - minVal)
 		idx := int(normalized * float64(len(chars)-1))
 		if idx >= len(chars) {
 			idx = len(chars) - 1
@@ -108,19 +108,19 @@ func RenderTrendChart(trends []TrendData, height int) string {
 	}
 
 	// Find min and max
-	min, max := values[0], values[0]
+	minVal, maxVal := values[0], values[0]
 	for _, v := range values {
-		if v < min {
-			min = v
+		if v < minVal {
+			minVal = v
 		}
-		if v > max {
-			max = v
+		if v > maxVal {
+			maxVal = v
 		}
 	}
 
 	// Handle case where all values are the same
-	if min == max {
-		return fmt.Sprintf("Flat trend at %.1f\n", min)
+	if minVal == maxVal {
+		return fmt.Sprintf("Flat trend at %.1f\n", minVal)
 	}
 
 	// Create chart grid
@@ -129,14 +129,14 @@ func RenderTrendChart(trends []TrendData, height int) string {
 	// Y-axis labels and grid
 	for row := height - 1; row >= 0; row-- {
 		// Calculate value for this row
-		yValue := min + (float64(row)/float64(height-1))*(max-min)
+		yValue := minVal + (float64(row)/float64(height-1))*(maxVal-minVal)
 
 		// Y-axis label
 		chart.WriteString(fmt.Sprintf("%4.1f │", yValue))
 
 		// Plot points
 		for col := 0; col < len(values); col++ {
-			normalized := (values[col] - min) / (max - min)
+			normalized := (values[col] - minVal) / (maxVal - minVal)
 			pointRow := int(normalized * float64(height-1))
 
 			if pointRow == row {

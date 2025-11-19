@@ -119,9 +119,10 @@ func (s *Server) HealthHandler(w http.ResponseWriter, r *http.Request) {
 
 	// Return appropriate HTTP status code based on health status
 	httpStatus := http.StatusOK
-	if status.Status == "unhealthy" {
+	switch status.Status {
+	case "unhealthy":
 		httpStatus = http.StatusServiceUnavailable
-	} else if status.Status == "degraded" {
+	case "degraded":
 		httpStatus = http.StatusOK // Still return 200 for degraded
 	}
 
@@ -407,7 +408,7 @@ func (s *Server) DeleteIdeaHandler(w http.ResponseWriter, r *http.Request) {
 }
 
 // AnalyticsStatsHandler handles requests for analytics statistics
-func (s *Server) AnalyticsStatsHandler(w http.ResponseWriter, r *http.Request) {
+func (s *Server) AnalyticsStatsHandler(w http.ResponseWriter, _ *http.Request) {
 	// Get all ideas
 	allIdeas, err := s.repo.List(database.ListOptions{})
 	if err != nil {
@@ -456,7 +457,7 @@ func (s *Server) AnalyticsStatsHandler(w http.ResponseWriter, r *http.Request) {
 }
 
 // MetricsHandler handles requests for application metrics
-func (s *Server) MetricsHandler(w http.ResponseWriter, r *http.Request) {
+func (s *Server) MetricsHandler(w http.ResponseWriter, _ *http.Request) {
 	snapshot := metrics.GetMetrics()
 
 	// Convert to a more friendly format for API responses
@@ -479,21 +480,21 @@ func (s *Server) MetricsHandler(w http.ResponseWriter, r *http.Request) {
 			if len(metric.Values) > 0 {
 				// Calculate basic stats
 				sum := 0.0
-				min := metric.Values[0]
-				max := metric.Values[0]
+				minVal := metric.Values[0]
+				maxVal := metric.Values[0]
 				for _, v := range metric.Values {
 					sum += v
-					if v < min {
-						min = v
+					if v < minVal {
+						minVal = v
 					}
-					if v > max {
-						max = v
+					if v > maxVal {
+						maxVal = v
 					}
 				}
 				metricData["stats"] = map[string]interface{}{
 					"count": len(metric.Values),
-					"min":   min,
-					"max":   max,
+					"min":   minVal,
+					"max":   maxVal,
 					"avg":   sum / float64(len(metric.Values)),
 				}
 			}

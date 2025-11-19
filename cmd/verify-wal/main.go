@@ -1,3 +1,4 @@
+// Package main provides a utility to verify WAL mode configuration for the SQLite database.
 package main
 
 import (
@@ -55,9 +56,10 @@ func main() {
 		log.Printf("Warning: failed to get temp store: %v", err)
 	}
 	tempStoreStr := "DEFAULT"
-	if tempStore == 1 {
+	switch tempStore {
+	case 1:
 		tempStoreStr = "FILE"
-	} else if tempStore == 2 {
+	case 2:
 		tempStoreStr = "MEMORY"
 	}
 	fmt.Printf("Temp Store: %s\n", tempStoreStr)

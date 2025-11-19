@@ -7,6 +7,8 @@ import (
 	"github.com/rayyacub/telos-idea-matrix/internal/llm"
 	"github.com/rs/zerolog/log"
 	"github.com/spf13/cobra"
+	"golang.org/x/text/cases"
+	"golang.org/x/text/language"
 )
 
 var (
@@ -165,7 +167,8 @@ func formatCategoryTitle(category string) string {
 	default:
 		// Convert underscores to spaces and title case
 		title := strings.ReplaceAll(category, "_", " ")
-		return strings.Title(title)
+		caser := cases.Title(language.English)
+		return caser.String(title)
 	}
 }
 

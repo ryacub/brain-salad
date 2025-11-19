@@ -229,9 +229,10 @@ func extractJSON(s string) string {
 	if start := strings.Index(s, "{"); start != -1 {
 		braceCount := 0
 		for i := start; i < len(s); i++ {
-			if s[i] == '{' {
+			switch s[i] {
+			case '{':
 				braceCount++
-			} else if s[i] == '}' {
+			case '}':
 				braceCount--
 				if braceCount == 0 {
 					return s[start : i+1]

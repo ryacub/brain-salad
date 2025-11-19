@@ -98,12 +98,12 @@ func TestGetClientIP(t *testing.T) {
 func TestRateLimitMiddleware_WithProxyHeaders(t *testing.T) {
 	limiter := NewRateLimiter(10, 10) // 10 requests per minute, burst of 10
 
-	handler := RateLimitMiddleware(limiter)(http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
+	handler := RateLimitMiddleware(limiter)(http.HandlerFunc(func(w http.ResponseWriter, _ *http.Request) {
 		w.WriteHeader(http.StatusOK)
 	}))
 
 	// Test that requests from different IPs via X-Forwarded-For are tracked separately
-	t.Run("Different IPs via X-Forwarded-For", func(t *testing.T) {
+	t.Run("Different IPs via X-Forwarded-For", func(_ *testing.T) {
 		// Request from IP 1
 		req1 := httptest.NewRequest("GET", "/", nil)
 		req1.RemoteAddr = "10.0.0.1:8080" // Proxy IP (same for both)
@@ -128,9 +128,9 @@ func TestRateLimitMiddleware_WithProxyHeaders(t *testing.T) {
 	})
 
 	// Test that the same IP is rate limited
-	t.Run("Same IP is rate limited", func(t *testing.T) {
+	t.Run("Same IP is rate limited", func(_ *testing.T) {
 		limiter := NewRateLimiter(2, 2) // Very low limit for testing
-		handler := RateLimitMiddleware(limiter)(http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
+		handler := RateLimitMiddleware(limiter)(http.HandlerFunc(func(w http.ResponseWriter, _ *http.Request) {
 			w.WriteHeader(http.StatusOK)
 		}))
 

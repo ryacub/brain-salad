@@ -249,7 +249,7 @@ func TestOllamaClient_HealthCheck(t *testing.T) {
 
 func TestOllamaClient_Generate_ContextCancellation(t *testing.T) {
 	// Create a mock server that delays response
-	server := httptest.NewServer(http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
+	server := httptest.NewServer(http.HandlerFunc(func(w http.ResponseWriter, _ *http.Request) {
 		time.Sleep(2 * time.Second)
 		w.WriteHeader(http.StatusOK)
 	}))

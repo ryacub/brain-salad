@@ -861,7 +861,7 @@ func parseDate(dateStr string) time.Time {
 	return t
 }
 func TestCalculateOverviewMetrics(t *testing.T) {
-	t.Run("empty ideas", func(t *testing.T) {
+	t.Run("empty ideas", func(_ *testing.T) {
 		ideas := []*models.Idea{}
 		metrics := calculateOverviewMetrics(ideas)
 
@@ -873,7 +873,7 @@ func TestCalculateOverviewMetrics(t *testing.T) {
 		}
 	})
 
-	t.Run("multiple ideas with patterns", func(t *testing.T) {
+	t.Run("multiple ideas with patterns", func(_ *testing.T) {
 		ideas := []*models.Idea{
 			{FinalScore: 5.0, Patterns: []string{"p1"}},
 			{FinalScore: 7.0, Patterns: []string{"p1", "p2"}},
@@ -903,7 +903,7 @@ func TestCalculateOverviewMetrics(t *testing.T) {
 		}
 	})
 
-	t.Run("duplicate patterns", func(t *testing.T) {
+	t.Run("duplicate patterns", func(_ *testing.T) {
 		ideas := []*models.Idea{
 			{FinalScore: 5.0, Patterns: []string{"p1", "p2"}},
 			{FinalScore: 7.0, Patterns: []string{"p1", "p2"}},
@@ -941,21 +941,21 @@ func TestCalculateMedian(t *testing.T) {
 }
 
 func TestCalculateStdDev(t *testing.T) {
-	t.Run("empty scores", func(t *testing.T) {
+	t.Run("empty scores", func(_ *testing.T) {
 		result := calculateStdDev([]float64{})
 		if result != 0 {
 			t.Errorf("Expected 0, got %.2f", result)
 		}
 	})
 
-	t.Run("identical values", func(t *testing.T) {
+	t.Run("identical values", func(_ *testing.T) {
 		result := calculateStdDev([]float64{5, 5, 5, 5})
 		if result != 0 {
 			t.Errorf("Expected 0 for identical values, got %.2f", result)
 		}
 	})
 
-	t.Run("standard calculation", func(t *testing.T) {
+	t.Run("standard calculation", func(_ *testing.T) {
 		// Mean = 5, variance = 2, stddev = sqrt(2) ≈ 1.414
 		result := calculateStdDev([]float64{3, 4, 5, 6, 7})
 		expected := 1.414
@@ -991,7 +991,7 @@ func TestCalculatePercentile(t *testing.T) {
 		})
 	}
 
-	t.Run("empty scores", func(t *testing.T) {
+	t.Run("empty scores", func(_ *testing.T) {
 		result := calculatePercentile([]float64{}, 50)
 		if result != 0 {
 			t.Errorf("Expected 0 for empty scores, got %.1f", result)

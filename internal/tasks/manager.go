@@ -1,3 +1,4 @@
+// Package tasks provides background task management with graceful shutdown support.
 package tasks
 
 import (
