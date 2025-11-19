@@ -6,9 +6,19 @@ import (
 	"time"
 
 	"github.com/rayyacub/telos-idea-matrix/internal/llm/client"
+	"github.com/rayyacub/telos-idea-matrix/internal/llm/processing"
+	"github.com/rayyacub/telos-idea-matrix/internal/llm/quality"
 	"github.com/rayyacub/telos-idea-matrix/internal/models"
 	"github.com/rayyacub/telos-idea-matrix/internal/scoring"
 )
+
+// Global quality tracker for all LLM analyses
+var globalQualityTracker = quality.NewSimpleTracker()
+
+// GetQualityTracker returns the global quality tracker
+func GetQualityTracker() *quality.SimpleTracker {
+	return globalQualityTracker
+}
 
 // ============================================================================
 // OLLAMA PROVIDER
@@ -16,8 +26,9 @@ import (
 
 // OllamaProvider implements the Provider interface using Ollama.
 type OllamaProvider struct {
-	client *client.OllamaClient
-	model  string
+	client    *client.OllamaClient
+	model     string
+	processor *processing.SimpleProcessor
 }
 
 // NewOllamaProvider creates a new Ollama provider with the given configuration.
@@ -27,9 +38,39 @@ func NewOllamaProvider(baseURL string, model string) *OllamaProvider {
 		model = "llama2"
 	}
 
+	// Create processor with rule-based fallback function
+	fallbackFunc := func(ideaContent string) (*processing.ProcessedResult, error) {
+		// Use rule-based provider as fallback
+		ruleProvider := NewRuleBasedProvider()
+		result, err := ruleProvider.Analyze(AnalysisRequest{
+			IdeaContent: ideaContent,
+			Telos:       nil, // TODO: Pass telos when available
+		})
+		if err != nil {
+			return nil, err
+		}
+
+		// Convert to ProcessedResult
+		return &processing.ProcessedResult{
+			Scores: processing.ScoreBreakdown{
+				MissionAlignment: result.Scores.MissionAlignment,
+				AntiChallenge:    result.Scores.AntiChallenge,
+				StrategicFit:     result.Scores.StrategicFit,
+			},
+			FinalScore:     result.FinalScore,
+			Recommendation: result.Recommendation,
+			Explanations:   result.Explanations,
+			Provider:       result.Provider,
+			UsedFallback:   true,
+		}, nil
+	}
+
+	processor := processing.NewSimpleProcessor(fallbackFunc)
+
 	return &OllamaProvider{
-		client: client.NewOllamaClient(baseURL, 30*time.Second),
-		model:  model,
+		client:    client.NewOllamaClient(baseURL, 30*time.Second),
+		model:     model,
+		processor: processor,
 	}
 }
 
@@ -68,26 +109,40 @@ func (op *OllamaProvider) Analyze(req AnalysisRequest) (*AnalysisResult, error) 
 		return nil, fmt.Errorf("generate: %w", err)
 	}
 
-	// Parse LLM response
-	llmResp, err := ParseLLMResponse(resp.Response)
+	// Process LLM response with fallback support
+	processed, err := op.processor.Process(resp.Response, req.IdeaContent)
 	if err != nil {
-		return nil, fmt.Errorf("parse response: %w", err)
+		return nil, fmt.Errorf("process response: %w", err)
 	}
 
 	// Convert to AnalysisResult
 	result := &AnalysisResult{
 		Scores: ScoreBreakdown{
-			MissionAlignment: llmResp.Scores.MissionAlignment,
-			AntiChallenge:    llmResp.Scores.AntiChallenge,
-			StrategicFit:     llmResp.Scores.StrategicFit,
+			MissionAlignment: processed.Scores.MissionAlignment,
+			AntiChallenge:    processed.Scores.AntiChallenge,
+			StrategicFit:     processed.Scores.StrategicFit,
 		},
-		FinalScore:     llmResp.FinalScore,
-		Recommendation: llmResp.Recommendation,
-		Explanations:   llmResp.Explanations,
+		FinalScore:     processed.FinalScore,
+		Recommendation: processed.Recommendation,
+		Explanations:   processed.Explanations,
 		Provider:       op.Name(),
 		Duration:       time.Since(start),
 		FromCache:      false,
 	}
+
+	// Track quality metrics
+	simpleResult := &quality.SimpleResult{
+		MissionAlignment: result.Scores.MissionAlignment,
+		AntiChallenge:    result.Scores.AntiChallenge,
+		StrategicFit:     result.Scores.StrategicFit,
+		FinalScore:       result.FinalScore,
+		Explanations:     result.Explanations,
+		Provider:         result.Provider,
+	}
+	qualityMetrics := globalQualityTracker.Record(simpleResult)
+
+	// Log quality metrics (optional - could be removed in production)
+	_ = qualityMetrics // Suppress unused variable warning
 
 	return result, nil
 }
