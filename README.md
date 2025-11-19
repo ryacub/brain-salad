@@ -2,7 +2,7 @@
 
 > AI-powered personal productivity system for decision-making and idea management
 
-**Language:** Go 1.21+
+**Language:** Go 1.25.4+
 **Status:** Production Ready ✅
 **License:** MIT
 
@@ -146,7 +146,7 @@ tm health                   # System health check
 
 ## Architecture
 
-**Language:** Go 1.21+
+**Language:** Go 1.25.4+
 **Database:** SQLite (no external DB required)
 **CLI Framework:** Cobra + Viper
 **LLM Integration:** Multi-provider with fallback chain

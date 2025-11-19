@@ -28,10 +28,10 @@ type CLIContext struct {
 }
 
 var (
-	ctx        *CLIContext
-	dbPath     string
-	telosPath  string
-	rootCmd    *cobra.Command
+	ctx       *CLIContext
+	dbPath    string
+	telosPath string
+	rootCmd   *cobra.Command
 
 	// Color definitions
 	successColor = color.New(color.FgGreen, color.Bold)

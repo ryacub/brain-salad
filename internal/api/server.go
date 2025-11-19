@@ -57,8 +57,8 @@ func NewServer(repo *database.Repository, telosConfig *models.Telos) *Server {
 	s := &Server{
 		repo:           repo,
 		telos:          telosConfig,
-		cache:          NewCache(5 * time.Minute),       // 5-minute cache TTL
-		rateLimiter:    NewRateLimiter(100, 10),         // 100 req/min, burst of 10
+		cache:          NewCache(5 * time.Minute),        // 5-minute cache TTL
+		rateLimiter:    NewRateLimiter(100, 10),          // 100 req/min, burst of 10
 		csrfProtection: NewCSRFProtection(1 * time.Hour), // 1-hour token TTL
 		sessionManager: sessionManager,
 		healthMonitor:  healthMonitor,

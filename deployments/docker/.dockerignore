@@ -60,7 +60,8 @@ go/vendor/
 go/coverage.html
 go/coverage.out
 
-# Rust specific (legacy - project is migrating to Go)
+# Rust specific (legacy - project has migrated to Go)
+# These entries are kept for historical reference but should not exist
 target/
 **/*.rs.bk
 *.pdb
@@ -69,7 +70,6 @@ rust-toolchain
 rust-toolchain.toml
 src/
 Cargo.toml
-migrations/
 
 # macOS
 .DS_Store

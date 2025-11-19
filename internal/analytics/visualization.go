@@ -192,9 +192,9 @@ func RenderDistribution(high, medium, low int, width int) string {
 	// Build distribution bar
 	var bar strings.Builder
 	bar.WriteString("[")
-	bar.WriteString(strings.Repeat("█", highWidth))    // High
-	bar.WriteString(strings.Repeat("▓", mediumWidth))  // Medium
-	bar.WriteString(strings.Repeat("░", lowWidth))     // Low
+	bar.WriteString(strings.Repeat("█", highWidth))   // High
+	bar.WriteString(strings.Repeat("▓", mediumWidth)) // Medium
+	bar.WriteString(strings.Repeat("░", lowWidth))    // Low
 	bar.WriteString("]")
 
 	return bar.String()

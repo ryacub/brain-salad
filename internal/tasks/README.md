@@ -140,7 +140,7 @@ Tests include:
 
 ## Architecture
 
-The implementation follows the Rust reference implementation in `src/background_tasks.rs` with Go-specific adaptations:
+The implementation was migrated from a Rust reference implementation with Go-specific adaptations:
 
 - Uses `context.Context` for cancellation (instead of Tokio channels)
 - Uses `sync.WaitGroup` for task tracking

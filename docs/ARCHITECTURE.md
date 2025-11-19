@@ -511,7 +511,7 @@ Run tests with: `go test ./...`
 
 ### Local Development
 1. Clone repository
-2. Install Go 1.24+
+2. Install Go 1.25.4+
 3. Run `go mod download`
 4. Create `~/.telos/telos.md` with your configuration
 5. Run CLI: `go run ./cmd/cli`
@@ -573,7 +573,7 @@ In-memory metrics tracking:
 ### Docker
 Dockerfile example:
 ```dockerfile
-FROM golang:1.24-alpine AS builder
+FROM golang:1.25-alpine AS builder
 WORKDIR /app
 COPY go.mod go.sum ./
 RUN go mod download

@@ -52,7 +52,7 @@ Before contributing, please:
 
 ### Prerequisites
 
-- **Rust 1.75 or higher**: Install via [rustup](https://rustup.rs/)
+- **Go 1.25.4 or higher**: Install via [official downloads](https://go.dev/dl/)
 - **SQLite**: Required for database functionality (typically pre-installed on most systems)
 - **Git**: For version control
 
@@ -66,14 +66,14 @@ Before contributing, please:
 
 2. **Install Dependencies**
    ```bash
-   # This will download and compile all dependencies
-   cargo build
+   # This will download all dependencies
+   go mod download
    ```
 
 3. **Set Up the Database**
    ```bash
    # Run migrations (creates necessary tables)
-   cargo run -- --help  # First run creates the database
+   go run ./cmd/cli --help  # First run creates the database
    ```
 
 4. **Create a Test Telos Configuration**
@@ -84,14 +84,14 @@ Before contributing, please:
 
    ## Goals
    - Build useful CLI tools
-   - Learn Rust deeply
+   - Learn Go deeply
 
    ## Strategies
    - Start simple, iterate often
    - Write tests first
 
    ## Current Stack
-   - Rust, SQLite, Tokio
+   - Go, SQLite
 
    ## Failure Patterns
    - Context switching between too many tools
@@ -101,18 +101,18 @@ Before contributing, please:
 5. **Run the Project Locally**
    ```bash
    # Run in development mode
-   cargo run -- dump "Test idea"
+   go run ./cmd/cli dump "Test idea"
 
    # Run with specific command
-   cargo run -- review
+   go run ./cmd/cli review
 
    # Run with verbose logging
-   RUST_LOG=debug cargo run -- dump "Test with logging"
+   LOG_LEVEL=debug go run ./cmd/cli dump "Test with logging"
    ```
 
 6. **Run Tests**
    ```bash
-   cargo test
+   go test ./...
    ```
 
 ### Development Dependencies
@@ -127,60 +127,64 @@ The project uses these key dependencies:
 - **reqwest**: HTTP client for AI integration
 - **ollama-rs**: LLM integration (optional)
 
-See [Cargo.toml](./Cargo.toml) for the complete dependency list.
+See [go.mod](./go.mod) for the complete dependency list.
 
 ## Code Standards
 
-### Rust Style Guidelines
+### Go Style Guidelines
 
-We follow the official Rust style guidelines. All code must pass formatting and linting checks before submission.
+We follow the official Go style guidelines and best practices. All code must pass formatting and linting checks before submission.
 
 #### Formatting
 ```bash
 # Format all code
-cargo fmt
+go fmt ./...
 
-# Check formatting without modifying files
-cargo fmt -- --check
+# Check formatting without modifying files (go fmt doesn't have --check, use diff)
+gofmt -d .
 ```
 
 #### Linting
 ```bash
-# Run Clippy with default lints
-cargo clippy
+# Run golangci-lint (requires installation)
+golangci-lint run
 
-# Run Clippy with warnings as errors (CI requirement)
-cargo clippy -- -D warnings
+# Run go vet for basic checks
+go vet ./...
+
+# Run golint for style checks (requires installation)
+golint ./...
 ```
 
 ### Code Quality Guidelines
 
-1. **Write Idiomatic Rust**
-   - Use iterators instead of loops where appropriate
-   - Leverage Rust's type system for safety
-   - Prefer `Result` types over panics
-   - Use `?` operator for error propagation
+1. **Write Idiomatic Go**
+   - Keep naming conventions (PascalCase for exported, camelCase for unexported)
+   - Use interfaces for decoupling
+   - Handle errors explicitly, don't panic
+   - Prefer composition over inheritance
 
 2. **Error Handling**
-   - Use `anyhow::Result` for application errors
-   - Use `thiserror` for custom error types
+   - Use explicit error returns with context
+   - Create custom error types with fmt.Errorf
+   - Wrap errors to provide context
    - Provide meaningful error messages
-   - Don't use `.unwrap()` or `.expect()` in production code (tests are OK)
+   - Don't panic in production code (tests are OK)
 
 3. **Documentation**
-   - Document all public APIs with doc comments (`///`)
+   - Document all public APIs with Go doc comments
    - Include examples in doc comments where helpful
    - Use `//` for inline comments explaining complex logic
-   - Run `cargo doc --open` to preview documentation
+   - Run `go doc .` to preview documentation
 
-4. **Async Code**
-   - Use `async/await` consistently
-   - Don't block the async runtime with CPU-intensive work
-   - Use `tokio::spawn` for concurrent operations
-   - Properly handle cancellation and timeouts
+4. **Concurrency**
+   - Use goroutines and channels appropriately
+   - Don't block in critical paths
+   - Use `context.Context` for cancellation and timeouts
+   - Properly synchronize shared data with mutexes or channels
 
 5. **Database Code**
-   - Use SQLx compile-time checked queries
+   - Use prepared statements and parameterized queries
    - Always use parameterized queries (never string interpolation)
    - Handle database errors gracefully
    - Write migrations for schema changes
@@ -199,7 +203,7 @@ Organize imports in this order:
 2. External crates
 3. Internal modules
 
-```rust
+```go
 use std::path::PathBuf;
 
 use anyhow::Result;
@@ -225,19 +229,19 @@ All contributions must include appropriate tests and pass the existing test suit
 
 ```bash
 # Run all tests
-cargo test
+go test ./...
 
 # Run tests with output
-cargo test -- --nocapture
+go test ./... -- --nocapture
 
 # Run specific test
-cargo test test_name
+go test ./... test_name
 
 # Run tests with logging
-RUST_LOG=debug cargo test
+RUST_LOG=debug go test ./...
 
 # Run integration tests only
-cargo test --test '*'
+go test ./... --test '*'
 ```
 
 ### Test Coverage
@@ -251,23 +255,23 @@ cargo test --test '*'
 1. **Test Structure**: Follow the Arrange-Act-Assert pattern
 2. **Test Isolation**: Tests should not depend on each other
 3. **Descriptive Names**: Use clear, descriptive test function names
-4. **Test Data**: Use temporary directories for file-based tests (see `tempfile` crate)
+4. **Test Data**: Use temporary directories for file-based tests (see `t.TempDir()`)
 5. **Mock External Services**: Don't rely on external APIs in tests
 
 Example test:
-```rust
-#[tokio::test]
-async fn test_idea_scoring_mission_alignment() {
+```go
+func TestIdeaScoringMissionAlignment(t *testing.T) {
     // Arrange
-    let telos = create_test_telos();
-    let idea = "Build a Rust CLI tool";
+    telos := createTestTelos()
+    idea := "Build a Go CLI tool"
 
     // Act
-    let score = score_idea(&telos, idea).await.unwrap();
+    score, err := scoreIdea(telos, idea)
+    require.NoError(t, err)
 
     // Assert
-    assert!(score >= 7.0);
-    assert!(score <= 10.0);
+    assert.GreaterOrEqual(t, score, 7.0)
+    assert.LessOrEqual(t, score, 10.0)
 }
 ```
 
@@ -290,16 +294,16 @@ async fn test_idea_scoring_mission_alignment() {
 3. **Verify Your Changes**
    ```bash
    # Format code
-   cargo fmt
+   go fmt ./...
 
    # Run linter
-   cargo clippy -- -D warnings
+   golangci-lint run -- -D warnings
 
    # Run tests
-   cargo test
+   go test ./...
 
    # Build the project
-   cargo build --release
+   go build ./... --release
    ```
 
 4. **Update Documentation**
@@ -358,10 +362,10 @@ async fn test_idea_scoring_mission_alignment() {
 ### CI/CD Pipeline Expectations
 
 Your PR must pass:
-- [ ] `cargo test` - All tests pass
-- [ ] `cargo clippy --all-targets --all-features -- -D warnings` - No clippy warnings
-- [ ] `cargo fmt --check` - Code is properly formatted
-- [ ] `cargo build` - Builds successfully
+- [ ] `go test ./...` - All tests pass
+- [ ] `golangci-lint run --all-targets --all-features -- -D warnings` - No clippy warnings
+- [ ] `go fmt ./... --check` - Code is properly formatted
+- [ ] `go build ./...` - Builds successfully
 - [ ] `docker build .` - Container builds successfully (if Dockerfile changed)
 
 ## Issue Reporting
@@ -382,8 +386,8 @@ Include the following information:
 - **Steps to Reproduce**: Exact steps to reproduce the issue
 - **Expected Behavior**: What you expected to happen
 - **Actual Behavior**: What actually happened
-- **Environment**: OS, Rust version, project version
-- **Logs**: Relevant error messages or logs (use `RUST_LOG=debug`)
+- **Environment**: OS, Go version, project version
+- **Logs**: Relevant error messages or logs (use `LOG_LEVEL=debug`)
 
 Example:
 ```markdown
@@ -398,7 +402,7 @@ Example:
 
 **Environment**:
 - OS: macOS 14.0
-- Rust: 1.75.0
+- Go: 1.25.4
 - Version: 0.1.0
 ```
 
@@ -540,14 +544,14 @@ Check the [Issues](https://github.com/rayyacub/telos-idea-matrix/issues) page fo
 ### Core Components
 
 ```
-main.rs          # CLI entry point & command routing
-├── commands/    # CLI command implementations
-│   ├── dump.rs  # Idea capture & analysis
-│   ├── review.rs  # Idea browsing & management
-│   └── ...      # Other commands
-├── config/      # Configuration loading & management
-├── scoring/     # Telos alignment scoring
-├── telos/       # Telos parsing & processing
+cmd/cli/main.go         # CLI entry point & command routing
+├── cli/                # CLI command implementations
+│   ├── dump.go         # Idea capture & analysis
+│   ├── review.go       # Idea browsing & management
+│   └── ...             # Other commands
+├── config/             # Configuration loading & management
+├── scoring/            # Telos alignment scoring
+├── telos/              # Telos parsing & processing
 ├── database/    # Data storage & retrieval
 ├── ai/          # AI integration layer
 └── types/       # Shared data structures

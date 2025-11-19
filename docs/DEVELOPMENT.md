@@ -22,7 +22,7 @@ This guide covers everything you need to know to develop the Telos Idea Matrix G
 
 ### Required
 
-- **Go 1.21+** - [Download](https://go.dev/dl/)
+- **Go 1.25.4+** - [Download](https://go.dev/dl/)
 - **SQLite3** - Should be installed on most systems
 - **make** - For running build targets
 
@@ -36,7 +36,7 @@ This guide covers everything you need to know to develop the Telos Idea Matrix G
 
 ```bash
 # Check Go version
-go version  # Should be 1.21 or higher
+go version  # Should be 1.25.4 or higher
 
 # Check SQLite
 sqlite3 --version

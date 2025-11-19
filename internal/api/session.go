@@ -32,11 +32,11 @@ type SessionConfig struct {
 // DefaultSessionConfig returns a secure default configuration
 func DefaultSessionConfig() SessionConfig {
 	return SessionConfig{
-		IdleTimeout:     1 * time.Hour,  // 1 hour of inactivity
+		IdleTimeout:     1 * time.Hour,      // 1 hour of inactivity
 		AbsoluteTimeout: 7 * 24 * time.Hour, // 7 days maximum
 		CookieName:      "session_id",
 		CookiePath:      "/",
-		CookieDomain:    "", // Let browser determine
+		CookieDomain:    "",   // Let browser determine
 		SecureCookie:    true, // Should be true in production with HTTPS
 		SameSite:        http.SameSiteStrictMode,
 	}
@@ -310,9 +310,9 @@ func (sm *SessionManager) SetSessionCookie(w http.ResponseWriter, session *Sessi
 		Domain:   sm.config.CookieDomain,
 		Expires:  session.ExpiresAt,
 		MaxAge:   int(time.Until(session.ExpiresAt).Seconds()),
-		HttpOnly: true, // Prevents JavaScript access (XSS protection)
+		HttpOnly: true,                   // Prevents JavaScript access (XSS protection)
 		Secure:   sm.config.SecureCookie, // Only send over HTTPS
-		SameSite: sm.config.SameSite, // CSRF protection at cookie level
+		SameSite: sm.config.SameSite,     // CSRF protection at cookie level
 	}
 
 	http.SetCookie(w, cookie)

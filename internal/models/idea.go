@@ -10,19 +10,19 @@ import (
 // Idea represents a captured idea with analysis.
 // Maps to StoredIdea in Rust implementation.
 type Idea struct {
-	ID               string    `json:"id" db:"id"`
-	Content          string    `json:"content" db:"content"`
-	RawScore         float64   `json:"raw_score,omitempty" db:"raw_score"`
-	FinalScore       float64   `json:"final_score,omitempty" db:"final_score"`
-	Patterns         []string  `json:"patterns,omitempty" db:"patterns"`
-	Tags             []string  `json:"tags,omitempty" db:"tags"`
-	Recommendation   string    `json:"recommendation,omitempty" db:"recommendation"`
-	AnalysisDetails  string    `json:"analysis_details,omitempty" db:"analysis_details"`
-	CreatedAt        time.Time `json:"created_at" db:"created_at"`
-	ReviewedAt       *time.Time `json:"reviewed_at,omitempty" db:"reviewed_at"`
-	Status           string    `json:"status" db:"status"`
-	Title            string    `json:"title,omitempty"` // For compatibility
-	Analysis         *Analysis `json:"analysis,omitempty"` // Full analysis object (not stored in DB)
+	ID              string     `json:"id" db:"id"`
+	Content         string     `json:"content" db:"content"`
+	RawScore        float64    `json:"raw_score,omitempty" db:"raw_score"`
+	FinalScore      float64    `json:"final_score,omitempty" db:"final_score"`
+	Patterns        []string   `json:"patterns,omitempty" db:"patterns"`
+	Tags            []string   `json:"tags,omitempty" db:"tags"`
+	Recommendation  string     `json:"recommendation,omitempty" db:"recommendation"`
+	AnalysisDetails string     `json:"analysis_details,omitempty" db:"analysis_details"`
+	CreatedAt       time.Time  `json:"created_at" db:"created_at"`
+	ReviewedAt      *time.Time `json:"reviewed_at,omitempty" db:"reviewed_at"`
+	Status          string     `json:"status" db:"status"`
+	Title           string     `json:"title,omitempty"`    // For compatibility
+	Analysis        *Analysis  `json:"analysis,omitempty"` // Full analysis object (not stored in DB)
 }
 
 // NewIdea creates a new Idea with generated ID and current timestamp.

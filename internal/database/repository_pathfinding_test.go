@@ -120,9 +120,10 @@ func TestFindRelationshipPath_MultiHop(t *testing.T) {
 }
 
 // TestFindRelationshipPath_MultiplePaths tests finding multiple paths in a diamond structure:
-//     → B →
-//   A       D
-//     → C →
+//
+//	  → B →
+//	A       D
+//	  → C →
 func TestFindRelationshipPath_MultiplePaths(t *testing.T) {
 	repo, cleanup := setupPathTestDB(t)
 	defer cleanup()

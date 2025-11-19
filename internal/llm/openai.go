@@ -33,9 +33,9 @@ func NewOpenAIProvider() *OpenAIProvider {
 	}
 
 	return &OpenAIProvider{
-		apiKey:      apiKey,
-		model:       model,
-		baseURL:     "https://api.openai.com/v1/chat/completions",
+		apiKey:  apiKey,
+		model:   model,
+		baseURL: "https://api.openai.com/v1/chat/completions",
 		httpClient: &http.Client{
 			Timeout: 30 * time.Second,
 		},
@@ -79,7 +79,7 @@ func (p *OpenAIProvider) Analyze(req AnalysisRequest) (*AnalysisResult, error) {
 		Model: p.model,
 		Messages: []openAIMessage{
 			{
-				Role: "system",
+				Role:    "system",
 				Content: "You are an expert at analyzing ideas against personal goals and values (telos). Provide structured analysis with scores, patterns, and recommendations.",
 			},
 			{
@@ -213,16 +213,16 @@ func (p *OpenAIProvider) sendRequest(req *openAIRequest) (*openAIResponse, error
 func (p *OpenAIProvider) SetModel(model string) {
 	validModels := []string{
 		// Latest GPT-5 models (2025)
-		"gpt-5.1",             // GPT-5.1 (latest flagship, Nov 2025)
-		"gpt-5.1-instant",     // GPT-5.1 Instant (faster, more conversational)
-		"gpt-5.1-thinking",    // GPT-5.1 Thinking (advanced reasoning)
-		"gpt-5.1-codex",       // GPT-5.1 Codex (specialized for coding)
-		"gpt-5.1-codex-mini",  // GPT-5.1 Codex Mini (smaller coding model)
-		"gpt-5",               // GPT-5 (Aug 2025)
-		"gpt-5-mini",          // GPT-5 Mini (faster variant)
-		"gpt-5-nano",          // GPT-5 Nano (smallest variant)
+		"gpt-5.1",            // GPT-5.1 (latest flagship, Nov 2025)
+		"gpt-5.1-instant",    // GPT-5.1 Instant (faster, more conversational)
+		"gpt-5.1-thinking",   // GPT-5.1 Thinking (advanced reasoning)
+		"gpt-5.1-codex",      // GPT-5.1 Codex (specialized for coding)
+		"gpt-5.1-codex-mini", // GPT-5.1 Codex Mini (smaller coding model)
+		"gpt-5",              // GPT-5 (Aug 2025)
+		"gpt-5-mini",         // GPT-5 Mini (faster variant)
+		"gpt-5-nano",         // GPT-5 Nano (smallest variant)
 		// GPT-4.5 models
-		"gpt-4.5",             // GPT-4.5 (research preview)
+		"gpt-4.5", // GPT-4.5 (research preview)
 		// GPT-4 models (2024)
 		"gpt-4o",              // GPT-4 Optimized
 		"gpt-4o-mini",         // GPT-4 Optimized Mini
@@ -267,7 +267,7 @@ type openAIRequest struct {
 
 // openAIMessage represents a message in the conversation
 type openAIMessage struct {
-	Role    string `json:"role"`    // "system", "user", or "assistant"
+	Role    string `json:"role"` // "system", "user", or "assistant"
 	Content string `json:"content"`
 }
 
