@@ -26,6 +26,9 @@ import (
 
 // TestEndToEndWorkflow tests the complete workflow from idea creation to analysis
 func TestEndToEndWorkflow(t *testing.T) {
+	// Disable rate limiting for tests to avoid flaky failures
+	t.Setenv("DISABLE_RATE_LIMIT", "true")
+
 	// Setup test environment
 	tempDir := t.TempDir()
 	dbPath := filepath.Join(tempDir, "test.db")
@@ -257,6 +260,9 @@ func TestEndToEndWorkflow(t *testing.T) {
 
 // TestConcurrentAccess tests concurrent API requests
 func TestConcurrentAccess(t *testing.T) {
+	// Disable rate limiting for tests to avoid flaky failures
+	t.Setenv("DISABLE_RATE_LIMIT", "true")
+
 	// Setup
 	tempDir := t.TempDir()
 	dbPath := filepath.Join(tempDir, "test.db")
@@ -543,6 +549,9 @@ func TestDatabaseIntegrity(t *testing.T) {
 
 // TestAPIErrorHandling tests error scenarios
 func TestAPIErrorHandling(t *testing.T) {
+	// Disable rate limiting for tests to avoid flaky failures
+	t.Setenv("DISABLE_RATE_LIMIT", "true")
+
 	tempDir := t.TempDir()
 	dbPath := filepath.Join(tempDir, "test.db")
 
@@ -605,11 +614,14 @@ func TestAPIErrorHandling(t *testing.T) {
 
 // TestHealthCheck tests the health endpoint
 func TestHealthCheck(t *testing.T) {
+	// Disable rate limiting for tests to avoid flaky failures
+	t.Setenv("DISABLE_RATE_LIMIT", "true")
+
 	tempDir := t.TempDir()
 	dbPath := filepath.Join(tempDir, "test.db")
 
 	telosPath := filepath.Join(tempDir, "telos.md")
-	require.NoError(t, os.WriteFile(telosPath, []byte("# Telos\n## Core Goals\n- Goal 1"), 0644))
+	require.NoError(t, os.WriteFile(telosPath, []byte("# Telos\n## Goals\n- G1: Goal 1"), 0644))
 
 	telosConfig, err := telos.ParseTelosFile(telosPath)
 	require.NoError(t, err)

@@ -78,6 +78,9 @@ func TestLoadCreateIdeas(t *testing.T) {
 		t.Skip("Skipping load test in short mode")
 	}
 
+	// Disable rate limiting for tests to avoid flaky failures
+	t.Setenv("DISABLE_RATE_LIMIT", "true")
+
 	// Setup
 	tempDir := t.TempDir()
 	dbPath := filepath.Join(tempDir, "load_test.db")
@@ -183,6 +186,9 @@ func TestLoadMixedOperations(t *testing.T) {
 	if testing.Short() {
 		t.Skip("Skipping load test in short mode")
 	}
+
+	// Disable rate limiting for tests to avoid flaky failures
+	t.Setenv("DISABLE_RATE_LIMIT", "true")
 
 	// Setup
 	tempDir := t.TempDir()

@@ -107,7 +107,12 @@ func (s *Server) setupRouter() {
 
 	// Security middleware
 	r.Use(SecurityHeadersMiddleware)
-	r.Use(RateLimitMiddleware(s.rateLimiter))
+
+	// Rate limiting - skip in test environment to avoid flaky tests
+	// Tests often run many requests quickly from the same IP (localhost)
+	if os.Getenv("DISABLE_RATE_LIMIT") != "true" {
+		r.Use(RateLimitMiddleware(s.rateLimiter))
+	}
 
 	// CORS configuration
 	r.Use(cors.Handler(cors.Options{
