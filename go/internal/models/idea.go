@@ -15,6 +15,7 @@ type Idea struct {
 	RawScore         float64   `json:"raw_score,omitempty" db:"raw_score"`
 	FinalScore       float64   `json:"final_score,omitempty" db:"final_score"`
 	Patterns         []string  `json:"patterns,omitempty" db:"patterns"`
+	Tags             []string  `json:"tags,omitempty" db:"tags"`
 	Recommendation   string    `json:"recommendation,omitempty" db:"recommendation"`
 	AnalysisDetails  string    `json:"analysis_details,omitempty" db:"analysis_details"`
 	CreatedAt        time.Time `json:"created_at" db:"created_at"`

@@ -5,6 +5,7 @@ package cli
 import (
 	"os"
 	"path/filepath"
+	"reflect"
 	"testing"
 	"time"
 
@@ -391,4 +392,516 @@ func TestBulkArchive_DryRun(t *testing.T) {
 	unchangedIdea, err := cliCtx.Repository.GetByID(idea.ID)
 	require.NoError(t, err)
 	assert.Equal(t, "active", unchangedIdea.Status, "Dry run should not modify data")
+}
+
+// Unit tests for helper functions
+
+func TestSplitCommaSeparated(t *testing.T) {
+	tests := []struct {
+		name     string
+		input    string
+		expected []string
+	}{
+		{
+			name:     "empty string",
+			input:    "",
+			expected: []string{},
+		},
+		{
+			name:     "single item",
+			input:    "one",
+			expected: []string{"one"},
+		},
+		{
+			name:     "multiple items",
+			input:    "one,two,three",
+			expected: []string{"one", "two", "three"},
+		},
+		{
+			name:     "items with spaces",
+			input:    "one, two, three",
+			expected: []string{"one", "two", "three"},
+		},
+		{
+			name:     "items with extra spaces",
+			input:    " one , two ",
+			expected: []string{"one", "two"},
+		},
+		{
+			name:     "items with empty parts",
+			input:    "one,,two",
+			expected: []string{"one", "two"},
+		},
+	}
+
+	for _, tt := range tests {
+		t.Run(tt.name, func(t *testing.T) {
+			result := splitCommaSeparated(tt.input)
+			if !reflect.DeepEqual(result, tt.expected) {
+				t.Errorf("splitCommaSeparated(%q) = %v, want %v", tt.input, result, tt.expected)
+			}
+		})
+	}
+}
+
+func TestAddUniqueStrings(t *testing.T) {
+	tests := []struct {
+		name     string
+		existing []string
+		newItems []string
+		expected []string
+	}{
+		{
+			name:     "add to empty slice",
+			existing: []string{},
+			newItems: []string{"a", "b"},
+			expected: []string{"a", "b"},
+		},
+		{
+			name:     "add new items",
+			existing: []string{"a", "b", "c"},
+			newItems: []string{"d", "e"},
+			expected: []string{"a", "b", "c", "d", "e"},
+		},
+		{
+			name:     "add with duplicates",
+			existing: []string{"a", "b", "c"},
+			newItems: []string{"b", "d", "e"},
+			expected: []string{"a", "b", "c", "d", "e"},
+		},
+		{
+			name:     "add all duplicates",
+			existing: []string{"a", "b", "c"},
+			newItems: []string{"a", "b", "c"},
+			expected: []string{"a", "b", "c"},
+		},
+		{
+			name:     "add nothing",
+			existing: []string{"a", "b", "c"},
+			newItems: []string{},
+			expected: []string{"a", "b", "c"},
+		},
+	}
+
+	for _, tt := range tests {
+		t.Run(tt.name, func(t *testing.T) {
+			result := addUniqueStrings(tt.existing, tt.newItems)
+			if !reflect.DeepEqual(result, tt.expected) {
+				t.Errorf("addUniqueStrings(%v, %v) = %v, want %v",
+					tt.existing, tt.newItems, result, tt.expected)
+			}
+		})
+	}
+}
+
+func TestRemoveStrings(t *testing.T) {
+	tests := []struct {
+		name     string
+		existing []string
+		toRemove []string
+		expected []string
+	}{
+		{
+			name:     "remove from empty slice",
+			existing: []string{},
+			toRemove: []string{"a"},
+			expected: []string{},
+		},
+		{
+			name:     "remove existing items",
+			existing: []string{"a", "b", "c", "d"},
+			toRemove: []string{"b", "d"},
+			expected: []string{"a", "c"},
+		},
+		{
+			name:     "remove non-existing items",
+			existing: []string{"a", "b", "c"},
+			toRemove: []string{"d", "e"},
+			expected: []string{"a", "b", "c"},
+		},
+		{
+			name:     "remove all items",
+			existing: []string{"a", "b", "c"},
+			toRemove: []string{"a", "b", "c"},
+			expected: []string{},
+		},
+		{
+			name:     "remove nothing",
+			existing: []string{"a", "b", "c"},
+			toRemove: []string{},
+			expected: []string{"a", "b", "c"},
+		},
+		{
+			name:     "remove with duplicates in toRemove",
+			existing: []string{"a", "b", "c"},
+			toRemove: []string{"b", "b", "c"},
+			expected: []string{"a"},
+		},
+	}
+
+	for _, tt := range tests {
+		t.Run(tt.name, func(t *testing.T) {
+			result := removeStrings(tt.existing, tt.toRemove)
+			if !reflect.DeepEqual(result, tt.expected) {
+				t.Errorf("removeStrings(%v, %v) = %v, want %v",
+					tt.existing, tt.toRemove, result, tt.expected)
+			}
+		})
+	}
+}
+
+func TestContains(t *testing.T) {
+	tests := []struct {
+		name     string
+		slice    []string
+		item     string
+		expected bool
+	}{
+		{
+			name:     "item exists",
+			slice:    []string{"a", "b", "c"},
+			item:     "b",
+			expected: true,
+		},
+		{
+			name:     "item does not exist",
+			slice:    []string{"a", "b", "c"},
+			item:     "d",
+			expected: false,
+		},
+		{
+			name:     "empty slice",
+			slice:    []string{},
+			item:     "a",
+			expected: false,
+		},
+		{
+			name:     "case sensitive",
+			slice:    []string{"a", "b", "c"},
+			item:     "A",
+			expected: false,
+		},
+	}
+
+	for _, tt := range tests {
+		t.Run(tt.name, func(t *testing.T) {
+			result := contains(tt.slice, tt.item)
+			if result != tt.expected {
+				t.Errorf("contains(%v, %q) = %v, want %v",
+					tt.slice, tt.item, result, tt.expected)
+			}
+		})
+	}
+}
+
+func TestTruncate(t *testing.T) {
+	tests := []struct {
+		name     string
+		input    string
+		maxLen   int
+		expected string
+	}{
+		{
+			name:     "no truncation needed",
+			input:    "short",
+			maxLen:   10,
+			expected: "short",
+		},
+		{
+			name:     "truncation needed",
+			input:    "this is a very long string that needs truncation",
+			maxLen:   20,
+			expected: "this is a very lo...",
+		},
+		{
+			name:     "exact length",
+			input:    "exactly",
+			maxLen:   7,
+			expected: "exactly",
+		},
+		{
+			name:     "empty string",
+			input:    "",
+			maxLen:   10,
+			expected: "",
+		},
+	}
+
+	for _, tt := range tests {
+		t.Run(tt.name, func(t *testing.T) {
+			result := truncate(tt.input, tt.maxLen)
+			if result != tt.expected {
+				t.Errorf("truncate(%q, %d) = %q, want %q",
+					tt.input, tt.maxLen, result, tt.expected)
+			}
+		})
+	}
+}
+
+// Integration tests for bulk update
+
+func TestBulkUpdate_SetStatus(t *testing.T) {
+	cliCtx, cleanup := setupTestCLI(t)
+	defer cleanup()
+
+	// Create test ideas
+	ideas := []*models.Idea{
+		{
+			ID:         uuid.New().String(),
+			Content:    "Low score idea 1",
+			RawScore:   2.0,
+			FinalScore: 2.5,
+			Status:     "active",
+			Patterns:   []string{},
+			Tags:       []string{},
+			CreatedAt:  time.Now().UTC(),
+		},
+		{
+			ID:         uuid.New().String(),
+			Content:    "Low score idea 2",
+			RawScore:   1.5,
+			FinalScore: 1.8,
+			Status:     "active",
+			Patterns:   []string{},
+			Tags:       []string{},
+			CreatedAt:  time.Now().UTC(),
+		},
+	}
+
+	for _, idea := range ideas {
+		err := cliCtx.Repository.Create(idea)
+		require.NoError(t, err)
+	}
+
+	// Test bulk update to archive low-scoring ideas
+	cmd := GetRootCmd()
+	cmd.SetArgs([]string{
+		"--telos", cliCtx.TelosPath,
+		"--db", cliCtx.DBPath,
+		"bulk", "update",
+		"--score-max", "3.0",
+		"--set-status", "archived",
+		"--yes",
+	})
+
+	err := cmd.Execute()
+	require.NoError(t, err)
+
+	// Verify ideas were archived
+	for _, idea := range ideas {
+		updated, err := cliCtx.Repository.GetByID(idea.ID)
+		require.NoError(t, err)
+		assert.Equal(t, "archived", updated.Status)
+	}
+}
+
+func TestBulkUpdate_AddPatterns(t *testing.T) {
+	cliCtx, cleanup := setupTestCLI(t)
+	defer cleanup()
+
+	// Create test idea
+	idea := &models.Idea{
+		ID:         uuid.New().String(),
+		Content:    "High value idea",
+		RawScore:   8.0,
+		FinalScore: 8.5,
+		Status:     "active",
+		Patterns:   []string{"existing-pattern"},
+		Tags:       []string{},
+		CreatedAt:  time.Now().UTC(),
+	}
+
+	err := cliCtx.Repository.Create(idea)
+	require.NoError(t, err)
+
+	// Test bulk update to add pattern
+	cmd := GetRootCmd()
+	cmd.SetArgs([]string{
+		"--telos", cliCtx.TelosPath,
+		"--db", cliCtx.DBPath,
+		"bulk", "update",
+		"--score-min", "7.0",
+		"--add-patterns", "high-value,priority",
+		"--yes",
+	})
+
+	err = cmd.Execute()
+	require.NoError(t, err)
+
+	// Verify patterns were added
+	updated, err := cliCtx.Repository.GetByID(idea.ID)
+	require.NoError(t, err)
+	assert.Contains(t, updated.Patterns, "existing-pattern")
+	assert.Contains(t, updated.Patterns, "high-value")
+	assert.Contains(t, updated.Patterns, "priority")
+	assert.Equal(t, 3, len(updated.Patterns))
+}
+
+func TestBulkUpdate_RemovePatterns(t *testing.T) {
+	cliCtx, cleanup := setupTestCLI(t)
+	defer cleanup()
+
+	// Create test idea
+	idea := &models.Idea{
+		ID:         uuid.New().String(),
+		Content:    "Idea with obsolete patterns",
+		RawScore:   5.0,
+		FinalScore: 5.5,
+		Status:     "active",
+		Patterns:   []string{"old-pattern", "keep-pattern", "remove-pattern"},
+		Tags:       []string{},
+		CreatedAt:  time.Now().UTC(),
+	}
+
+	err := cliCtx.Repository.Create(idea)
+	require.NoError(t, err)
+
+	// Test bulk update to remove patterns
+	cmd := GetRootCmd()
+	cmd.SetArgs([]string{
+		"--telos", cliCtx.TelosPath,
+		"--db", cliCtx.DBPath,
+		"bulk", "update",
+		"--remove-patterns", "old-pattern,remove-pattern",
+		"--yes",
+	})
+
+	err = cmd.Execute()
+	require.NoError(t, err)
+
+	// Verify patterns were removed
+	updated, err := cliCtx.Repository.GetByID(idea.ID)
+	require.NoError(t, err)
+	assert.NotContains(t, updated.Patterns, "old-pattern")
+	assert.NotContains(t, updated.Patterns, "remove-pattern")
+	assert.Contains(t, updated.Patterns, "keep-pattern")
+	assert.Equal(t, 1, len(updated.Patterns))
+}
+
+func TestBulkUpdate_AddTags(t *testing.T) {
+	cliCtx, cleanup := setupTestCLI(t)
+	defer cleanup()
+
+	// Create test idea
+	idea := &models.Idea{
+		ID:         uuid.New().String(),
+		Content:    "Archived idea",
+		RawScore:   6.0,
+		FinalScore: 6.2,
+		Status:     "archived",
+		Patterns:   []string{},
+		Tags:       []string{},
+		CreatedAt:  time.Now().UTC(),
+	}
+
+	err := cliCtx.Repository.Create(idea)
+	require.NoError(t, err)
+
+	// Test bulk update to add tags
+	cmd := GetRootCmd()
+	cmd.SetArgs([]string{
+		"--telos", cliCtx.TelosPath,
+		"--db", cliCtx.DBPath,
+		"bulk", "update",
+		"--status", "archived",
+		"--add-tags", "reviewed,processed",
+		"--yes",
+	})
+
+	err = cmd.Execute()
+	require.NoError(t, err)
+
+	// Verify tags were added
+	updated, err := cliCtx.Repository.GetByID(idea.ID)
+	require.NoError(t, err)
+	assert.Contains(t, updated.Tags, "reviewed")
+	assert.Contains(t, updated.Tags, "processed")
+	assert.Equal(t, 2, len(updated.Tags))
+}
+
+func TestBulkUpdate_DryRun(t *testing.T) {
+	cliCtx, cleanup := setupTestCLI(t)
+	defer cleanup()
+
+	// Create test idea
+	idea := &models.Idea{
+		ID:         uuid.New().String(),
+		Content:    "Idea for dry run",
+		RawScore:   3.0,
+		FinalScore: 3.5,
+		Status:     "active",
+		Patterns:   []string{"old"},
+		Tags:       []string{},
+		CreatedAt:  time.Now().UTC(),
+	}
+
+	err := cliCtx.Repository.Create(idea)
+	require.NoError(t, err)
+
+	// Test bulk update with dry-run
+	cmd := GetRootCmd()
+	cmd.SetArgs([]string{
+		"--telos", cliCtx.TelosPath,
+		"--db", cliCtx.DBPath,
+		"bulk", "update",
+		"--score-max", "4.0",
+		"--set-status", "archived",
+		"--add-patterns", "new",
+		"--dry-run",
+	})
+
+	err = cmd.Execute()
+	require.NoError(t, err)
+
+	// Verify idea was NOT modified
+	unchanged, err := cliCtx.Repository.GetByID(idea.ID)
+	require.NoError(t, err)
+	assert.Equal(t, "active", unchanged.Status)
+	assert.Equal(t, []string{"old"}, unchanged.Patterns)
+}
+
+func TestBulkUpdate_CombinedOperations(t *testing.T) {
+	cliCtx, cleanup := setupTestCLI(t)
+	defer cleanup()
+
+	// Create test idea
+	idea := &models.Idea{
+		ID:         uuid.New().String(),
+		Content:    "Idea for combined update",
+		RawScore:   7.0,
+		FinalScore: 7.5,
+		Status:     "active",
+		Patterns:   []string{"remove-me"},
+		Tags:       []string{},
+		CreatedAt:  time.Now().UTC(),
+	}
+
+	err := cliCtx.Repository.Create(idea)
+	require.NoError(t, err)
+
+	// Test bulk update with multiple operations
+	cmd := GetRootCmd()
+	cmd.SetArgs([]string{
+		"--telos", cliCtx.TelosPath,
+		"--db", cliCtx.DBPath,
+		"bulk", "update",
+		"--score-min", "7.0",
+		"--set-status", "archived",
+		"--add-patterns", "high-priority",
+		"--remove-patterns", "remove-me",
+		"--add-tags", "reviewed,done",
+		"--yes",
+	})
+
+	err = cmd.Execute()
+	require.NoError(t, err)
+
+	// Verify all changes were applied
+	updated, err := cliCtx.Repository.GetByID(idea.ID)
+	require.NoError(t, err)
+	assert.Equal(t, "archived", updated.Status)
+	assert.Contains(t, updated.Patterns, "high-priority")
+	assert.NotContains(t, updated.Patterns, "remove-me")
+	assert.Contains(t, updated.Tags, "reviewed")
+	assert.Contains(t, updated.Tags, "done")
 }
