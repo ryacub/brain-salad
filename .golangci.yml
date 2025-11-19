@@ -2,7 +2,6 @@ version: "2"
 
 run:
   timeout: 5m
-  tests: true
 
 linters:
   default: standard
@@ -22,11 +21,6 @@ linters:
         - name: error-naming
         - name: if-return
         - name: var-naming
-
-exclusions:
-  paths:
-    - test/**
-    - bin/**
 
 issues:
   max-issues-per-linter: 0
