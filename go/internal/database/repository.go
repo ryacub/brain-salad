@@ -422,3 +422,365 @@ func (r *Repository) Close() error {
 	}
 	return nil
 }
+
+// --- Relationship Methods ---
+
+// CreateRelationship creates a new relationship between two ideas
+func (r *Repository) CreateRelationship(relationship *models.IdeaRelationship) error {
+	if relationship == nil {
+		return errors.New("relationship cannot be nil")
+	}
+
+	// Validate the relationship
+	if err := relationship.Validate(); err != nil {
+		return fmt.Errorf("invalid relationship: %w", err)
+	}
+
+	// Check that both ideas exist
+	if _, err := r.GetByID(relationship.SourceIdeaID); err != nil {
+		return fmt.Errorf("source idea not found: %w", err)
+	}
+	if _, err := r.GetByID(relationship.TargetIdeaID); err != nil {
+		return fmt.Errorf("target idea not found: %w", err)
+	}
+
+	// Check for duplicate relationship
+	checkQuery := `
+		SELECT COUNT(*) FROM idea_relationships
+		WHERE source_idea_id = ? AND target_idea_id = ? AND relationship_type = ?
+	`
+	var count int
+	err := r.db.QueryRow(checkQuery, relationship.SourceIdeaID, relationship.TargetIdeaID, relationship.RelationshipType.String()).Scan(&count)
+	if err != nil {
+		return fmt.Errorf("failed to check for duplicate relationship: %w", err)
+	}
+	if count > 0 {
+		return fmt.Errorf("relationship already exists between %s and %s with type %s", relationship.SourceIdeaID, relationship.TargetIdeaID, relationship.RelationshipType)
+	}
+
+	// Insert the relationship
+	query := `
+		INSERT INTO idea_relationships (id, source_idea_id, target_idea_id, relationship_type, created_at)
+		VALUES (?, ?, ?, ?, ?)
+	`
+
+	_, err = r.db.Exec(
+		query,
+		relationship.ID,
+		relationship.SourceIdeaID,
+		relationship.TargetIdeaID,
+		relationship.RelationshipType.String(),
+		relationship.CreatedAt.Format(time.RFC3339),
+	)
+
+	if err != nil {
+		return fmt.Errorf("failed to create relationship: %w", err)
+	}
+
+	return nil
+}
+
+// GetRelationship retrieves a relationship by its ID
+func (r *Repository) GetRelationship(id string) (*models.IdeaRelationship, error) {
+	if id == "" {
+		return nil, errors.New("id cannot be empty")
+	}
+
+	query := `
+		SELECT id, source_idea_id, target_idea_id, relationship_type, created_at
+		FROM idea_relationships
+		WHERE id = ?
+	`
+
+	var rel models.IdeaRelationship
+	var createdAt string
+	var relTypeStr string
+
+	err := r.db.QueryRow(query, id).Scan(
+		&rel.ID,
+		&rel.SourceIdeaID,
+		&rel.TargetIdeaID,
+		&relTypeStr,
+		&createdAt,
+	)
+
+	if err == sql.ErrNoRows {
+		return nil, fmt.Errorf("relationship not found: %s", id)
+	}
+	if err != nil {
+		return nil, fmt.Errorf("failed to query relationship: %w", err)
+	}
+
+	// Parse relationship type
+	relType, err := models.ParseRelationshipType(relTypeStr)
+	if err != nil {
+		return nil, fmt.Errorf("invalid relationship type in database: %w", err)
+	}
+	rel.RelationshipType = relType
+
+	// Parse timestamp
+	if parsedTime, err := time.Parse(time.RFC3339, createdAt); err == nil {
+		rel.CreatedAt = parsedTime
+	}
+
+	return &rel, nil
+}
+
+// GetRelationshipsForIdea retrieves all relationships for a given idea
+func (r *Repository) GetRelationshipsForIdea(ideaID string) ([]*models.IdeaRelationship, error) {
+	if ideaID == "" {
+		return nil, errors.New("ideaID cannot be empty")
+	}
+
+	query := `
+		SELECT id, source_idea_id, target_idea_id, relationship_type, created_at
+		FROM idea_relationships
+		WHERE source_idea_id = ? OR target_idea_id = ?
+		ORDER BY created_at DESC
+	`
+
+	rows, err := r.db.Query(query, ideaID, ideaID)
+	if err != nil {
+		return nil, fmt.Errorf("failed to query relationships: %w", err)
+	}
+	defer rows.Close()
+
+	var relationships []*models.IdeaRelationship
+
+	for rows.Next() {
+		var rel models.IdeaRelationship
+		var createdAt string
+		var relTypeStr string
+
+		err := rows.Scan(
+			&rel.ID,
+			&rel.SourceIdeaID,
+			&rel.TargetIdeaID,
+			&relTypeStr,
+			&createdAt,
+		)
+
+		if err != nil {
+			return nil, fmt.Errorf("failed to scan relationship: %w", err)
+		}
+
+		// Parse relationship type
+		relType, err := models.ParseRelationshipType(relTypeStr)
+		if err != nil {
+			return nil, fmt.Errorf("invalid relationship type in database: %w", err)
+		}
+		rel.RelationshipType = relType
+
+		// Parse timestamp
+		if parsedTime, err := time.Parse(time.RFC3339, createdAt); err == nil {
+			rel.CreatedAt = parsedTime
+		}
+
+		relationships = append(relationships, &rel)
+	}
+
+	if err := rows.Err(); err != nil {
+		return nil, fmt.Errorf("error iterating rows: %w", err)
+	}
+
+	return relationships, nil
+}
+
+// GetRelatedIdeas retrieves ideas related to a given idea, optionally filtered by relationship type
+func (r *Repository) GetRelatedIdeas(ideaID string, relType *models.RelationshipType) ([]*models.Idea, error) {
+	if ideaID == "" {
+		return nil, errors.New("ideaID cannot be empty")
+	}
+
+	baseQuery := `
+		SELECT DISTINCT i.id, i.content, i.raw_score, i.final_score, i.patterns,
+		       i.recommendation, i.analysis_details, i.created_at, i.reviewed_at, i.status
+		FROM ideas i
+		INNER JOIN idea_relationships r ON (i.id = r.target_idea_id OR i.id = r.source_idea_id)
+		WHERE (r.source_idea_id = ? OR r.target_idea_id = ?)
+		AND i.id != ?
+	`
+
+	args := []interface{}{ideaID, ideaID, ideaID}
+
+	if relType != nil {
+		baseQuery += " AND r.relationship_type = ?"
+		args = append(args, relType.String())
+	}
+
+	rows, err := r.db.Query(baseQuery, args...)
+	if err != nil {
+		return nil, fmt.Errorf("failed to query related ideas: %w", err)
+	}
+	defer rows.Close()
+
+	var ideas []*models.Idea
+
+	for rows.Next() {
+		var idea models.Idea
+		var patternsJSON string
+		var createdAt string
+		var reviewedAt sql.NullString
+
+		err := rows.Scan(
+			&idea.ID,
+			&idea.Content,
+			&idea.RawScore,
+			&idea.FinalScore,
+			&patternsJSON,
+			&idea.Recommendation,
+			&idea.AnalysisDetails,
+			&createdAt,
+			&reviewedAt,
+			&idea.Status,
+		)
+
+		if err != nil {
+			return nil, fmt.Errorf("failed to scan idea: %w", err)
+		}
+
+		// Parse patterns JSON
+		if patternsJSON != "" && patternsJSON != "null" {
+			if err := json.Unmarshal([]byte(patternsJSON), &idea.Patterns); err != nil {
+				return nil, fmt.Errorf("failed to parse patterns: %w", err)
+			}
+		}
+
+		// Parse timestamps
+		if parsedTime, err := time.Parse(time.RFC3339, createdAt); err == nil {
+			idea.CreatedAt = parsedTime
+		}
+
+		if reviewedAt.Valid {
+			if parsedTime, err := time.Parse(time.RFC3339, reviewedAt.String); err == nil {
+				idea.ReviewedAt = &parsedTime
+			}
+		}
+
+		ideas = append(ideas, &idea)
+	}
+
+	if err := rows.Err(); err != nil {
+		return nil, fmt.Errorf("error iterating rows: %w", err)
+	}
+
+	return ideas, nil
+}
+
+// DeleteRelationship deletes a relationship by its ID
+func (r *Repository) DeleteRelationship(id string) error {
+	if id == "" {
+		return errors.New("id cannot be empty")
+	}
+
+	query := "DELETE FROM idea_relationships WHERE id = ?"
+
+	result, err := r.db.Exec(query, id)
+	if err != nil {
+		return fmt.Errorf("failed to delete relationship: %w", err)
+	}
+
+	// Check if any rows were affected
+	rowsAffected, err := result.RowsAffected()
+	if err != nil {
+		return fmt.Errorf("failed to get rows affected: %w", err)
+	}
+
+	if rowsAffected == 0 {
+		return fmt.Errorf("relationship not found: %s", id)
+	}
+
+	return nil
+}
+
+// pathState represents a state in the BFS path finding algorithm
+type pathState struct {
+	currentID string
+	path      []*models.IdeaRelationship
+	visited   map[string]bool
+}
+
+// FindRelationshipPath finds all paths between two ideas using BFS
+func (r *Repository) FindRelationshipPath(sourceID, targetID string, maxDepth int) ([][]*models.IdeaRelationship, error) {
+	if sourceID == "" || targetID == "" {
+		return nil, errors.New("sourceID and targetID cannot be empty")
+	}
+
+	if maxDepth <= 0 {
+		maxDepth = 3 // Default max depth
+	}
+
+	// Check if both ideas exist
+	if _, err := r.GetByID(sourceID); err != nil {
+		return nil, fmt.Errorf("source idea not found: %w", err)
+	}
+	if _, err := r.GetByID(targetID); err != nil {
+		return nil, fmt.Errorf("target idea not found: %w", err)
+	}
+
+	// Initialize BFS queue
+	queue := []pathState{{
+		currentID: sourceID,
+		path:      []*models.IdeaRelationship{},
+		visited:   map[string]bool{sourceID: true},
+	}}
+
+	var foundPaths [][]*models.IdeaRelationship
+
+	for len(queue) > 0 {
+		state := queue[0]
+		queue = queue[1:]
+
+		// Check if we've reached max depth
+		if len(state.path) >= maxDepth {
+			continue
+		}
+
+		// Get all relationships for current idea
+		relationships, err := r.GetRelationshipsForIdea(state.currentID)
+		if err != nil {
+			return nil, fmt.Errorf("failed to get relationships: %w", err)
+		}
+
+		for _, rel := range relationships {
+			// Determine next node
+			var nextID string
+			if rel.SourceIdeaID == state.currentID {
+				nextID = rel.TargetIdeaID
+			} else {
+				nextID = rel.SourceIdeaID
+			}
+
+			// Skip if already visited in this path
+			if state.visited[nextID] {
+				continue
+			}
+
+			// Create new path
+			newPath := make([]*models.IdeaRelationship, len(state.path)+1)
+			copy(newPath, state.path)
+			newPath[len(state.path)] = rel
+
+			// Check if we've found the target
+			if nextID == targetID {
+				foundPaths = append(foundPaths, newPath)
+				continue
+			}
+
+			// Add to queue for further exploration
+			newVisited := make(map[string]bool)
+			for k, v := range state.visited {
+				newVisited[k] = v
+			}
+			newVisited[nextID] = true
+
+			queue = append(queue, pathState{
+				currentID: nextID,
+				path:      newPath,
+				visited:   newVisited,
+			})
+		}
+	}
+
+	return foundPaths, nil
+}
