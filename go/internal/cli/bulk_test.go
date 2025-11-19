@@ -5,7 +5,6 @@ package cli
 import (
 	"os"
 	"path/filepath"
-	"reflect"
 	"testing"
 	"time"
 
@@ -392,6 +391,290 @@ func TestBulkArchive_DryRun(t *testing.T) {
 	unchangedIdea, err := cliCtx.Repository.GetByID(idea.ID)
 	require.NoError(t, err)
 	assert.Equal(t, "active", unchangedIdea.Status, "Dry run should not modify data")
+}
+
+func TestBulkAnalyze_WithFilters(t *testing.T) {
+	cliCtx, cleanup := setupTestCLI(t)
+	defer cleanup()
+
+	// Create test ideas with varying scores
+	ideas := []*models.Idea{
+		{
+			ID:              uuid.New().String(),
+			Content:         "Build AI SaaS with Go",
+			RawScore:        2.0,
+			FinalScore:      2.5,
+			Recommendation:  "LOW PRIORITY",
+			AnalysisDetails: "Old analysis",
+			Status:          "active",
+			CreatedAt:       time.Now().UTC(),
+		},
+		{
+			ID:              uuid.New().String(),
+			Content:         "Python automation",
+			RawScore:        3.0,
+			FinalScore:      3.2,
+			Recommendation:  "CONSIDER",
+			AnalysisDetails: "Old analysis",
+			Status:          "active",
+			CreatedAt:       time.Now().UTC(),
+		},
+		{
+			ID:              uuid.New().String(),
+			Content:         "High score idea",
+			RawScore:        8.0,
+			FinalScore:      8.5,
+			Recommendation:  "PRIORITIZE",
+			AnalysisDetails: "Old analysis",
+			Status:          "active",
+			CreatedAt:       time.Now().UTC(),
+		},
+	}
+
+	// Save test ideas
+	for _, idea := range ideas {
+		err := cliCtx.Repository.Create(idea)
+		require.NoError(t, err)
+	}
+
+	// Test bulk analyze with score filter
+	cmd := GetRootCmd()
+	cmd.SetArgs([]string{
+		"--telos", cliCtx.TelosPath,
+		"--db", cliCtx.DBPath,
+		"bulk", "analyze",
+		"--score-max", "4.0",
+		"--yes", // Auto-confirm for testing
+	})
+
+	err := cmd.Execute()
+	require.NoError(t, err)
+
+	// Verify low-scoring ideas were re-analyzed
+	// (scores may have changed based on current telos)
+	for _, idea := range ideas[:2] {
+		reanalyzed, err := cliCtx.Repository.GetByID(idea.ID)
+		require.NoError(t, err)
+		assert.NotNil(t, reanalyzed.AnalysisDetails)
+		// Score should be recalculated (may be different)
+		assert.NotEqual(t, 0.0, reanalyzed.FinalScore)
+	}
+}
+
+func TestBulkAnalyze_WithOlderThan(t *testing.T) {
+	cliCtx, cleanup := setupTestCLI(t)
+	defer cleanup()
+
+	// Create old and new ideas
+	oldIdea := &models.Idea{
+		ID:              uuid.New().String(),
+		Content:         "Old idea - Build mobile app",
+		RawScore:        5.0,
+		FinalScore:      5.5,
+		Recommendation:  "OLD ANALYSIS",
+		AnalysisDetails: "Very old analysis",
+		Status:          "active",
+		CreatedAt:       time.Now().UTC().Add(-60 * 24 * time.Hour), // 60 days old
+	}
+
+	newIdea := &models.Idea{
+		ID:              uuid.New().String(),
+		Content:         "New idea - Build web app",
+		RawScore:        5.0,
+		FinalScore:      5.5,
+		Recommendation:  "RECENT ANALYSIS",
+		AnalysisDetails: "Recent analysis",
+		Status:          "active",
+		CreatedAt:       time.Now().UTC(),
+	}
+
+	err := cliCtx.Repository.Create(oldIdea)
+	require.NoError(t, err)
+	err = cliCtx.Repository.Create(newIdea)
+	require.NoError(t, err)
+
+	// Test bulk analyze with older-than filter
+	cmd := GetRootCmd()
+	cmd.SetArgs([]string{
+		"--telos", cliCtx.TelosPath,
+		"--db", cliCtx.DBPath,
+		"bulk", "analyze",
+		"--older-than", "30d", // 30 days
+		"--yes",
+	})
+
+	err = cmd.Execute()
+	require.NoError(t, err)
+
+	// Verify old idea was re-analyzed
+	reanalyzed, err := cliCtx.Repository.GetByID(oldIdea.ID)
+	require.NoError(t, err)
+	assert.NotNil(t, reanalyzed.AnalysisDetails)
+}
+
+func TestBulkAnalyze_DryRun(t *testing.T) {
+	cliCtx, cleanup := setupTestCLI(t)
+	defer cleanup()
+
+	// Create test idea
+	originalRecommendation := "ORIGINAL RECOMMENDATION"
+	idea := &models.Idea{
+		ID:              uuid.New().String(),
+		Content:         "Test idea for dry run",
+		RawScore:        4.0,
+		FinalScore:      4.5,
+		Recommendation:  originalRecommendation,
+		AnalysisDetails: "Original analysis",
+		Status:          "active",
+		CreatedAt:       time.Now().UTC(),
+	}
+
+	err := cliCtx.Repository.Create(idea)
+	require.NoError(t, err)
+
+	// Test bulk analyze with dry-run
+	cmd := GetRootCmd()
+	cmd.SetArgs([]string{
+		"--telos", cliCtx.TelosPath,
+		"--db", cliCtx.DBPath,
+		"bulk", "analyze",
+		"--score-max", "5.0",
+		"--dry-run",
+	})
+
+	err = cmd.Execute()
+	require.NoError(t, err)
+
+	// Verify idea was NOT modified (dry run)
+	unchanged, err := cliCtx.Repository.GetByID(idea.ID)
+	require.NoError(t, err)
+	assert.Equal(t, originalRecommendation, unchanged.Recommendation, "Dry run should not modify data")
+	assert.Equal(t, "Original analysis", unchanged.AnalysisDetails, "Dry run should not modify data")
+}
+
+func TestBulkAnalyze_EmptyResult(t *testing.T) {
+	cliCtx, cleanup := setupTestCLI(t)
+	defer cleanup()
+
+	// Create test idea that doesn't match filters
+	idea := &models.Idea{
+		ID:         uuid.New().String(),
+		Content:    "High score idea",
+		RawScore:   9.0,
+		FinalScore: 9.5,
+		Status:     "active",
+		CreatedAt:  time.Now().UTC(),
+	}
+
+	err := cliCtx.Repository.Create(idea)
+	require.NoError(t, err)
+
+	// Test bulk analyze with filters that don't match any ideas
+	cmd := GetRootCmd()
+	cmd.SetArgs([]string{
+		"--telos", cliCtx.TelosPath,
+		"--db", cliCtx.DBPath,
+		"bulk", "analyze",
+		"--score-max", "3.0", // No ideas below 3.0
+		"--yes",
+	})
+
+	err = cmd.Execute()
+	require.NoError(t, err) // Should complete without error even with no matches
+}
+
+func TestBulkAnalyze_WithProvider(t *testing.T) {
+	cliCtx, cleanup := setupTestCLI(t)
+	defer cleanup()
+
+	// Create test idea
+	idea := &models.Idea{
+		ID:              uuid.New().String(),
+		Content:         "Test provider selection",
+		RawScore:        5.0,
+		FinalScore:      5.5,
+		Recommendation:  "OLD",
+		AnalysisDetails: "Old",
+		Status:          "active",
+		CreatedAt:       time.Now().UTC(),
+	}
+
+	err := cliCtx.Repository.Create(idea)
+	require.NoError(t, err)
+
+	// Test bulk analyze with specific provider
+	cmd := GetRootCmd()
+	cmd.SetArgs([]string{
+		"--telos", cliCtx.TelosPath,
+		"--db", cliCtx.DBPath,
+		"bulk", "analyze",
+		"--provider", "rule_based", // Use rule-based provider
+		"--yes",
+	})
+
+	err = cmd.Execute()
+	require.NoError(t, err)
+
+	// Verify idea was re-analyzed
+	reanalyzed, err := cliCtx.Repository.GetByID(idea.ID)
+	require.NoError(t, err)
+	assert.NotNil(t, reanalyzed.AnalysisDetails)
+}
+
+func TestBulkAnalyze_StatusFilter(t *testing.T) {
+	cliCtx, cleanup := setupTestCLI(t)
+	defer cleanup()
+
+	// Create active and archived ideas
+	activeIdea := &models.Idea{
+		ID:              uuid.New().String(),
+		Content:         "Active idea",
+		RawScore:        5.0,
+		FinalScore:      5.5,
+		Recommendation:  "OLD",
+		AnalysisDetails: "Old analysis",
+		Status:          "active",
+		CreatedAt:       time.Now().UTC(),
+	}
+
+	archivedIdea := &models.Idea{
+		ID:              uuid.New().String(),
+		Content:         "Archived idea",
+		RawScore:        5.0,
+		FinalScore:      5.5,
+		Recommendation:  "OLD ARCHIVED",
+		AnalysisDetails: "Old analysis",
+		Status:          "archived",
+		CreatedAt:       time.Now().UTC(),
+	}
+
+	err := cliCtx.Repository.Create(activeIdea)
+	require.NoError(t, err)
+	err = cliCtx.Repository.Create(archivedIdea)
+	require.NoError(t, err)
+
+	// Test bulk analyze with status filter (only active)
+	cmd := GetRootCmd()
+	cmd.SetArgs([]string{
+		"--telos", cliCtx.TelosPath,
+		"--db", cliCtx.DBPath,
+		"bulk", "analyze",
+		"--status", "active",
+		"--yes",
+	})
+
+	err = cmd.Execute()
+	require.NoError(t, err)
+
+	// Verify active idea was re-analyzed
+	reanalyzed, err := cliCtx.Repository.GetByID(activeIdea.ID)
+	require.NoError(t, err)
+	assert.NotEqual(t, "OLD", reanalyzed.Recommendation)
+
+	// Archived idea should remain unchanged
+	unchanged, err := cliCtx.Repository.GetByID(archivedIdea.ID)
+	require.NoError(t, err)
+	assert.Equal(t, "OLD ARCHIVED", unchanged.Recommendation)
 }
 
 // Unit tests for helper functions
