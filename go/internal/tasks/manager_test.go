@@ -131,7 +131,7 @@ func TestTaskManager_TaskCompletion(t *testing.T) {
 		t.Errorf("result.Duration = %v, want >= 50ms", result.Duration)
 	}
 
-	tm.Shutdown(2 * time.Second)
+	_ = tm.Shutdown(2 * time.Second)
 }
 
 // TestTaskManager_TaskFailure verifies task failures are tracked
@@ -165,7 +165,7 @@ func TestTaskManager_TaskFailure(t *testing.T) {
 		t.Error("result.Error = nil, want error")
 	}
 
-	tm.Shutdown(2 * time.Second)
+	_ = tm.Shutdown(2 * time.Second)
 }
 
 // TestTaskManager_ConcurrentTasks verifies multiple tasks can run concurrently
@@ -200,7 +200,7 @@ func TestTaskManager_ConcurrentTasks(t *testing.T) {
 		t.Errorf("len(results) = %d, want %d", len(results), numTasks)
 	}
 
-	tm.Shutdown(2 * time.Second)
+	_ = tm.Shutdown(2 * time.Second)
 }
 
 // TestTaskManager_ShutdownTimeout verifies shutdown timeout works
@@ -259,7 +259,7 @@ func TestTaskManager_NoGoroutineLeaks(t *testing.T) {
 	time.Sleep(200 * time.Millisecond)
 
 	// Shutdown
-	tm.Shutdown(2 * time.Second)
+	_ = tm.Shutdown(2 * time.Second)
 
 	// Give goroutines time to clean up
 	time.Sleep(100 * time.Millisecond)
@@ -295,7 +295,7 @@ func TestTaskManager_ContextCancellation(t *testing.T) {
 	time.Sleep(50 * time.Millisecond)
 
 	// Cancel via shutdown
-	tm.Shutdown(1 * time.Second)
+	_ = tm.Shutdown(1 * time.Second)
 
 	if !cancelled.Load() {
 		t.Error("task did not receive cancellation")
@@ -317,7 +317,7 @@ func TestScheduledTask(t *testing.T) {
 	// Let it run for ~350ms (should execute 3-4 times)
 	time.Sleep(350 * time.Millisecond)
 
-	tm.Shutdown(1 * time.Second)
+	_ = tm.Shutdown(1 * time.Second)
 
 	count := counter.Load()
 	if count < 2 || count > 5 {
@@ -341,7 +341,7 @@ func TestScheduledTask_Cancellation(t *testing.T) {
 	time.Sleep(175 * time.Millisecond)
 
 	// Cancel via shutdown
-	tm.Shutdown(1 * time.Second)
+	_ = tm.Shutdown(1 * time.Second)
 
 	countAfterShutdown := counter.Load()
 
@@ -429,7 +429,7 @@ func TestTaskManager_TaskCount(t *testing.T) {
 	}
 
 	time.Sleep(200 * time.Millisecond)
-	tm.Shutdown(2 * time.Second)
+	_ = tm.Shutdown(2 * time.Second)
 }
 
 // TestScheduledTask_ErrorHandling verifies errors in scheduled tasks are handled
@@ -450,7 +450,7 @@ func TestScheduledTask_ErrorHandling(t *testing.T) {
 	// Let it run for a bit
 	time.Sleep(200 * time.Millisecond)
 
-	tm.Shutdown(1 * time.Second)
+	_ = tm.Shutdown(1 * time.Second)
 
 	// Should have run multiple times despite errors
 	if count := counter.Load(); count < 2 {

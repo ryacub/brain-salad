@@ -14,6 +14,7 @@ import (
 	"github.com/rayyacub/telos-idea-matrix/internal/models"
 	"github.com/rayyacub/telos-idea-matrix/internal/patterns"
 	"github.com/rayyacub/telos-idea-matrix/internal/scoring"
+	"github.com/rs/zerolog/log"
 )
 
 // Request/Response types
@@ -81,7 +82,9 @@ func respondJSON(w http.ResponseWriter, status int, data interface{}) {
 	w.Header().Set("Content-Type", "application/json")
 	w.WriteHeader(status)
 	if data != nil {
-		json.NewEncoder(w).Encode(data)
+		if err := json.NewEncoder(w).Encode(data); err != nil {
+			log.Warn().Err(err).Msg("failed to encode JSON response")
+		}
 	}
 }
 

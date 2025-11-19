@@ -7,6 +7,8 @@ import (
 	"net/http"
 	"sync"
 	"time"
+
+	"github.com/rs/zerolog/log"
 )
 
 // CacheEntry represents a cached HTTP response
@@ -148,7 +150,9 @@ func CacheMiddleware(cache *Cache) func(http.Handler) http.Handler {
 				}
 				w.Header().Set("X-Cache", "HIT")
 				w.WriteHeader(entry.StatusCode)
-				w.Write(entry.Body)
+				if _, err := w.Write(entry.Body); err != nil {
+					log.Warn().Err(err).Msg("failed to write cached response body")
+				}
 				return
 			}
 

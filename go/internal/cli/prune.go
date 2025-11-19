@@ -6,6 +6,7 @@ import (
 
 	"github.com/rayyacub/telos-idea-matrix/internal/database"
 	"github.com/rayyacub/telos-idea-matrix/internal/models"
+	"github.com/rs/zerolog/log"
 	"github.com/spf13/cobra"
 )
 
@@ -68,7 +69,9 @@ func runPrune(cmd *cobra.Command, args []string) error {
 	}
 
 	if len(toPrune) == 0 {
-		successColor.Println("✅ No ideas to prune!")
+		if _, err := successColor.Println("✅ No ideas to prune!"); err != nil {
+			log.Warn().Err(err).Msg("failed to print message")
+		}
 		return nil
 	}
 
@@ -81,7 +84,9 @@ func runPrune(cmd *cobra.Command, args []string) error {
 	fmt.Println()
 
 	if pruneDryRun {
-		infoColor.Println("🔍 Dry run - nothing was changed")
+		if _, err := infoColor.Println("🔍 Dry run - nothing was changed"); err != nil {
+			log.Warn().Err(err).Msg("failed to print message")
+		}
 		return nil
 	}
 
@@ -90,12 +95,16 @@ func runPrune(cmd *cobra.Command, args []string) error {
 	for _, idea := range toPrune {
 		idea.Status = "archived"
 		if err := ctx.Repository.Update(idea); err != nil {
-			warningColor.Printf("Failed to archive idea %s: %v\n", idea.ID[:8], err)
+			if _, printErr := warningColor.Printf("Failed to archive idea %s: %v\n", idea.ID[:8], err); printErr != nil {
+				log.Warn().Err(printErr).Msg("failed to print message")
+			}
 			continue
 		}
 		archived++
 	}
 
-	successColor.Printf("✅ Archived %d ideas\n", archived)
+	if _, err := successColor.Printf("✅ Archived %d ideas\n", archived); err != nil {
+		log.Warn().Err(err).Msg("failed to print message")
+	}
 	return nil
 }

@@ -28,7 +28,7 @@ func TestOpenAIProvider_Analyze_MockServer(t *testing.T) {
 	server := httptest.NewServer(http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
 		w.Header().Set("Content-Type", "application/json")
 		w.WriteHeader(http.StatusOK)
-		w.Write([]byte(`{
+		_, _ = w.Write([]byte(`{
 			"id": "test",
 			"object": "chat.completion",
 			"created": 1234567890,
@@ -86,7 +86,7 @@ func TestOpenAIProvider_RetryLogic(t *testing.T) {
 		}
 		w.Header().Set("Content-Type", "application/json")
 		w.WriteHeader(http.StatusOK)
-		w.Write([]byte(`{
+		_, _ = w.Write([]byte(`{
 			"id": "test",
 			"object": "chat.completion",
 			"created": 1234567890,
@@ -132,7 +132,7 @@ func TestOpenAIProvider_APIError(t *testing.T) {
 	server := httptest.NewServer(http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
 		w.Header().Set("Content-Type", "application/json")
 		w.WriteHeader(http.StatusUnauthorized)
-		w.Write([]byte(`{
+		_, _ = w.Write([]byte(`{
 			"error": {
 				"message": "Invalid API key",
 				"type": "invalid_request_error",
@@ -201,7 +201,7 @@ func TestOpenAIProvider_RateLimit(t *testing.T) {
 		callTimes = append(callTimes, time.Now())
 		w.Header().Set("Content-Type", "application/json")
 		w.WriteHeader(http.StatusOK)
-		w.Write([]byte(`{
+		_, _ = w.Write([]byte(`{
 			"id": "test",
 			"object": "chat.completion",
 			"created": 1234567890,
@@ -251,7 +251,7 @@ func TestOpenAIProvider_MalformedResponse(t *testing.T) {
 	server := httptest.NewServer(http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
 		w.Header().Set("Content-Type", "application/json")
 		w.WriteHeader(http.StatusOK)
-		w.Write([]byte(`{
+		_, _ = w.Write([]byte(`{
 			"id": "test",
 			"object": "chat.completion",
 			"created": 1234567890,
@@ -296,7 +296,7 @@ func TestOpenAIProvider_EmptyResponse(t *testing.T) {
 	server := httptest.NewServer(http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
 		w.Header().Set("Content-Type", "application/json")
 		w.WriteHeader(http.StatusOK)
-		w.Write([]byte(`{
+		_, _ = w.Write([]byte(`{
 			"id": "test",
 			"object": "chat.completion",
 			"created": 1234567890,

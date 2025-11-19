@@ -4,6 +4,7 @@ import (
 	"fmt"
 
 	"github.com/rayyacub/telos-idea-matrix/internal/models"
+	"github.com/rs/zerolog/log"
 	"github.com/spf13/cobra"
 )
 
@@ -164,7 +165,9 @@ func runLinkCreate(sourceID, targetID, relTypeStr string, noConfirm bool) error 
 	// Validate relationship type
 	relType, err := models.ParseRelationshipType(relTypeStr)
 	if err != nil {
-		errorColor.Printf("❌ Invalid relationship type: %s\n", relTypeStr)
+		if _, printErr := errorColor.Printf("❌ Invalid relationship type: %s\n", relTypeStr); printErr != nil {
+			log.Warn().Err(printErr).Msg("failed to print error message")
+		}
 		fmt.Println("\nValid types:")
 		for _, rt := range models.AllRelationshipTypes() {
 			fmt.Printf("  - %s\n", rt)
@@ -175,19 +178,25 @@ func runLinkCreate(sourceID, targetID, relTypeStr string, noConfirm bool) error 
 	// Get both ideas for confirmation
 	sourceIdea, err := ctx.Repository.GetByID(sourceID)
 	if err != nil {
-		errorColor.Printf("❌ Source idea not found: %s\n", sourceID)
+		if _, printErr := errorColor.Printf("❌ Source idea not found: %s\n", sourceID); printErr != nil {
+			log.Warn().Err(printErr).Msg("failed to print error message")
+		}
 		return nil
 	}
 
 	targetIdea, err := ctx.Repository.GetByID(targetID)
 	if err != nil {
-		errorColor.Printf("❌ Target idea not found: %s\n", targetID)
+		if _, printErr := errorColor.Printf("❌ Target idea not found: %s\n", targetID); printErr != nil {
+			log.Warn().Err(printErr).Msg("failed to print error message")
+		}
 		return nil
 	}
 
 	// Show confirmation
 	fmt.Println()
-	infoColor.Println("Creating relationship:")
+	if _, err := infoColor.Println("Creating relationship:"); err != nil {
+		log.Warn().Err(err).Msg("failed to print message")
+	}
 	fmt.Printf("  Source: [%s] %s\n", truncateID(sourceID), truncateText(sourceIdea.Content, 60))
 	fmt.Printf("  Target: [%s] %s\n", truncateID(targetID), truncateText(targetIdea.Content, 60))
 	fmt.Printf("  Type: %s\n", relType)
@@ -196,7 +205,9 @@ func runLinkCreate(sourceID, targetID, relTypeStr string, noConfirm bool) error 
 	// Get user confirmation
 	if !noConfirm {
 		if !confirm("Continue?") {
-			warningColor.Println("❌ Cancelled.")
+			if _, err := warningColor.Println("❌ Cancelled."); err != nil {
+				log.Warn().Err(err).Msg("failed to print message")
+			}
 			return nil
 		}
 	}
@@ -212,7 +223,9 @@ func runLinkCreate(sourceID, targetID, relTypeStr string, noConfirm bool) error 
 		return fmt.Errorf("failed to save relationship: %w", err)
 	}
 
-	successColor.Printf("✓ Relationship created successfully (ID: %s)\n", truncateID(relationship.ID))
+	if _, err := successColor.Printf("✓ Relationship created successfully (ID: %s)\n", truncateID(relationship.ID)); err != nil {
+		log.Warn().Err(err).Msg("failed to print message")
+	}
 	return nil
 }
 
@@ -220,7 +233,9 @@ func runLinkList(ideaID string) error {
 	// Verify idea exists
 	idea, err := ctx.Repository.GetByID(ideaID)
 	if err != nil {
-		errorColor.Printf("❌ Idea not found: %s\n", ideaID)
+		if _, printErr := errorColor.Printf("❌ Idea not found: %s\n", ideaID); printErr != nil {
+			log.Warn().Err(printErr).Msg("failed to print error message")
+		}
 		return nil
 	}
 
@@ -230,12 +245,16 @@ func runLinkList(ideaID string) error {
 	}
 
 	if len(relationships) == 0 {
-		warningColor.Printf("📭 No relationships found for idea: %s\n", truncateID(ideaID))
+		if _, err := warningColor.Printf("📭 No relationships found for idea: %s\n", truncateID(ideaID)); err != nil {
+			log.Warn().Err(err).Msg("failed to print message")
+		}
 		return nil
 	}
 
 	fmt.Println()
-	infoColor.Printf("🔗 Relationships for idea: %s\n", truncateID(ideaID))
+	if _, err := infoColor.Printf("🔗 Relationships for idea: %s\n", truncateID(ideaID)); err != nil {
+		log.Warn().Err(err).Msg("failed to print message")
+	}
 	fmt.Printf("   %s\n", truncateText(idea.Content, 60))
 	fmt.Println()
 
@@ -251,7 +270,9 @@ func runLinkList(ideaID string) error {
 
 	// Display outgoing relationships
 	if len(outgoing) > 0 {
-		successColor.Println("Outgoing (where this idea is the source):")
+		if _, err := successColor.Println("Outgoing (where this idea is the source):"); err != nil {
+			log.Warn().Err(err).Msg("failed to print message")
+		}
 		for i, rel := range outgoing {
 			relatedIdeaID := rel.TargetIdeaID
 			relatedIdea, _ := ctx.Repository.GetByID(relatedIdeaID)
@@ -277,7 +298,9 @@ func runLinkList(ideaID string) error {
 
 	// Display incoming relationships
 	if len(incoming) > 0 {
-		infoColor.Println("Incoming (where this idea is the target):")
+		if _, err := infoColor.Println("Incoming (where this idea is the target):"); err != nil {
+			log.Warn().Err(err).Msg("failed to print message")
+		}
 		for i, rel := range incoming {
 			relatedIdeaID := rel.SourceIdeaID
 			relatedIdea, _ := ctx.Repository.GetByID(relatedIdeaID)
@@ -309,7 +332,9 @@ func runLinkShow(ideaID, relTypeStr string) error {
 	// Verify idea exists
 	idea, err := ctx.Repository.GetByID(ideaID)
 	if err != nil {
-		errorColor.Printf("❌ Idea not found: %s\n", ideaID)
+		if _, printErr := errorColor.Printf("❌ Idea not found: %s\n", ideaID); printErr != nil {
+			log.Warn().Err(printErr).Msg("failed to print error message")
+		}
 		return nil
 	}
 
@@ -318,7 +343,9 @@ func runLinkShow(ideaID, relTypeStr string) error {
 	if relTypeStr != "" {
 		rt, err := models.ParseRelationshipType(relTypeStr)
 		if err != nil {
-			errorColor.Printf("❌ Invalid relationship type: %s\n", relTypeStr)
+			if _, printErr := errorColor.Printf("❌ Invalid relationship type: %s\n", relTypeStr); printErr != nil {
+				log.Warn().Err(printErr).Msg("failed to print error message")
+			}
 			fmt.Println("\nValid types:")
 			for _, t := range models.AllRelationshipTypes() {
 				fmt.Printf("  - %s\n", t)
@@ -334,7 +361,9 @@ func runLinkShow(ideaID, relTypeStr string) error {
 	}
 
 	if len(relatedIdeas) == 0 {
-		warningColor.Printf("📭 No related ideas found for: %s\n", truncateID(ideaID))
+		if _, err := warningColor.Printf("📭 No related ideas found for: %s\n", truncateID(ideaID)); err != nil {
+			log.Warn().Err(err).Msg("failed to print message")
+		}
 		return nil
 	}
 
@@ -344,7 +373,9 @@ func runLinkShow(ideaID, relTypeStr string) error {
 	}
 
 	fmt.Println()
-	infoColor.Printf("🔗 Related ideas for: %s%s\n", truncateID(ideaID), filterText)
+	if _, err := infoColor.Printf("🔗 Related ideas for: %s%s\n", truncateID(ideaID), filterText); err != nil {
+		log.Warn().Err(err).Msg("failed to print message")
+	}
 	fmt.Printf("   %s\n", truncateText(idea.Content, 60))
 	fmt.Println()
 
@@ -372,7 +403,9 @@ func runLinkRemove(relationshipID string, noConfirm bool) error {
 	// Get relationship details
 	rel, err := ctx.Repository.GetRelationship(relationshipID)
 	if err != nil {
-		errorColor.Printf("❌ Relationship not found: %s\n", relationshipID)
+		if _, printErr := errorColor.Printf("❌ Relationship not found: %s\n", relationshipID); printErr != nil {
+			log.Warn().Err(printErr).Msg("failed to print error message")
+		}
 		return nil
 	}
 
@@ -391,7 +424,9 @@ func runLinkRemove(relationshipID string, noConfirm bool) error {
 	}
 
 	fmt.Println()
-	warningColor.Println("Removing relationship:")
+	if _, err := warningColor.Println("Removing relationship:"); err != nil {
+		log.Warn().Err(err).Msg("failed to print message")
+	}
 	fmt.Printf("  ID: %s\n", truncateID(relationshipID))
 	fmt.Printf("  [%s] %s\n", truncateID(rel.SourceIdeaID), sourceContent)
 	fmt.Printf("    %s →\n", rel.RelationshipType)
@@ -400,7 +435,9 @@ func runLinkRemove(relationshipID string, noConfirm bool) error {
 
 	if !noConfirm {
 		if !confirm("Are you sure?") {
-			warningColor.Println("❌ Removal cancelled.")
+			if _, err := warningColor.Println("❌ Removal cancelled."); err != nil {
+				log.Warn().Err(err).Msg("failed to print message")
+			}
 			return nil
 		}
 	}
@@ -409,7 +446,9 @@ func runLinkRemove(relationshipID string, noConfirm bool) error {
 		return fmt.Errorf("failed to remove relationship: %w", err)
 	}
 
-	successColor.Printf("✓ Relationship removed successfully\n")
+	if _, err := successColor.Printf("✓ Relationship removed successfully\n"); err != nil {
+		log.Warn().Err(err).Msg("failed to print message")
+	}
 	return nil
 }
 
@@ -417,18 +456,24 @@ func runLinkPath(sourceID, targetID string, maxDepth int) error {
 	// Verify both ideas exist
 	sourceIdea, err := ctx.Repository.GetByID(sourceID)
 	if err != nil {
-		errorColor.Printf("❌ Source idea not found: %s\n", sourceID)
+		if _, printErr := errorColor.Printf("❌ Source idea not found: %s\n", sourceID); printErr != nil {
+			log.Warn().Err(printErr).Msg("failed to print error message")
+		}
 		return nil
 	}
 
 	_, err = ctx.Repository.GetByID(targetID)
 	if err != nil {
-		errorColor.Printf("❌ Target idea not found: %s\n", targetID)
+		if _, printErr := errorColor.Printf("❌ Target idea not found: %s\n", targetID); printErr != nil {
+			log.Warn().Err(printErr).Msg("failed to print error message")
+		}
 		return nil
 	}
 
 	fmt.Println()
-	infoColor.Printf("🔍 Finding paths from %s to %s...\n", truncateID(sourceID), truncateID(targetID))
+	if _, err := infoColor.Printf("🔍 Finding paths from %s to %s...\n", truncateID(sourceID), truncateID(targetID)); err != nil {
+		log.Warn().Err(err).Msg("failed to print message")
+	}
 	fmt.Println()
 
 	paths, err := ctx.Repository.FindRelationshipPath(sourceID, targetID, maxDepth)
@@ -437,7 +482,9 @@ func runLinkPath(sourceID, targetID string, maxDepth int) error {
 	}
 
 	if len(paths) == 0 {
-		warningColor.Printf("❌ No path found between %s and %s\n", truncateID(sourceID), truncateID(targetID))
+		if _, err := warningColor.Printf("❌ No path found between %s and %s\n", truncateID(sourceID), truncateID(targetID)); err != nil {
+			log.Warn().Err(err).Msg("failed to print message")
+		}
 		fmt.Println()
 		fmt.Println("💡 Try linking ideas that might connect these two concepts")
 		return nil
@@ -445,7 +492,9 @@ func runLinkPath(sourceID, targetID string, maxDepth int) error {
 
 	// Display all found paths
 	for i, path := range paths {
-		successColor.Printf("Path %d (%d hops):\n", i+1, len(path))
+		if _, err := successColor.Printf("Path %d (%d hops):\n", i+1, len(path)); err != nil {
+			log.Warn().Err(err).Msg("failed to print message")
+		}
 
 		// Start with source idea
 		fmt.Printf("  [%s] %s\n", truncateID(sourceID), truncateText(sourceIdea.Content, 50))

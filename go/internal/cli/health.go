@@ -6,6 +6,7 @@ import (
 	"time"
 
 	"github.com/rayyacub/telos-idea-matrix/internal/health"
+	"github.com/rs/zerolog/log"
 	"github.com/spf13/cobra"
 )
 
@@ -148,7 +149,9 @@ func displayHealthText(status health.HealthStatus) error {
 
 		fmt.Printf("\n%s %s: %s\n", checkIcon, check.Name, checkStatus)
 		if check.Message != "" {
-			infoColor.Printf("  └─ %s\n", check.Message)
+			if _, err := infoColor.Printf("  └─ %s\n", check.Message); err != nil {
+				log.Warn().Err(err).Msg("failed to print message")
+			}
 		}
 		fmt.Printf("  └─ Duration: %s\n", check.Duration)
 	}
@@ -159,13 +162,17 @@ func displayHealthText(status health.HealthStatus) error {
 	// Return error if unhealthy (for CI/CD integration)
 	if status.Status == health.Unhealthy {
 		fmt.Println()
-		errorColor.Println("⚠️  System is unhealthy. Please address the issues above.")
+		if _, err := errorColor.Println("⚠️  System is unhealthy. Please address the issues above."); err != nil {
+			log.Warn().Err(err).Msg("failed to print error message")
+		}
 		return fmt.Errorf("system health check failed")
 	}
 
 	if status.Status == health.Degraded {
 		fmt.Println()
-		warningColor.Println("⚠️  System is degraded. Some components may not be operating optimally.")
+		if _, err := warningColor.Println("⚠️  System is degraded. Some components may not be operating optimally."); err != nil {
+			log.Warn().Err(err).Msg("failed to print warning")
+		}
 	}
 
 	return nil

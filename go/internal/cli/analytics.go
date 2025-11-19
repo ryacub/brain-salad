@@ -14,6 +14,7 @@ import (
 	"github.com/rayyacub/telos-idea-matrix/internal/analytics"
 	"github.com/rayyacub/telos-idea-matrix/internal/database"
 	"github.com/rayyacub/telos-idea-matrix/internal/models"
+	"github.com/rs/zerolog/log"
 	"github.com/spf13/cobra"
 )
 
@@ -52,7 +53,9 @@ func runAnalytics(cmd *cobra.Command, args []string) error {
 	}
 
 	if len(ideas) == 0 {
-		warningColor.Println("No ideas found. Use 'tm dump' to capture your first idea!")
+		if _, err := warningColor.Println("No ideas found. Use 'tm dump' to capture your first idea!"); err != nil {
+			log.Warn().Err(err).Msg("failed to print warning message")
+		}
 		return nil
 	}
 
@@ -90,7 +93,9 @@ func runAnalytics(cmd *cobra.Command, args []string) error {
 	fmt.Println("═════════════════════════════════════════════")
 	fmt.Println()
 
-	successColor.Printf("Total Ideas: %d\n", len(ideas))
+	if _, err := successColor.Printf("Total Ideas: %d\n", len(ideas)); err != nil {
+		log.Warn().Err(err).Msg("failed to print total ideas")
+	}
 	fmt.Printf("Average Score: %.1f/10.0\n", avgScore)
 	fmt.Printf("Highest Score: %.1f/10.0\n", highScore)
 	fmt.Printf("Lowest Score:  %.1f/10.0\n\n", lowScore)
@@ -101,20 +106,30 @@ func runAnalytics(cmd *cobra.Command, args []string) error {
 	distBar := analytics.RenderDistribution(highCount, mediumCount, lowCount, 50)
 	fmt.Printf("%s\n\n", distBar)
 
-	successColor.Printf("  🔥 High (>= 7.0):   %d ideas (%.0f%%)\n",
-		highCount, float64(highCount)/float64(len(ideas))*100)
-	warningColor.Printf("  ⚠️  Medium (5-7):   %d ideas (%.0f%%)\n",
-		mediumCount, float64(mediumCount)/float64(len(ideas))*100)
-	errorColor.Printf("  🚫 Low (< 5.0):     %d ideas (%.0f%%)\n",
-		lowCount, float64(lowCount)/float64(len(ideas))*100)
+	if _, err := successColor.Printf("  🔥 High (>= 7.0):   %d ideas (%.0f%%)\n",
+		highCount, float64(highCount)/float64(len(ideas))*100); err != nil {
+		log.Warn().Err(err).Msg("failed to print high count")
+	}
+	if _, err := warningColor.Printf("  ⚠️  Medium (5-7):   %d ideas (%.0f%%)\n",
+		mediumCount, float64(mediumCount)/float64(len(ideas))*100); err != nil {
+		log.Warn().Err(err).Msg("failed to print medium count")
+	}
+	if _, err := errorColor.Printf("  🚫 Low (< 5.0):     %d ideas (%.0f%%)\n",
+		lowCount, float64(lowCount)/float64(len(ideas))*100); err != nil {
+		log.Warn().Err(err).Msg("failed to print low count")
+	}
 	fmt.Println()
 
 	// Recommendations
 	if highCount > 0 {
-		successColor.Printf("✨ You have %d high-scoring ideas to prioritize!\n", highCount)
+		if _, err := successColor.Printf("✨ You have %d high-scoring ideas to prioritize!\n", highCount); err != nil {
+			log.Warn().Err(err).Msg("failed to print recommendation")
+		}
 	}
 	if lowCount > len(ideas)/2 {
-		warningColor.Println("💡 Tip: Many ideas are low-scoring. Consider aligning more with your telos.")
+		if _, err := warningColor.Println("💡 Tip: Many ideas are low-scoring. Consider aligning more with your telos."); err != nil {
+			log.Warn().Err(err).Msg("failed to print tip")
+		}
 	}
 
 	fmt.Println("═════════════════════════════════════════════")
@@ -150,7 +165,9 @@ Examples:
 			}
 
 			if len(ideas) == 0 {
-				warningColor.Println("No ideas found. Use 'tm dump' to capture your first idea!")
+				if _, err := warningColor.Println("No ideas found. Use 'tm dump' to capture your first idea!"); err != nil {
+					log.Warn().Err(err).Msg("failed to print warning message")
+				}
 				return nil
 			}
 
@@ -202,9 +219,13 @@ Examples:
 			fmt.Println()
 			switch direction {
 			case "up":
-				successColor.Println("📈 Trend: Your idea quality is improving over time!")
+				if _, err := successColor.Println("📈 Trend: Your idea quality is improving over time!"); err != nil {
+					log.Warn().Err(err).Msg("failed to print trend message")
+				}
 			case "down":
-				warningColor.Println("📉 Trend: Consider refining your idea capture process.")
+				if _, err := warningColor.Println("📉 Trend: Consider refining your idea capture process."); err != nil {
+					log.Warn().Err(err).Msg("failed to print trend message")
+				}
 			default:
 				fmt.Println("➡️  Trend: Your idea quality is stable.")
 			}
@@ -272,7 +293,9 @@ Examples:
 				if err != nil {
 					return fmt.Errorf("failed to write report: %w", err)
 				}
-				successColor.Printf("✅ Report saved to: %s\n", outputFile)
+				if _, err := successColor.Printf("✅ Report saved to: %s\n", outputFile); err != nil {
+					log.Warn().Err(err).Msg("failed to print success message")
+				}
 			} else {
 				fmt.Println(output)
 			}
@@ -312,7 +335,9 @@ Examples:
 			}
 
 			if len(ideas) == 0 {
-				warningColor.Println("No ideas found. Use 'tm dump' to capture your first idea!")
+				if _, err := warningColor.Println("No ideas found. Use 'tm dump' to capture your first idea!"); err != nil {
+					log.Warn().Err(err).Msg("failed to print warning message")
+				}
 				return nil
 			}
 
@@ -351,8 +376,10 @@ Examples:
 
 				// Highlight high-frequency patterns
 				if percentage > 40 {
-					warningColor.Printf("%d. %s: %d occurrences (%d%% of ideas) ⚠️\n",
-						i+1, pattern, count, percentage)
+					if _, err := warningColor.Printf("%d. %s: %d occurrences (%d%% of ideas) ⚠️\n",
+						i+1, pattern, count, percentage); err != nil {
+						log.Warn().Err(err).Msg("failed to print pattern")
+					}
 				} else {
 					fmt.Printf("%d. %s: %d occurrences (%d%% of ideas)\n",
 						i+1, pattern, count, percentage)
@@ -374,7 +401,9 @@ Examples:
 
 			if hasHighFreq {
 				fmt.Println()
-				warningColor.Println("⚠️  Warning: Some patterns appear very frequently.")
+				if _, err := warningColor.Println("⚠️  Warning: Some patterns appear very frequently."); err != nil {
+					log.Warn().Err(err).Msg("failed to print warning message")
+				}
 				fmt.Println("   Consider addressing these recurring anti-patterns in your ideation process.")
 			}
 
@@ -909,18 +938,34 @@ func outputMetricsCSV(metrics systemMetrics) error {
 	defer writer.Flush()
 
 	// Overview section
-	writer.Write([]string{"Metric", "Value"})
-	writer.Write([]string{"Total Ideas", strconv.Itoa(metrics.Overview.TotalIdeas)})
-	writer.Write([]string{"Total Patterns", strconv.Itoa(metrics.Overview.TotalPatterns)})
-	writer.Write([]string{"Average Score", fmt.Sprintf("%.2f", metrics.Overview.AverageScore)})
-	writer.Write([]string{"Median Score", fmt.Sprintf("%.2f", metrics.Overview.MedianScore)})
-	writer.Write([]string{})
+	if err := writer.Write([]string{"Metric", "Value"}); err != nil {
+		return fmt.Errorf("failed to write CSV header: %w", err)
+	}
+	if err := writer.Write([]string{"Total Ideas", strconv.Itoa(metrics.Overview.TotalIdeas)}); err != nil {
+		return fmt.Errorf("failed to write CSV row: %w", err)
+	}
+	if err := writer.Write([]string{"Total Patterns", strconv.Itoa(metrics.Overview.TotalPatterns)}); err != nil {
+		return fmt.Errorf("failed to write CSV row: %w", err)
+	}
+	if err := writer.Write([]string{"Average Score", fmt.Sprintf("%.2f", metrics.Overview.AverageScore)}); err != nil {
+		return fmt.Errorf("failed to write CSV row: %w", err)
+	}
+	if err := writer.Write([]string{"Median Score", fmt.Sprintf("%.2f", metrics.Overview.MedianScore)}); err != nil {
+		return fmt.Errorf("failed to write CSV row: %w", err)
+	}
+	if err := writer.Write([]string{}); err != nil {
+		return fmt.Errorf("failed to write CSV row: %w", err)
+	}
 
 	// Status breakdown
-	writer.Write([]string{"Status", "Count", "Percentage"})
+	if err := writer.Write([]string{"Status", "Count", "Percentage"}); err != nil {
+		return fmt.Errorf("failed to write CSV header: %w", err)
+	}
 	for status, count := range metrics.StatusBreakdown {
 		pct := float64(count) / float64(metrics.Overview.TotalIdeas) * 100
-		writer.Write([]string{status, strconv.Itoa(count), fmt.Sprintf("%.1f", pct)})
+		if err := writer.Write([]string{status, strconv.Itoa(count), fmt.Sprintf("%.1f", pct)}); err != nil {
+			return fmt.Errorf("failed to write CSV row: %w", err)
+		}
 	}
 
 	return nil
@@ -1215,14 +1260,16 @@ func outputCSV(reports []performanceReport) error {
 	defer writer.Flush()
 
 	// Header
-	writer.Write([]string{
+	if err := writer.Write([]string{
 		"Period", "TotalIdeas", "AverageScore", "MedianScore",
 		"HighestScore", "LowestScore", "StdDev",
-	})
+	}); err != nil {
+		return fmt.Errorf("failed to write CSV header: %w", err)
+	}
 
 	// Data rows
 	for _, report := range reports {
-		writer.Write([]string{
+		if err := writer.Write([]string{
 			report.Period,
 			strconv.Itoa(report.TotalIdeas),
 			fmt.Sprintf("%.2f", report.AverageScore),
@@ -1230,7 +1277,9 @@ func outputCSV(reports []performanceReport) error {
 			fmt.Sprintf("%.2f", report.HighestScore),
 			fmt.Sprintf("%.2f", report.LowestScore),
 			fmt.Sprintf("%.2f", report.StdDev),
-		})
+		}); err != nil {
+			return fmt.Errorf("failed to write CSV row: %w", err)
+		}
 	}
 
 	return nil

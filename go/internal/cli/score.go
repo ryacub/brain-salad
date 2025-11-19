@@ -4,6 +4,7 @@ import (
 	"fmt"
 	"strings"
 
+	"github.com/rs/zerolog/log"
 	"github.com/spf13/cobra"
 )
 
@@ -26,7 +27,9 @@ func runScore(cmd *cobra.Command, args []string) error {
 	ideaText := strings.Join(args, " ")
 
 	// Show progress
-	infoColor.Println("🎯 Scoring idea...")
+	if _, err := infoColor.Println("🎯 Scoring idea..."); err != nil {
+		log.Warn().Err(err).Msg("failed to print message")
+	}
 	fmt.Println()
 
 	// Calculate score
@@ -44,12 +47,16 @@ func runScore(cmd *cobra.Command, args []string) error {
 
 	// Score with color coding
 	scoreColor := getScoreColor(analysis.FinalScore)
-	scoreColor.Printf("⭐ Score: %.1f/10.0\n", analysis.FinalScore)
+	if _, err := scoreColor.Printf("⭐ Score: %.1f/10.0\n", analysis.FinalScore); err != nil {
+		log.Warn().Err(err).Msg("failed to print message")
+	}
 
 	// Recommendation
 	recommendation := analysis.GetRecommendation()
 	recommendationColor := getRecommendationColor(recommendation)
-	recommendationColor.Printf("%s\n\n", recommendation)
+	if _, err := recommendationColor.Printf("%s\n\n", recommendation); err != nil {
+		log.Warn().Err(err).Msg("failed to print message")
+	}
 
 	// Summary scores
 	fmt.Printf("📊 Mission Alignment:   %.2f/4.00 (40%%)\n", analysis.Mission.Total)
@@ -58,7 +65,9 @@ func runScore(cmd *cobra.Command, args []string) error {
 
 	// Patterns
 	if len(detectedPatterns) > 0 {
-		warningColor.Println("⚠️  Patterns Detected:")
+		if _, err := warningColor.Println("⚠️  Patterns Detected:"); err != nil {
+			log.Warn().Err(err).Msg("failed to print message")
+		}
 		for _, p := range detectedPatterns {
 			fmt.Printf("  • %s: %s\n", p.Name, p.Description)
 		}
@@ -66,7 +75,9 @@ func runScore(cmd *cobra.Command, args []string) error {
 	}
 
 	fmt.Println(strings.Repeat("─", 80))
-	infoColor.Println("💡 Not saved - use 'tm dump' to save this idea")
+	if _, err := infoColor.Println("💡 Not saved - use 'tm dump' to save this idea"); err != nil {
+		log.Warn().Err(err).Msg("failed to print message")
+	}
 	fmt.Println(strings.Repeat("─", 80))
 
 	return nil

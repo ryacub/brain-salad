@@ -5,6 +5,7 @@ import (
 	"sort"
 
 	"github.com/rayyacub/telos-idea-matrix/internal/llm"
+	"github.com/rs/zerolog/log"
 	"github.com/spf13/cobra"
 )
 
@@ -38,7 +39,9 @@ func runLLMList(cmd *cobra.Command, args []string) error {
 	// Get health status if requested
 	var health map[string]bool
 	if listShowHealth {
-		infoColor.Println("🔍 Running health checks...")
+		if _, err := infoColor.Println("🔍 Running health checks..."); err != nil {
+			log.Warn().Err(err).Msg("failed to print message")
+		}
 		fmt.Println()
 		health = manager.HealthCheck()
 	}
@@ -49,12 +52,16 @@ func runLLMList(cmd *cobra.Command, args []string) error {
 
 	// Display header
 	fmt.Println("═══════════════════════════════════════════════════════════════")
-	successColor.Println("🤖 LLM Providers")
+	if _, err := successColor.Println("🤖 LLM Providers"); err != nil {
+		log.Warn().Err(err).Msg("failed to print message")
+	}
 	fmt.Println("═══════════════════════════════════════════════════════════════")
 	fmt.Println()
 
 	// Display primary
-	successColor.Printf("Primary Provider: %s\n", primaryName)
+	if _, err := successColor.Printf("Primary Provider: %s\n", primaryName); err != nil {
+		log.Warn().Err(err).Msg("failed to print message")
+	}
 	fmt.Println()
 
 	// Sort provider names for consistent output

@@ -18,7 +18,7 @@ func TestE2E_AnalyzeLLM_Basic(t *testing.T) {
 
 	// Build the binary
 	binaryPath := buildBinary(t)
-	defer os.Remove(binaryPath)
+	defer func() { _ = os.Remove(binaryPath) }()
 
 	// Run analyze command
 	cmd := exec.Command(binaryPath, "analyze-llm", "Build a simple web app")
@@ -74,10 +74,10 @@ Secondary: Docker
 `
 
 	telosPath := createTempFile(t, "telos.md", telosContent)
-	defer os.Remove(telosPath)
+	defer func() { _ = os.Remove(telosPath) }()
 
 	binaryPath := buildBinary(t)
-	defer os.Remove(binaryPath)
+	defer func() { _ = os.Remove(binaryPath) }()
 
 	// Run with custom telos
 	cmd := exec.Command(binaryPath, "analyze-llm",
@@ -111,7 +111,7 @@ func TestE2E_AnalyzeLLM_LongIdea(t *testing.T) {
 	}
 
 	binaryPath := buildBinary(t)
-	defer os.Remove(binaryPath)
+	defer func() { _ = os.Remove(binaryPath) }()
 
 	longIdea := `Build a comprehensive AI-powered automation platform that uses
 Python and GPT-4 to help businesses streamline their workflows. The platform
@@ -146,7 +146,7 @@ func TestE2E_AnalyzeLLM_Performance(t *testing.T) {
 	}
 
 	binaryPath := buildBinary(t)
-	defer os.Remove(binaryPath)
+	defer func() { _ = os.Remove(binaryPath) }()
 
 	start := time.Now()
 
@@ -175,7 +175,7 @@ func TestE2E_AnalyzeLLM_MultipleRuns(t *testing.T) {
 	}
 
 	binaryPath := buildBinary(t)
-	defer os.Remove(binaryPath)
+	defer func() { _ = os.Remove(binaryPath) }()
 
 	ideas := []string{
 		"Build a web app",
@@ -209,7 +209,7 @@ func TestE2E_AnalyzeLLM_InvalidInput(t *testing.T) {
 	}
 
 	binaryPath := buildBinary(t)
-	defer os.Remove(binaryPath)
+	defer func() { _ = os.Remove(binaryPath) }()
 
 	tests := []struct {
 		name string
@@ -251,7 +251,7 @@ func TestE2E_AnalyzeLLM_Help(t *testing.T) {
 	}
 
 	binaryPath := buildBinary(t)
-	defer os.Remove(binaryPath)
+	defer func() { _ = os.Remove(binaryPath) }()
 
 	cmd := exec.Command(binaryPath, "analyze-llm", "--help")
 	var out bytes.Buffer
@@ -281,7 +281,7 @@ func TestE2E_AnalyzeLLM_JSONOutput(t *testing.T) {
 	}
 
 	binaryPath := buildBinary(t)
-	defer os.Remove(binaryPath)
+	defer func() { _ = os.Remove(binaryPath) }()
 
 	// Try with --json flag if supported
 	cmd := exec.Command(binaryPath, "analyze-llm", "--json", "Build a web app")
@@ -312,7 +312,7 @@ func TestE2E_AnalyzeLLM_VerboseOutput(t *testing.T) {
 	}
 
 	binaryPath := buildBinary(t)
-	defer os.Remove(binaryPath)
+	defer func() { _ = os.Remove(binaryPath) }()
 
 	// Run with verbose flag
 	cmd := exec.Command(binaryPath, "analyze-llm", "-v", "Build a web app")
@@ -389,7 +389,7 @@ func TestE2E_AnalyzeLLM_StressTest(t *testing.T) {
 	}
 
 	binaryPath := buildBinary(t)
-	defer os.Remove(binaryPath)
+	defer func() { _ = os.Remove(binaryPath) }()
 
 	iterations := 10
 	successCount := 0
