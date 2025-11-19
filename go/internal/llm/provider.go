@@ -2,8 +2,10 @@ package llm
 
 import (
 	"context"
+	"errors"
 	"fmt"
 	"strings"
+	"sync"
 	"time"
 
 	"github.com/rayyacub/telos-idea-matrix/internal/llm/client"
@@ -14,11 +16,27 @@ import (
 	"github.com/rayyacub/telos-idea-matrix/internal/scoring"
 )
 
-// Global quality tracker for all LLM analyses
-var globalQualityTracker = quality.NewSimpleTracker()
+// Error types for better error classification
+var (
+	ErrTimeout         = errors.New("request timeout")
+	ErrRateLimit       = errors.New("rate limit exceeded")
+	ErrAuth            = errors.New("authentication failed")
+	ErrNetwork         = errors.New("network error")
+	ErrInvalidResponse = errors.New("invalid response")
+	ErrProvider        = errors.New("provider error")
+)
 
-// GetQualityTracker returns the global quality tracker
+// Global quality tracker for all LLM analyses
+var (
+	globalQualityTracker *quality.SimpleTracker
+	trackerOnce          sync.Once
+)
+
+// GetQualityTracker returns the global quality tracker with thread-safe initialization
 func GetQualityTracker() *quality.SimpleTracker {
+	trackerOnce.Do(func() {
+		globalQualityTracker = quality.NewSimpleTracker()
+	})
 	return globalQualityTracker
 }
 
@@ -157,7 +175,7 @@ func (op *OllamaProvider) Analyze(req AnalysisRequest) (*AnalysisResult, error) 
 		Explanations:     result.Explanations,
 		Provider:         result.Provider,
 	}
-	qualityMetrics := globalQualityTracker.Record(simpleResult)
+	qualityMetrics := GetQualityTracker().Record(simpleResult)
 
 	// Log quality metrics (optional - could be removed in production)
 	_ = qualityMetrics // Suppress unused variable warning
@@ -342,14 +360,30 @@ func CreateDefaultFallbackChain(config ProviderConfig, telos *models.Telos) *Fal
 }
 
 // classifyError categorizes errors into standard types for metrics tracking
+// Uses error type checking first, then falls back to string matching for compatibility
 func classifyError(err error) string {
 	if err == nil {
 		return "unknown"
 	}
 
-	errStr := strings.ToLower(err.Error())
+	// Check for specific error types using errors.Is()
+	switch {
+	case errors.Is(err, ErrTimeout):
+		return "timeout"
+	case errors.Is(err, ErrRateLimit):
+		return "rate_limit"
+	case errors.Is(err, ErrAuth):
+		return "auth_error"
+	case errors.Is(err, ErrNetwork):
+		return "network_error"
+	case errors.Is(err, ErrInvalidResponse):
+		return "invalid_response"
+	case errors.Is(err, ErrProvider):
+		return "provider_error"
+	}
 
-	// Check for specific error types
+	// Fall back to string matching for errors that don't use typed errors
+	errStr := strings.ToLower(err.Error())
 	switch {
 	case strings.Contains(errStr, "timeout") || strings.Contains(errStr, "deadline exceeded"):
 		return "timeout"

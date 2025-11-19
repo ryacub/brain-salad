@@ -33,6 +33,37 @@ type ListOptions struct {
 	Offset   *int     // Offset for pagination
 }
 
+// validOrderByColumns defines the whitelist of allowed ORDER BY columns
+var validOrderByColumns = map[string]bool{
+	"id":               true,
+	"content":          true,
+	"raw_score":        true,
+	"final_score":      true,
+	"created_at":       true,
+	"reviewed_at":      true,
+	"status":           true,
+	"final_score DESC": true,
+	"final_score ASC":  true,
+	"created_at DESC":  true,
+	"created_at ASC":   true,
+	"raw_score DESC":   true,
+	"raw_score ASC":    true,
+}
+
+// validateOrderBy validates and sanitizes the ORDER BY clause against a whitelist
+func validateOrderBy(orderBy string) (string, error) {
+	if orderBy == "" {
+		return "", nil
+	}
+
+	// Check if the exact string is in the whitelist
+	if validOrderByColumns[orderBy] {
+		return orderBy, nil
+	}
+
+	return "", fmt.Errorf("invalid ORDER BY clause: %s", orderBy)
+}
+
 // NewRepository creates a new database repository and runs migrations.
 func NewRepository(dbPath string) (*Repository, error) {
 	// Create directory if it doesn't exist
@@ -369,9 +400,13 @@ func (r *Repository) List(options ListOptions) ([]*models.Idea, error) {
 		args = append(args, *options.MaxScore)
 	}
 
-	// Add ordering
+	// Add ordering with validation to prevent SQL injection
 	if options.OrderBy != "" {
-		query += " ORDER BY " + options.OrderBy
+		validatedOrderBy, err := validateOrderBy(options.OrderBy)
+		if err != nil {
+			return nil, fmt.Errorf("invalid order by clause: %w", err)
+		}
+		query += " ORDER BY " + validatedOrderBy
 	} else {
 		query += " ORDER BY created_at DESC"
 	}
