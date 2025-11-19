@@ -1,687 +1,702 @@
-# Telos Idea Matrix - Development Guide
+# Development Guide
 
-This guide covers everything you need to know to develop, test, and contribute to the Telos Idea Matrix project.
+This guide covers everything you need to know to develop the Telos Idea Matrix Go implementation.
+
+---
 
 ## Table of Contents
 
-- [Getting Started](#getting-started)
-- [Project Structure](#project-structure)
-- [Development Workflow](#development-workflow)
-- [Testing](#testing)
-- [Code Quality](#code-quality)
-- [Performance](#performance)
-- [Security](#security)
-- [Deployment](#deployment)
-- [Contributing](#contributing)
+1. [Prerequisites](#prerequisites)
+2. [Setup](#setup)
+3. [Project Structure](#project-structure)
+4. [Development Workflow](#development-workflow)
+5. [Testing](#testing)
+6. [Coding Standards](#coding-standards)
+7. [TDD Workflow](#tdd-workflow)
+8. [Common Tasks](#common-tasks)
+9. [Resources](#resources)
 
-## Getting Started
+---
 
-### Prerequisites
+## Prerequisites
 
-- **Go 1.24.7 or higher**
-- **Node.js 18+ and npm**
-- **Docker and Docker Compose** (for containerized development)
-- **Make** (for build automation)
-- **Git**
+### Required
 
-### Initial Setup
+- **Go 1.21+** - [Download](https://go.dev/dl/)
+- **SQLite3** - Should be installed on most systems
+- **make** - For running build targets
+
+### Recommended
+
+- **golangci-lint** - For linting ([Installation](https://golangci-lint.run/usage/install/))
+- **air** - For hot reload during development ([Installation](https://github.com/cosmtrek/air))
+- **git** - For version control
+
+### Installation Check
 
 ```bash
-# Clone the repository
+# Check Go version
+go version  # Should be 1.21 or higher
+
+# Check SQLite
+sqlite3 --version
+
+# Check make
+make --version
+
+# Check golangci-lint (optional but recommended)
+golangci-lint version
+```
+
+---
+
+## Setup
+
+### 1. Clone the Repository
+
+```bash
 git clone https://github.com/rayyacub/telos-idea-matrix.git
 cd telos-idea-matrix
+```
 
-# Install Go dependencies
-cd go
+### 2. Install Dependencies
+
+```bash
 go mod download
-cd ..
-
-# Install frontend dependencies
-cd web
-npm install
-cd ..
-
-# Create a telos.md file (or use the example)
-cp examples/telos.md ./telos.md
-
-# Initialize database
-mkdir -p ~/.telos
+go mod verify
 ```
 
-### Development Environment
-
-#### Option 1: Local Development
+### 3. Build the Project
 
 ```bash
-# Terminal 1: Run API server with hot reload
-cd go
-make dev-api
-
-# Terminal 2: Run frontend dev server
-cd web
-npm run dev
+make build
 ```
 
-#### Option 2: Docker Development
+This creates two binaries:
+- `bin/tm` - CLI tool
+- `bin/tm-web` - API server
+
+### 4. Run Tests
 
 ```bash
-# Build and start services
-docker-compose up --build
-
-# Access services:
-# - API: http://localhost:8080
-# - Frontend: http://localhost:5173
+make test
 ```
+
+### 5. Optional: Install Development Tools
+
+```bash
+# Install golangci-lint (macOS/Linux)
+brew install golangci-lint
+
+# Or using go install
+go install github.com/golangci/golangci-lint/cmd/golangci-lint@latest
+
+# Install air for hot reload
+go install github.com/cosmtrek/air@latest
+```
+
+---
 
 ## Project Structure
 
 ```
-telos-idea-matrix/
-├── go/                          # Go backend
-│   ├── cmd/
-│   │   ├── cli/                 # CLI application
-│   │   └── web/                 # Web API server
-│   ├── internal/
-│   │   ├── api/                 # HTTP handlers and middleware
-│   │   ├── cli/                 # CLI commands
-│   │   ├── config/              # Configuration management
-│   │   ├── database/            # Database layer
-│   │   │   └── migrations/      # SQL migrations
-│   │   ├── models/              # Data models
-│   │   ├── patterns/            # Anti-pattern detection
-│   │   ├── scoring/             # Scoring engine
-│   │   └── telos/               # Telos parsing
-│   ├── pkg/                     # Public packages
-│   ├── test/
-│   │   └── integration/         # Integration tests
-│   ├── Makefile                 # Build automation
-│   └── go.mod                   # Go dependencies
-│
-├── web/                         # SvelteKit frontend
-│   ├── src/
-│   │   ├── lib/
-│   │   │   └── components/      # Svelte components
-│   │   ├── routes/              # SvelteKit routes
-│   │   └── test/                # Test setup
-│   ├── tests/                   # E2E tests
-│   └── package.json             # npm dependencies
-│
-├── docs/                        # Documentation
-│   ├── api/                     # API documentation
-│   ├── ARCHITECTURE.md
-│   ├── CLI_REFERENCE.md
-│   └── DEVELOPMENT.md (this file)
-│
-├── scripts/                     # Utility scripts
-│   └── deploy.sh                # Deployment script
-│
-├── Dockerfile                   # Multi-stage Docker build
-├── docker-compose.yml           # Local development
-└── README.md                    # Main documentation
+telos-idea-matrix-go/
+├── cmd/
+│   ├── cli/                    # CLI entry point
+│   │   └── main.go
+│   └── web/                    # API server entry point
+│       └── main.go
+├── internal/                   # Private application code
+│   ├── models/                 # Domain models
+│   │   ├── idea.go
+│   │   ├── telos.go
+│   │   ├── analysis.go
+│   │   └── models_test.go
+│   ├── telos/                  # Telos markdown parser
+│   │   ├── parser.go
+│   │   ├── parser_test.go
+│   │   └── testdata/
+│   ├── scoring/                # Scoring engine
+│   │   ├── engine.go
+│   │   ├── engine_test.go
+│   │   └── testdata/
+│   ├── patterns/               # Pattern detection
+│   │   ├── detector.go
+│   │   └── detector_test.go
+│   ├── database/               # Database layer
+│   │   ├── repository.go
+│   │   ├── repository_test.go
+│   │   └── migrations/
+│   ├── config/                 # Configuration management
+│   │   ├── config.go
+│   │   └── paths.go
+│   ├── cli/                    # CLI command handlers
+│   │   ├── root.go
+│   │   ├── dump.go
+│   │   ├── analyze.go
+│   │   └── review.go
+│   └── api/                    # API server handlers
+│       ├── server.go
+│       ├── handlers.go
+│       └── middleware/
+├── pkg/                        # Public libraries
+│   └── client/                 # Optional Go API client
+│       └── client.go
+├── web/                        # SvelteKit frontend (Phase 4)
+│   └── README.md
+├── test/                       # Integration tests
+│   └── integration/
+├── docs/                       # Documentation
+│   ├── DEVELOPMENT.md          # This file
+│   ├── API.md                  # API documentation (TBD)
+│   └── CLI.md                  # CLI documentation (TBD)
+├── scripts/                    # Build and deployment scripts
+│   ├── build.sh
+│   ├── test.sh
+│   └── deploy.sh
+├── .github/                    # GitHub Actions CI/CD
+│   └── workflows/
+│       └── ci.yml
+├── .gitignore
+├── .golangci.yml               # Linter configuration
+├── go.mod
+├── go.sum
+├── Makefile
+├── README.md
+├── deployments/                # Deployment configurations
+│   ├── docker/                 # Docker files and compose configs
+│   ├── nginx/                  # Nginx configuration
+│   └── monitoring/             # Prometheus, Grafana configs
+└── scripts/                    # Build and utility scripts
 ```
+
+### Directory Conventions
+
+- **cmd/**: Application entry points (main packages)
+- **internal/**: Private code that cannot be imported by other projects
+- **pkg/**: Public libraries that can be imported by other projects
+- **test/**: Integration and end-to-end tests
+- **docs/**: Documentation
+- **scripts/**: Build, test, and deployment scripts
+
+---
 
 ## Development Workflow
 
-### Making Changes
+### 1. Create a Feature Branch
 
-1. **Create a Feature Branch**
-   ```bash
-   git checkout -b feature/your-feature-name
-   ```
-
-2. **Make Your Changes**
-   - Follow the [coding standards](#coding-standards)
-   - Add tests for new functionality
-   - Update documentation as needed
-
-3. **Run Tests**
-   ```bash
-   # Go tests
-   cd go && make test
-
-   # Integration tests
-   make test-integration
-
-   # Frontend tests
-   cd web && npm test
-   ```
-
-4. **Run Linters**
-   ```bash
-   # Go linter
-   cd go && make lint
-
-   # Frontend linter
-   cd web && npm run check
-   ```
-
-5. **Commit Your Changes**
-   ```bash
-   git add .
-   git commit -m "feat: add your feature description"
-   ```
-
-6. **Push and Create PR**
-   ```bash
-   git push origin feature/your-feature-name
-   ```
-
-### Coding Standards
-
-#### Go Code
-
-- Follow [Effective Go](https://golang.org/doc/effective_go.html)
-- Use `gofmt` for formatting
-- Write descriptive variable names
-- Keep functions small and focused
-- Add godoc comments for exported functions
-
-**Example:**
-
-```go
-// CalculateScore analyzes idea content against telos configuration
-// and returns a detailed Analysis with scores and recommendations.
-func (e *Engine) CalculateScore(content string) (*models.Analysis, error) {
-    if content == "" {
-        return nil, errors.New("content cannot be empty")
-    }
-
-    // Implementation...
-}
+```bash
+git checkout -b feature/your-feature-name
 ```
 
-#### TypeScript/Svelte Code
+### 2. Write Tests First (TDD)
 
-- Use TypeScript for type safety
-- Follow [Svelte best practices](https://svelte.dev/docs)
-- Use meaningful component names
-- Keep components small and reusable
+See [TDD Workflow](#tdd-workflow) section.
 
-**Example:**
+### 3. Implement Feature
 
-```typescript
-<script lang="ts">
-  interface IdeaCardProps {
-    idea: Idea;
-    onDelete?: (id: string) => void;
-  }
+Write minimal code to pass tests.
 
-  let { idea, onDelete }: IdeaCardProps = $props();
-</script>
+### 4. Run Tests
+
+```bash
+make test
 ```
 
-### Commit Message Format
+### 5. Run Linters
 
-Follow the [Conventional Commits](https://www.conventionalcommits.org/) specification:
-
-```
-<type>(<scope>): <description>
-
-[optional body]
-
-[optional footer]
+```bash
+make lint
 ```
 
-**Types:**
-- `feat`: New feature
-- `fix`: Bug fix
-- `docs`: Documentation changes
-- `refactor`: Code refactoring
-- `test`: Adding or updating tests
-- `chore`: Maintenance tasks
-- `perf`: Performance improvements
+### 6. Format Code
 
-**Examples:**
+```bash
+make fmt
 ```
-feat(api): add caching middleware for GET requests
-fix(scoring): correct keyword matching algorithm
-docs(cli): update CLI reference with new flags
-test(integration): add concurrent access tests
+
+### 7. Commit Changes
+
+```bash
+git add .
+git commit -m "feat: add feature description"
 ```
+
+Follow [Conventional Commits](https://www.conventionalcommits.org/):
+- `feat:` - New feature
+- `fix:` - Bug fix
+- `docs:` - Documentation
+- `test:` - Tests
+- `refactor:` - Code refactoring
+- `chore:` - Build/tooling changes
+
+### 8. Push and Create PR
+
+```bash
+git push origin feature/your-feature-name
+```
+
+Then create a Pull Request on GitHub.
+
+---
 
 ## Testing
 
 ### Unit Tests
 
-#### Go Unit Tests
+Unit tests live alongside the code they test with `_test.go` suffix.
 
 ```bash
 # Run all tests
-cd go && make test
+make test
 
-# Run tests with coverage
-make test-coverage
+# Run tests for specific package
+go test ./internal/scoring
 
-# Run specific package tests
-go test ./internal/scoring -v
+# Run tests with verbose output
+go test -v ./...
 
 # Run specific test
-go test ./internal/scoring -run TestCalculateScore
+go test -v ./internal/scoring -run TestScoreDomainExpertise
 ```
 
-**Writing Tests:**
-
-```go
-func TestCalculateScore(t *testing.T) {
-    telos := &models.Telos{
-        CoreGoals: []models.Goal{
-            {
-                Name:     "Quality",
-                Weight:   10.0,
-                Keywords: []string{"quality", "testing"},
-            },
-        },
-    }
-
-    engine := NewEngine(telos)
-    analysis, err := engine.CalculateScore("Build quality testing framework")
-
-    assert.NoError(t, err)
-    assert.Greater(t, analysis.FinalScore, 0.0)
-    assert.Contains(t, analysis.MatchedGoals, "Quality")
-}
-```
-
-#### Frontend Unit Tests
+### Test Coverage
 
 ```bash
-# Run tests
-cd web && npm test
+# Generate coverage report
+make test-coverage
 
-# Run tests in watch mode
-npm test -- --watch
-
-# Run tests with coverage
-npm run test:coverage
+# View coverage in browser
+open coverage.html
 ```
 
-**Writing Component Tests:**
-
-```typescript
-import { render, screen } from '@testing-library/svelte';
-import { describe, it, expect } from 'vitest';
-import IdeaCard from './IdeaCard.svelte';
-
-describe('IdeaCard', () => {
-  it('renders idea content', () => {
-    const idea = {
-      id: '123',
-      content: 'Test idea',
-      final_score: 8.5,
-      status: 'active'
-    };
-
-    render(IdeaCard, { props: { idea } });
-    expect(screen.getByText('Test idea')).toBeInTheDocument();
-  });
-});
-```
+**Coverage Target:** >85% for all packages
 
 ### Integration Tests
 
-Integration tests verify the entire stack works together:
+Integration tests use build tags:
 
 ```bash
-cd go && make test-integration
+# Run integration tests
+make test-integration
+
+# Or manually
+go test -tags=integration ./...
 ```
 
-**Writing Integration Tests:**
+### Test Structure
 
 ```go
-//go:build integration
-// +build integration
+func TestFunctionName(t *testing.T) {
+    // Arrange
+    input := "test data"
+    expected := 42.0
 
-func TestEndToEndWorkflow(t *testing.T) {
-    // Setup test database and server
-    repo, _ := database.NewRepository(t.TempDir() + "/test.db")
-    defer repo.Close()
+    // Act
+    result, err := FunctionName(input)
 
-    server := api.NewServer(repo, telosConfig)
-    ts := httptest.NewServer(server.Router())
-    defer ts.Close()
-
-    // Test full workflow
-    // 1. Create idea
-    // 2. Retrieve idea
-    // 3. Update idea
-    // 4. Delete idea
-}
-```
-
-### End-to-End Tests
-
-Frontend E2E tests use Playwright:
-
-```bash
-cd web && npm run test:e2e
-
-# Run with UI
-npm run test:e2e:ui
-
-# Run specific test file
-npx playwright test dashboard.spec.ts
-```
-
-### Load Testing
-
-```bash
-# Run load tests
-cd go && go test -tags=integration ./test/integration -run TestLoad
-
-# Skip in short mode
-go test -short ./test/integration
-```
-
-## Code Quality
-
-### Linting
-
-#### Go Linting
-
-```bash
-cd go && make lint
-
-# Auto-fix issues
-golangci-lint run --fix
-```
-
-Configuration: `.golangci.yml`
-
-#### Frontend Linting
-
-```bash
-cd web && npm run check
-
-# Type checking
-npm run check:types
-
-# Svelte check
-npx svelte-check
-```
-
-### Code Coverage
-
-```bash
-# Go coverage
-cd go && make test-coverage
-open coverage.html
-
-# Frontend coverage
-cd web && npm run test:coverage
-```
-
-**Coverage Goals:**
-- Minimum 70% coverage for new code
-- Critical paths should have 90%+ coverage
-- Integration tests for all API endpoints
-
-### Security Scanning
-
-```bash
-# Go security scan
-cd go && ~/go/bin/gosec ./...
-
-# npm audit
-cd web && npm audit
-
-# Check for dependency vulnerabilities
-npm audit fix
-```
-
-## Performance
-
-### Benchmarking
-
-```bash
-# Run Go benchmarks
-cd go && go test -bench=. ./internal/scoring
-
-# Compare benchmarks
-go test -bench=. -benchmem ./internal/scoring
-```
-
-**Writing Benchmarks:**
-
-```go
-func BenchmarkCalculateScore(b *testing.B) {
-    engine := NewEngine(testTelos)
-    content := "Build a testing framework"
-
-    b.ResetTimer()
-    for i := 0; i < b.N; i++ {
-        engine.CalculateScore(content)
+    // Assert
+    if err != nil {
+        t.Fatalf("unexpected error: %v", err)
+    }
+    if result != expected {
+        t.Errorf("expected %v, got %v", expected, result)
     }
 }
 ```
 
-### Profiling
+### Table-Driven Tests
 
-```bash
-# CPU profiling
-go test -cpuprofile=cpu.prof -bench=.
+Preferred for testing multiple scenarios:
 
-# Memory profiling
-go test -memprofile=mem.prof -bench=.
+```go
+func TestScoring(t *testing.T) {
+    tests := []struct {
+        name     string
+        input    string
+        expected float64
+        wantErr  bool
+    }{
+        {
+            name:     "high score idea",
+            input:    "Build AI tool with Python...",
+            expected: 8.5,
+            wantErr:  false,
+        },
+        {
+            name:     "low score idea",
+            input:    "Learn Rust before...",
+            expected: 2.0,
+            wantErr:  false,
+        },
+        {
+            name:     "empty input",
+            input:    "",
+            expected: 0.0,
+            wantErr:  true,
+        },
+    }
 
-# Analyze profile
-go tool pprof cpu.prof
+    for _, tt := range tests {
+        t.Run(tt.name, func(t *testing.T) {
+            result, err := Calculate(tt.input)
+
+            if (err != nil) != tt.wantErr {
+                t.Errorf("wantErr %v, got err %v", tt.wantErr, err)
+            }
+
+            if !tt.wantErr && math.Abs(result-tt.expected) > 0.1 {
+                t.Errorf("expected %v, got %v", tt.expected, result)
+            }
+        })
+    }
+}
 ```
 
-### Database Optimization
+### Testdata
 
-- All queries use parameterized statements
-- Indexes on frequently queried columns:
-  - `idx_ideas_created_at`
-  - `idx_ideas_final_score`
-  - `idx_ideas_status`
-  - `idx_ideas_status_score` (composite)
+Use `testdata/` directories for test fixtures:
 
-### API Performance
-
-- Response caching (5-minute TTL)
-- Rate limiting (100 req/min default)
-- Connection pooling
-- Efficient JSON serialization
-
-## Security
-
-### Best Practices
-
-1. **Input Validation**
-   - Validate all user inputs
-   - Use parameterized queries
-   - Sanitize file paths
-
-2. **Authentication & Authorization**
-   - CSRF token protection available
-   - Rate limiting enabled
-   - Security headers set
-
-3. **Data Protection**
-   - Sensitive data not logged
-   - Database access restricted
-   - CORS configured properly
-
-### Security Headers
-
-The API sets these security headers:
-- `X-Content-Type-Options: nosniff`
-- `X-Frame-Options: DENY`
-- `X-XSS-Protection: 1; mode=block`
-- `Content-Security-Policy: default-src 'self'`
-
-### Dependency Management
-
-```bash
-# Update Go dependencies
-cd go && go get -u ./...
-go mod tidy
-
-# Update npm dependencies
-cd web && npm update
-
-# Check for vulnerabilities
-npm audit
+```
+internal/telos/testdata/
+├── example_telos.md
+├── minimal_telos.md
+└── invalid_telos.md
 ```
 
-## Deployment
+---
 
-### Local Deployment
+## Coding Standards
 
-```bash
-# Build and deploy
-./scripts/deploy.sh deploy --env dev
+### Go Conventions
 
-# Or manually
-make build
-./bin/tm server
+Follow official Go conventions:
+
+1. **gofmt** - Use standard formatting
+2. **Effective Go** - Follow [Effective Go](https://go.dev/doc/effective_go)
+3. **Code Review Comments** - Follow [Go Code Review Comments](https://github.com/golang/go/wiki/CodeReviewComments)
+
+### Naming
+
+- **Files**: `snake_case.go`
+- **Packages**: `lowercase`, singular
+- **Types**: `PascalCase`
+- **Functions/Methods**: `PascalCase` (exported), `camelCase` (unexported)
+- **Variables**: `camelCase`
+- **Constants**: `PascalCase` or `SCREAMING_SNAKE_CASE`
+
+### Documentation
+
+All exported functions, types, and packages must have godoc comments:
+
+```go
+// Score represents a calculated idea score.
+// Scores range from 0.0 to 10.0, where higher scores indicate
+// better alignment with the user's telos.
+type Score struct {
+    Value float64
+    Valid bool
+}
+
+// Calculate computes a score for the given idea text.
+// It returns an error if the idea text is empty or invalid.
+func Calculate(idea string) (*Score, error) {
+    // Implementation...
+}
 ```
 
-### Docker Deployment
+### Error Handling
 
-```bash
-# Build Docker image
-docker-compose build
+```go
+// Good: Return descriptive errors
+if idea == "" {
+    return nil, fmt.Errorf("idea text cannot be empty")
+}
 
-# Start services
-docker-compose up -d
+// Good: Wrap errors with context
+result, err := db.Save(idea)
+if err != nil {
+    return nil, fmt.Errorf("failed to save idea: %w", err)
+}
 
-# View logs
-docker-compose logs -f
+// Bad: Ignoring errors
+_ = db.Save(idea)
 
-# Stop services
-docker-compose down
+// Bad: Generic error messages
+return nil, errors.New("error")
 ```
 
-### Production Deployment
+### Function Guidelines
 
-```bash
-# Build for production
-./scripts/deploy.sh build
+1. **Keep functions small** - Ideally < 50 lines
+2. **Single responsibility** - One clear purpose
+3. **Minimize parameters** - Max 3-4 parameters; use structs for more
+4. **Return early** - Reduce nesting
 
-# Run tests
-./scripts/deploy.sh test
+```go
+// Good
+func Validate(idea string) error {
+    if idea == "" {
+        return ErrEmptyIdea
+    }
 
-# Deploy
-./scripts/deploy.sh deploy --env prod
+    if len(idea) > MaxLength {
+        return ErrTooLong
+    }
 
-# Monitor
-./scripts/deploy.sh status
-./scripts/deploy.sh logs
+    return nil
+}
+
+// Bad
+func Validate(idea string) error {
+    var err error
+    if idea != "" {
+        if len(idea) <= MaxLength {
+            // Success path deeply nested
+        } else {
+            err = ErrTooLong
+        }
+    } else {
+        err = ErrEmptyIdea
+    }
+    return err
+}
 ```
 
-### Environment Variables
+---
 
-**API Server:**
-- `TELOS_FILE` - Path to telos configuration
-- `PORT` - Server port (default: 8080)
-- `TELOS_DB` - Database path
-- `LOG_LEVEL` - Logging level
+## TDD Workflow
 
-**Frontend:**
-- `VITE_API_URL` - API base URL
+We follow strict Test-Driven Development:
 
-## Contributing
+### RED → GREEN → REFACTOR
 
-### Pull Request Process
+#### 1. RED: Write Failing Test
 
-1. Fork the repository
-2. Create your feature branch
-3. Make your changes
-4. Add tests
-5. Run all tests and linters
-6. Update documentation
-7. Commit with conventional commit messages
-8. Push to your fork
-9. Create a Pull Request
+```go
+func TestCalculateScore(t *testing.T) {
+    engine := NewScoringEngine()
 
-### PR Checklist
+    score, err := engine.Calculate("Build AI tool with Python")
 
-- [ ] Tests added for new functionality
-- [ ] All tests passing
-- [ ] No linter errors
-- [ ] Documentation updated
-- [ ] Conventional commit messages
-- [ ] PR description explains changes
+    if err != nil {
+        t.Fatalf("unexpected error: %v", err)
+    }
 
-### Code Review Guidelines
-
-**Reviewers should check:**
-- Code quality and style
-- Test coverage
-- Performance implications
-- Security concerns
-- Documentation completeness
-
-## Debugging
-
-### Go Debugging
-
-```bash
-# Use delve debugger
-go install github.com/go-delve/delve/cmd/dlv@latest
-
-# Debug test
-dlv test ./internal/scoring
-
-# Debug server
-dlv debug ./cmd/web/main.go
+    if score.Value < 7.0 {
+        t.Errorf("expected high score, got %v", score.Value)
+    }
+}
 ```
 
-### Frontend Debugging
-
+Run test - it should **FAIL**:
 ```bash
-# Chrome DevTools
-npm run dev
-# Open http://localhost:5173
-# Press F12 for DevTools
-
-# Svelte DevTools
-# Install browser extension
+go test ./internal/scoring
 ```
 
-### Common Issues
+#### 2. GREEN: Write Minimal Code
 
-**Database locked:**
-```bash
-# Kill all tm processes
-killall tm
+```go
+func (e *ScoringEngine) Calculate(idea string) (*Score, error) {
+    if idea == "" {
+        return nil, errors.New("empty idea")
+    }
 
-# Use separate database
-tm --db /tmp/test.db list
+    // Minimal implementation to pass test
+    return &Score{Value: 8.0, Valid: true}, nil
+}
 ```
 
-**Port already in use:**
+Run test - it should **PASS**:
 ```bash
-# Find process using port
-lsof -i :8080
-
-# Kill process
-kill -9 <PID>
-
-# Or use different port
-tm server --port 3000
+go test ./internal/scoring
 ```
 
-**Build fails:**
-```bash
-# Clean and rebuild
-cd go && make clean && make build
+#### 3. REFACTOR: Improve Code Quality
 
-# Clean npm cache
-cd web && rm -rf node_modules && npm install
+```go
+func (e *ScoringEngine) Calculate(idea string) (*Score, error) {
+    if err := validateIdea(idea); err != nil {
+        return nil, err
+    }
+
+    mission := e.scoreMission(idea)
+    antiChallenge := e.scoreAntiChallenge(idea)
+    strategic := e.scoreStrategic(idea)
+
+    rawScore := mission + antiChallenge + strategic
+    finalScore := (rawScore / 10.0) * 10.0
+
+    return &Score{Value: finalScore, Valid: true}, nil
+}
 ```
+
+Run tests - they should still **PASS**:
+```bash
+go test ./internal/scoring
+```
+
+### TDD Benefits
+
+- Forces you to think about API design first
+- Ensures code is testable
+- Provides regression protection
+- Documents expected behavior
+
+---
+
+## Common Tasks
+
+### Add a New CLI Command
+
+1. Create command file: `internal/cli/mycommand.go`
+2. Implement command handler
+3. Register in `internal/cli/root.go`
+4. Add tests: `internal/cli/mycommand_test.go`
+
+### Add a New Scoring Dimension
+
+1. Update `internal/models/analysis.go` with new field
+2. Add scoring function in `internal/scoring/engine.go`
+3. Write tests in `internal/scoring/engine_test.go`
+4. Update documentation in `docs/ARCHITECTURE.md` if behavior changes
+
+### Add a Database Field
+
+1. Update schema in `internal/database/repository.go`
+2. Create migration if needed
+3. Update `StoredIdea` struct
+4. Update queries
+5. Add tests
+
+### Run Development Server with Hot Reload
+
+```bash
+# CLI hot reload
+make dev-cli
+
+# API server hot reload
+make dev-api
+```
+
+### Generate Test Coverage Report
+
+```bash
+make test-coverage
+open coverage.html
+```
+
+### Run Linters
+
+```bash
+make lint
+```
+
+### Format All Code
+
+```bash
+make fmt
+```
+
+### Clean Build Artifacts
+
+```bash
+make clean
+```
+
+---
 
 ## Resources
 
-- [Go Documentation](https://golang.org/doc/)
-- [SvelteKit Documentation](https://kit.svelte.dev/docs)
-- [Chi Router](https://github.com/go-chi/chi)
-- [Vitest](https://vitest.dev/)
-- [Playwright](https://playwright.dev/)
+### Official Documentation
+
+- [Effective Go](https://go.dev/doc/effective_go)
+- [Go Code Review Comments](https://github.com/golang/go/wiki/CodeReviewComments)
+- [Go Testing](https://go.dev/doc/tutorial/add-a-test)
+- [Go Modules](https://go.dev/blog/using-go-modules)
+
+### Libraries Used
+
+- **Cobra** - CLI framework: https://github.com/spf13/cobra
+- **Viper** - Configuration: https://github.com/spf13/viper
+- **Chi** - HTTP router: https://github.com/go-chi/chi
+- **SQLite** - Database: https://github.com/mattn/go-sqlite3
+- **Testify** - Testing toolkit: https://github.com/stretchr/testify
+
+### Tools
+
+- **golangci-lint** - Linter aggregator: https://golangci-lint.run/
+- **air** - Hot reload: https://github.com/cosmtrek/air
+- **go-coverage** - Coverage visualization: https://go.dev/blog/cover
+
+### Project-Specific
+
+- **README.md** - Project overview
+- **docs/ARCHITECTURE.md** - System design and architecture
+- **docs/API.md** - API documentation
+- **docs/CLI_REFERENCE.md** - CLI command reference
+- **docs/CONFIGURATION.md** - Configuration guide
+- **docs/DOCKER_GUIDE.md** - Docker deployment guide
+
+---
 
 ## Getting Help
 
-- **Issues:** https://github.com/rayyacub/telos-idea-matrix/issues
-- **Discussions:** https://github.com/rayyacub/telos-idea-matrix/discussions
-- **Documentation:** https://github.com/rayyacub/telos-idea-matrix/docs
+### Common Issues
+
+**Issue:** `cannot find package`
+```bash
+# Solution: Download dependencies
+go mod download
+go mod tidy
+```
+
+**Issue:** `database locked`
+```bash
+# Solution: Close other connections, check for hanging processes
+pkill tm
+```
+
+**Issue:** Linter errors
+```bash
+# Solution: Format code and run linters
+make fmt
+make lint
+```
+
+### Debugging
+
+```go
+// Use fmt.Printf for quick debugging
+fmt.Printf("DEBUG: value=%v\n", myValue)
+
+// Use log package for structured logging
+import "log"
+log.Printf("Processing idea: %s", idea)
+
+// Use testify for better test output
+import "github.com/stretchr/testify/assert"
+assert.Equal(t, expected, actual, "scores should match")
+```
+
+### Contact
+
+- **GitHub Issues**: https://github.com/rayyacub/telos-idea-matrix/issues
+- **Pull Requests**: https://github.com/rayyacub/telos-idea-matrix/pulls
+
+---
+
+## Next Steps
+
+Once Phase 0 is complete:
+
+1. **Phase 1**: Implement core domain models
+2. **Phase 2**: Implement CLI commands
+3. **Phase 3**: Build API server
+4. **Phase 4**: Create SvelteKit frontend
+
+Refer to the migration plan in the repository for detailed phase breakdown.
+
+---
+
+Happy coding! 🚀

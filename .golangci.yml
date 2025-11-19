@@ -1,18 +1,13 @@
+version: "2"
+
 run:
   timeout: 5m
   tests: true
+  modules-download-mode: readonly
 
 linters:
+  default: standard
   enable:
-    - errcheck
-    - gosimple
-    - govet
-    - ineffassign
-    - staticcheck
-    - typecheck
-    - unused
-    - gofmt
-    - goimports
     - misspell
     - goconst
     - dupl
@@ -23,8 +18,6 @@ linters-settings:
     check-blank: true
   govet:
     check-shadowing: true
-  gofmt:
-    simplify: true
   revive:
     rules:
       - name: exported
@@ -38,3 +31,6 @@ issues:
   exclude-use-default: false
   max-issues-per-linter: 0
   max-same-issues: 0
+  exclude-dirs:
+    - test
+    - bin
