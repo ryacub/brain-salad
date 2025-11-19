@@ -7,11 +7,15 @@ import (
 
 	"github.com/fatih/color"
 	"github.com/rayyacub/telos-idea-matrix/internal/models"
+	"github.com/rayyacub/telos-idea-matrix/internal/utils"
 	"github.com/spf13/cobra"
 )
 
 func newDumpCommand() *cobra.Command {
-	return &cobra.Command{
+	var fromClipboard bool
+	var toClipboard bool
+
+	cmd := &cobra.Command{
 		Use:   "dump <idea text>",
 		Short: "Capture and analyze an idea immediately",
 		Long: `Capture a new idea, analyze it against your telos, and save it to the database.
@@ -19,14 +23,44 @@ The idea will be scored and analyzed for patterns immediately.
 
 Examples:
   tm dump "Build a SaaS product for developers"
-  tm dump "Create an AI agent that automates customer support"`,
-		Args: cobra.MinimumNArgs(1),
-		RunE: runDump,
+  tm dump "Create an AI agent that automates customer support"
+  tm dump --from-clipboard
+  tm dump "Quick idea" --to-clipboard`,
+		Args: func(cmd *cobra.Command, args []string) error {
+			fromClipboard, _ := cmd.Flags().GetBool("from-clipboard")
+			if !fromClipboard && len(args) < 1 {
+				return fmt.Errorf("provide idea text or use --from-clipboard")
+			}
+			return nil
+		},
+		RunE: func(cmd *cobra.Command, args []string) error {
+			return runDump(cmd, args, fromClipboard, toClipboard)
+		},
 	}
+
+	cmd.Flags().BoolVar(&fromClipboard, "from-clipboard", false, "Read idea from clipboard")
+	cmd.Flags().BoolVar(&toClipboard, "to-clipboard", false, "Copy result to clipboard")
+
+	return cmd
 }
 
-func runDump(cmd *cobra.Command, args []string) error {
-	ideaText := strings.Join(args, " ")
+func runDump(cmd *cobra.Command, args []string, fromClipboard, toClipboard bool) error {
+	var ideaText string
+
+	// Get idea content from clipboard or arguments
+	if fromClipboard {
+		text, err := utils.PasteFromClipboard()
+		if err != nil {
+			return fmt.Errorf("read clipboard: %w", err)
+		}
+		ideaText = strings.TrimSpace(text)
+		if ideaText == "" {
+			return fmt.Errorf("clipboard is empty")
+		}
+		infoColor.Printf("📋 Read from clipboard: %s\n", truncateText(ideaText, 50))
+	} else {
+		ideaText = strings.Join(args, " ")
+	}
 
 	// Show progress
 	infoColor.Println("📝 Capturing idea...")
@@ -68,6 +102,20 @@ func runDump(cmd *cobra.Command, args []string) error {
 
 	// Display results
 	displayIdeaAnalysis(idea, analysis)
+
+	// Copy result to clipboard if requested
+	if toClipboard {
+		summary := fmt.Sprintf("Score: %.1f/10.0\n%s\n\nIdea: %s",
+			idea.FinalScore,
+			idea.Recommendation,
+			idea.Content)
+
+		if err := utils.CopyToClipboard(summary); err != nil {
+			warningColor.Printf("⚠️  Warning: failed to copy to clipboard: %v\n", err)
+		} else {
+			successColor.Println("✓ Result copied to clipboard")
+		}
+	}
 
 	return nil
 }
@@ -151,4 +199,11 @@ func getRecommendationColor(recommendation string) *color.Color {
 		return color.New(color.FgYellow)
 	}
 	return color.New(color.FgRed)
+}
+
+func truncateText(text string, maxLen int) string {
+	if len(text) <= maxLen {
+		return text
+	}
+	return text[:maxLen] + "..."
 }
