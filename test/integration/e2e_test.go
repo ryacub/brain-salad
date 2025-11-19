@@ -9,8 +9,6 @@ import (
 	"fmt"
 	"io"
 	"net/http"
-	"net/http/httptest"
-	"os"
 	"path/filepath"
 	"sync"
 	"testing"
@@ -19,7 +17,6 @@ import (
 	"github.com/rayyacub/telos-idea-matrix/internal/api"
 	"github.com/rayyacub/telos-idea-matrix/internal/database"
 	"github.com/rayyacub/telos-idea-matrix/internal/models"
-	"github.com/rayyacub/telos-idea-matrix/internal/telos"
 	"github.com/stretchr/testify/assert"
 	"github.com/stretchr/testify/require"
 )
@@ -43,7 +40,7 @@ func TestEndToEndWorkflow(t *testing.T) {
 - Over-engineering
 - Technical debt accumulation
 `
-	ts, repo := setupTestServer(t, &testServerConfig{telosContent: telosContent})
+	ts, _ := setupTestServer(t, &testServerConfig{telosContent: telosContent})
 
 	// Test 1: Create an idea via API
 	t.Run("CreateIdea", func(t *testing.T) {
