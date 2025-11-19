@@ -973,6 +973,7 @@ func TestBulkUpdate_SetStatus(t *testing.T) {
 	cmd := GetRootCmd()
 	cmd.SetArgs([]string{
 		"bulk", "update",
+		"--score-min", "0.0",
 		"--score-max", "3.0",
 		"--set-status", "archived",
 		"--yes",
@@ -1023,6 +1024,7 @@ func TestBulkUpdate_AddPatterns(t *testing.T) {
 	cmd.SetArgs([]string{
 		"bulk", "update",
 		"--score-min", "7.0",
+		"--score-max", "10.0",  // Explicitly set to avoid flag reuse issues
 		"--add-patterns", "high-value,priority",
 		"--yes",
 	})
@@ -1065,6 +1067,8 @@ func TestBulkUpdate_RemovePatterns(t *testing.T) {
 	cmd := GetRootCmd()
 	cmd.SetArgs([]string{
 		"bulk", "update",
+		"--score-min", "0.0",
+		"--score-max", "10.0",
 		"--remove-patterns", "old-pattern,remove-pattern",
 		"--yes",
 	})
@@ -1107,6 +1111,8 @@ func TestBulkUpdate_AddTags(t *testing.T) {
 	cmd := GetRootCmd()
 	cmd.SetArgs([]string{
 		"bulk", "update",
+		"--score-min", "0.0",
+		"--score-max", "10.0",
 		"--status", "archived",
 		"--add-tags", "reviewed,processed",
 		"--yes",
@@ -1149,6 +1155,7 @@ func TestBulkUpdate_DryRun(t *testing.T) {
 	cmd := GetRootCmd()
 	cmd.SetArgs([]string{
 		"bulk", "update",
+		"--score-min", "0.0",
 		"--score-max", "4.0",
 		"--set-status", "archived",
 		"--add-patterns", "new",
@@ -1192,6 +1199,7 @@ func TestBulkUpdate_CombinedOperations(t *testing.T) {
 	cmd.SetArgs([]string{
 		"bulk", "update",
 		"--score-min", "7.0",
+		"--score-max", "10.0",
 		"--set-status", "archived",
 		"--add-patterns", "high-priority",
 		"--remove-patterns", "remove-me",
