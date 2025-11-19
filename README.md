@@ -296,15 +296,28 @@ tm delete <idea-id>
 ### Linking Related Ideas
 
 ```bash
-# Link two ideas with a relationship type
-tm link add <idea-id-1> <idea-id-2> --type "depends-on"
+# Create a relationship between two ideas
+tm link create <source-id> <target-id> <relationship-type>
 
-# View relationships for an idea
-tm link show <idea-id>
+# View all relationships for an idea
+tm link list <idea-id>
 
-# Remove a link
-tm link remove <link-id>
+# Show related ideas with full details
+tm link show <idea-id> [--type <relationship-type>]
+
+# Find dependency paths between ideas
+tm link path <from-id> <to-id>
+
+# Remove a relationship
+tm link remove <relationship-id>
 ```
+
+**Relationship types:** `depends_on`, `blocked_by`, `blocks`, `part_of`, `parent`, `child`, `related_to`, `similar_to`, `duplicate`
+
+**Learn more:**
+- [Link Command User Guide](./docs/user-guide/link-command.md) - Complete documentation
+- [Getting Started Tutorial](./docs/tutorials/getting-started-with-links.md) - Step-by-step guide
+- [Quick Reference](./docs/quick-reference/link-cheatsheet.md) - Cheat sheet
 
 ### Pruning and Maintenance
 
