@@ -13,13 +13,19 @@ linters:
   settings:
     errcheck:
       check-blank: false
+    goconst:
+      min-len: 3
+      min-occurrences: 5
+      ignore-strings: '""'
     revive:
       rules:
+        # Disable exported comment checks - too noisy for internal packages
         - name: exported
-          severity: warning
+          disabled: true
         - name: error-strings
         - name: error-naming
         - name: if-return
+          disabled: true
         - name: var-naming
   exclusions:
     rules:
