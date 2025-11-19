@@ -14,6 +14,7 @@ import (
 	"github.com/rayyacub/telos-idea-matrix/internal/telos"
 	"github.com/rs/zerolog/log"
 	"github.com/spf13/cobra"
+	"github.com/spf13/pflag"
 )
 
 // CLIContext holds shared dependencies for all commands
@@ -83,6 +84,11 @@ you focus on what truly matters.`,
 
 // initializeCLI sets up the shared context for all commands
 func initializeCLI(cmd *cobra.Command, args []string) error {
+	// Skip initialization if context is already set (e.g., by tests)
+	if ctx != nil {
+		return nil
+	}
+
 	// Create .telos directory if it doesn't exist
 	telosDir := filepath.Dir(telosPath)
 	if err := os.MkdirAll(telosDir, 0755); err != nil {
@@ -139,12 +145,49 @@ func Execute() error {
 	return rootCmd.Execute()
 }
 
+// resetCommandFlags recursively resets all flags for a command and its subcommands
+func resetCommandFlags(cmd *cobra.Command) {
+	// Reset local flags
+	cmd.Flags().VisitAll(func(flag *pflag.Flag) {
+		flag.Changed = false
+		_ = flag.Value.Set(flag.DefValue)
+	})
+
+	// Reset persistent flags
+	cmd.PersistentFlags().VisitAll(func(flag *pflag.Flag) {
+		flag.Changed = false
+		_ = flag.Value.Set(flag.DefValue)
+	})
+
+	// Reset all subcommands recursively
+	for _, subCmd := range cmd.Commands() {
+		resetCommandFlags(subCmd)
+	}
+}
+
 // GetRootCmd returns the root command for testing
 func GetRootCmd() *cobra.Command {
+	// Reset command state for testing
+	// This ensures flags are re-parsed fresh for each test
+	if rootCmd != nil {
+		rootCmd.SilenceUsage = false
+		rootCmd.SilenceErrors = false
+
+		// Reset all flags recursively for root and all subcommands
+		resetCommandFlags(rootCmd)
+	}
 	return rootCmd
 }
 
 // SetContext allows setting a custom context for testing
 func SetContext(c *CLIContext) {
 	ctx = c
+}
+
+// ClearContext clears the global context (used for test cleanup)
+func ClearContext() {
+	ctx = nil
+	// Also reset the global flag variables
+	dbPath = ""
+	telosPath = ""
 }

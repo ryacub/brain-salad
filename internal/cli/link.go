@@ -8,6 +8,10 @@ import (
 	"github.com/spf13/cobra"
 )
 
+const (
+	ideaNotFoundMessage = "(idea not found)"
+)
+
 func newLinkCommand() *cobra.Command {
 	cmd := &cobra.Command{
 		Use:   "link",
@@ -277,7 +281,7 @@ func runLinkList(ideaID string) error {
 			relatedIdeaID := rel.TargetIdeaID
 			relatedIdea, _ := ctx.Repository.GetByID(relatedIdeaID)
 
-			relatedContent := "(idea not found)"
+			relatedContent := ideaNotFoundMessage
 			if relatedIdea != nil {
 				relatedContent = truncateText(relatedIdea.Content, 60)
 			}
@@ -305,7 +309,7 @@ func runLinkList(ideaID string) error {
 			relatedIdeaID := rel.SourceIdeaID
 			relatedIdea, _ := ctx.Repository.GetByID(relatedIdeaID)
 
-			relatedContent := "(idea not found)"
+			relatedContent := ideaNotFoundMessage
 			if relatedIdea != nil {
 				relatedContent = truncateText(relatedIdea.Content, 60)
 			}
@@ -413,12 +417,12 @@ func runLinkRemove(relationshipID string, noConfirm bool) error {
 	sourceIdea, _ := ctx.Repository.GetByID(rel.SourceIdeaID)
 	targetIdea, _ := ctx.Repository.GetByID(rel.TargetIdeaID)
 
-	sourceContent := "(idea not found)"
+	sourceContent := ideaNotFoundMessage
 	if sourceIdea != nil {
 		sourceContent = truncateText(sourceIdea.Content, 50)
 	}
 
-	targetContent := "(idea not found)"
+	targetContent := ideaNotFoundMessage
 	if targetIdea != nil {
 		targetContent = truncateText(targetIdea.Content, 50)
 	}
@@ -512,7 +516,7 @@ func runLinkPath(sourceID, targetID string, maxDepth int) error {
 
 			// Get next idea
 			nextIdea, _ := ctx.Repository.GetByID(nextID)
-			nextContent := "(idea not found)"
+			nextContent := ideaNotFoundMessage
 			if nextIdea != nil {
 				nextContent = truncateText(nextIdea.Content, 50)
 			}

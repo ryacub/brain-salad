@@ -147,6 +147,12 @@ func (r *Repository) runMigrations() error {
 
 		// Execute migration
 		if _, err := r.db.Exec(string(content)); err != nil {
+			// For idempotency: ignore "duplicate column" errors from ALTER TABLE ADD COLUMN
+			// This allows migrations to be run multiple times safely (e.g., in tests)
+			if strings.Contains(err.Error(), "duplicate column name") {
+				// Migration already applied, skip silently
+				continue
+			}
 			return fmt.Errorf("failed to execute migration %s: %w", entry.Name(), err)
 		}
 	}

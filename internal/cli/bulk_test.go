@@ -16,8 +16,17 @@ import (
 	"github.com/stretchr/testify/require"
 )
 
-func TestBulkTag_WithFilters(t *testing.T) {
+// setupBulkTestCLI sets up CLI context for bulk operation tests
+// Returns context and cleanup function - cleanup is automatically deferred
+func setupBulkTestCLI(t *testing.T) (*CLIContext, func()) {
+	t.Helper()
 	cliCtx, cleanup := setupTestCLI(t)
+	SetContext(cliCtx)
+	return cliCtx, cleanup
+}
+
+func TestBulkTag_WithFilters(t *testing.T) {
+	cliCtx, cleanup := setupBulkTestCLI(t)
 	defer cleanup()
 
 	// Create test ideas with varying scores
@@ -73,7 +82,7 @@ func TestBulkTag_WithFilters(t *testing.T) {
 }
 
 func TestBulkArchive_WithFilters(t *testing.T) {
-	cliCtx, cleanup := setupTestCLI(t)
+	cliCtx, cleanup := setupBulkTestCLI(t)
 	defer cleanup()
 
 	// Create old and new ideas
@@ -395,7 +404,7 @@ func TestBulkArchive_DryRun(t *testing.T) {
 }
 
 func TestBulkAnalyze_WithFilters(t *testing.T) {
-	cliCtx, cleanup := setupTestCLI(t)
+	cliCtx, cleanup := setupBulkTestCLI(t)
 	defer cleanup()
 
 	// Create test ideas with varying scores
@@ -925,7 +934,7 @@ func TestTruncate(t *testing.T) {
 // Integration tests for bulk update
 
 func TestBulkUpdate_SetStatus(t *testing.T) {
-	cliCtx, cleanup := setupTestCLI(t)
+	cliCtx, cleanup := setupBulkTestCLI(t)
 	defer cleanup()
 
 	// Create test ideas
@@ -960,9 +969,8 @@ func TestBulkUpdate_SetStatus(t *testing.T) {
 	// Test bulk update to archive low-scoring ideas
 	cmd := GetRootCmd()
 	cmd.SetArgs([]string{
-		"--telos", cliCtx.TelosPath,
-		"--db", cliCtx.DBPath,
 		"bulk", "update",
+		"--score-min", "0.0",
 		"--score-max", "3.0",
 		"--set-status", "archived",
 		"--yes",
@@ -980,7 +988,7 @@ func TestBulkUpdate_SetStatus(t *testing.T) {
 }
 
 func TestBulkUpdate_AddPatterns(t *testing.T) {
-	cliCtx, cleanup := setupTestCLI(t)
+	cliCtx, cleanup := setupBulkTestCLI(t)
 	defer cleanup()
 
 	// Create test idea
@@ -998,13 +1006,19 @@ func TestBulkUpdate_AddPatterns(t *testing.T) {
 	err := cliCtx.Repository.Create(idea)
 	require.NoError(t, err)
 
+	// Verify the idea exists with direct repository access
+	limit := 100
+	allIdeas, err := cliCtx.Repository.List(database.ListOptions{Limit: &limit})
+	require.NoError(t, err)
+	t.Logf("Repository has %d ideas before bulk update", len(allIdeas))
+
 	// Test bulk update to add pattern
+	// Don't pass --telos and --db since we've already set the context
 	cmd := GetRootCmd()
 	cmd.SetArgs([]string{
-		"--telos", cliCtx.TelosPath,
-		"--db", cliCtx.DBPath,
 		"bulk", "update",
 		"--score-min", "7.0",
+		"--score-max", "10.0",  // Explicitly set to avoid flag reuse issues
 		"--add-patterns", "high-value,priority",
 		"--yes",
 	})
@@ -1022,7 +1036,7 @@ func TestBulkUpdate_AddPatterns(t *testing.T) {
 }
 
 func TestBulkUpdate_RemovePatterns(t *testing.T) {
-	cliCtx, cleanup := setupTestCLI(t)
+	cliCtx, cleanup := setupBulkTestCLI(t)
 	defer cleanup()
 
 	// Create test idea
@@ -1043,9 +1057,9 @@ func TestBulkUpdate_RemovePatterns(t *testing.T) {
 	// Test bulk update to remove patterns
 	cmd := GetRootCmd()
 	cmd.SetArgs([]string{
-		"--telos", cliCtx.TelosPath,
-		"--db", cliCtx.DBPath,
 		"bulk", "update",
+		"--score-min", "0.0",
+		"--score-max", "10.0",
 		"--remove-patterns", "old-pattern,remove-pattern",
 		"--yes",
 	})
@@ -1063,7 +1077,7 @@ func TestBulkUpdate_RemovePatterns(t *testing.T) {
 }
 
 func TestBulkUpdate_AddTags(t *testing.T) {
-	cliCtx, cleanup := setupTestCLI(t)
+	cliCtx, cleanup := setupBulkTestCLI(t)
 	defer cleanup()
 
 	// Create test idea
@@ -1084,9 +1098,9 @@ func TestBulkUpdate_AddTags(t *testing.T) {
 	// Test bulk update to add tags
 	cmd := GetRootCmd()
 	cmd.SetArgs([]string{
-		"--telos", cliCtx.TelosPath,
-		"--db", cliCtx.DBPath,
 		"bulk", "update",
+		"--score-min", "0.0",
+		"--score-max", "10.0",
 		"--status", "archived",
 		"--add-tags", "reviewed,processed",
 		"--yes",
@@ -1104,7 +1118,7 @@ func TestBulkUpdate_AddTags(t *testing.T) {
 }
 
 func TestBulkUpdate_DryRun(t *testing.T) {
-	cliCtx, cleanup := setupTestCLI(t)
+	cliCtx, cleanup := setupBulkTestCLI(t)
 	defer cleanup()
 
 	// Create test idea
@@ -1125,9 +1139,8 @@ func TestBulkUpdate_DryRun(t *testing.T) {
 	// Test bulk update with dry-run
 	cmd := GetRootCmd()
 	cmd.SetArgs([]string{
-		"--telos", cliCtx.TelosPath,
-		"--db", cliCtx.DBPath,
 		"bulk", "update",
+		"--score-min", "0.0",
 		"--score-max", "4.0",
 		"--set-status", "archived",
 		"--add-patterns", "new",
@@ -1145,7 +1158,7 @@ func TestBulkUpdate_DryRun(t *testing.T) {
 }
 
 func TestBulkUpdate_CombinedOperations(t *testing.T) {
-	cliCtx, cleanup := setupTestCLI(t)
+	cliCtx, cleanup := setupBulkTestCLI(t)
 	defer cleanup()
 
 	// Create test idea
@@ -1166,10 +1179,9 @@ func TestBulkUpdate_CombinedOperations(t *testing.T) {
 	// Test bulk update with multiple operations
 	cmd := GetRootCmd()
 	cmd.SetArgs([]string{
-		"--telos", cliCtx.TelosPath,
-		"--db", cliCtx.DBPath,
 		"bulk", "update",
 		"--score-min", "7.0",
+		"--score-max", "10.0",
 		"--set-status", "archived",
 		"--add-patterns", "high-priority",
 		"--remove-patterns", "remove-me",

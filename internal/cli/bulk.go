@@ -16,6 +16,11 @@ import (
 	"github.com/spf13/cobra"
 )
 
+const (
+	formatJSON = "json"
+	formatCSV  = "csv"
+)
+
 // NewBulkCommand creates the bulk operations command.
 func NewBulkCommand() *cobra.Command {
 	cmd := &cobra.Command{
@@ -494,9 +499,9 @@ Use filters to control which ideas are exported.`,
 			if format == "" {
 				ext := strings.ToLower(filepath.Ext(filename))
 				if ext == ".json" {
-					format = "json"
+					format = formatJSON
 				} else {
-					format = "csv"
+					format = formatCSV
 				}
 			}
 
@@ -525,9 +530,9 @@ Use filters to control which ideas are exported.`,
 
 			// Export based on format
 			switch format {
-			case "json":
+			case formatJSON:
 				err = export.ExportJSON(ideas, filename, pretty)
-			case "csv":
+			case formatCSV:
 				err = export.ExportCSV(ideas, filename)
 			default:
 				return fmt.Errorf("unsupported format: %s (use 'csv' or 'json')", format)
@@ -658,6 +663,11 @@ func runBulkUpdate(opts bulkUpdateOptions) error {
 			return fmt.Errorf("invalid status: %s (must be one of: %s)",
 				opts.setStatus, strings.Join(validStatuses, ", "))
 		}
+	}
+
+	// Safety check for tests
+	if ctx == nil || ctx.Repository == nil {
+		return fmt.Errorf("CLI context not initialized")
 	}
 
 	// Build filter

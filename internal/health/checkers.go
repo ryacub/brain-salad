@@ -10,6 +10,13 @@ import (
 	"time"
 )
 
+const (
+	// Health check names
+	checkNameDatabase  = "database"
+	checkNameMemory    = "memory"
+	checkNameDiskSpace = "disk_space"
+)
+
 // DatabaseHealthChecker checks database connectivity
 type DatabaseHealthChecker struct {
 	db *sql.DB
@@ -22,7 +29,7 @@ func NewDatabaseHealthChecker(db *sql.DB) *DatabaseHealthChecker {
 
 // Name returns the name of the checker
 func (d *DatabaseHealthChecker) Name() string {
-	return "database"
+	return checkNameDatabase
 }
 
 // Check performs the database health check
@@ -62,7 +69,7 @@ func NewMemoryHealthChecker(thresholdMB float64) *MemoryHealthChecker {
 
 // Name returns the name of the checker
 func (m *MemoryHealthChecker) Name() string {
-	return "memory"
+	return checkNameMemory
 }
 
 // Check performs the memory health check
@@ -113,7 +120,7 @@ func NewDiskSpaceHealthChecker(path string, thresholdMB uint64) *DiskSpaceHealth
 
 // Name returns the name of the checker
 func (d *DiskSpaceHealthChecker) Name() string {
-	return "disk_space"
+	return checkNameDiskSpace
 }
 
 // Check performs the disk space health check

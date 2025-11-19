@@ -9,8 +9,6 @@ import (
 	"fmt"
 	"io"
 	"net/http"
-	"net/http/httptest"
-	"os"
 	"path/filepath"
 	"sync"
 	"testing"
@@ -19,25 +17,18 @@ import (
 	"github.com/rayyacub/telos-idea-matrix/internal/api"
 	"github.com/rayyacub/telos-idea-matrix/internal/database"
 	"github.com/rayyacub/telos-idea-matrix/internal/models"
-	"github.com/rayyacub/telos-idea-matrix/internal/telos"
 	"github.com/stretchr/testify/assert"
 	"github.com/stretchr/testify/require"
 )
 
 // TestEndToEndWorkflow tests the complete workflow from idea creation to analysis
 func TestEndToEndWorkflow(t *testing.T) {
-	// Setup test environment
-	tempDir := t.TempDir()
-	dbPath := filepath.Join(tempDir, "test.db")
-
-	// Create test telos file
-	telosPath := filepath.Join(tempDir, "telos.md")
 	telosContent := `# Telos: Technical Excellence
 
-## Core Goals
-- Build scalable systems
-- Write clean code
-- Deliver value
+## Goals
+- G1: Build scalable systems
+- G2: Write clean code
+- G3: Deliver value
 
 ## Strategies
 - Test-driven development
@@ -49,21 +40,7 @@ func TestEndToEndWorkflow(t *testing.T) {
 - Over-engineering
 - Technical debt accumulation
 `
-	require.NoError(t, os.WriteFile(telosPath, []byte(telosContent), 0644))
-
-	// Parse telos
-	telosConfig, err := telos.ParseTelosFile(telosPath)
-	require.NoError(t, err)
-
-	// Create database repository
-	repo, err := database.NewRepository(dbPath)
-	require.NoError(t, err)
-	defer repo.Close()
-
-	// Create API server
-	server := api.NewServer(repo, telosConfig)
-	ts := httptest.NewServer(server.Router())
-	defer ts.Close()
+	ts, _ := setupTestServer(t, &testServerConfig{telosContent: telosContent})
 
 	// Test 1: Create an idea via API
 	t.Run("CreateIdea", func(t *testing.T) {
@@ -257,29 +234,7 @@ func TestEndToEndWorkflow(t *testing.T) {
 
 // TestConcurrentAccess tests concurrent API requests
 func TestConcurrentAccess(t *testing.T) {
-	// Setup
-	tempDir := t.TempDir()
-	dbPath := filepath.Join(tempDir, "test.db")
-
-	telosPath := filepath.Join(tempDir, "telos.md")
-	telosContent := `# Telos
-## Core Goals
-- Goal 1
-## Strategies
-- Strategy 1
-`
-	require.NoError(t, os.WriteFile(telosPath, []byte(telosContent), 0644))
-
-	telosConfig, err := telos.ParseTelosFile(telosPath)
-	require.NoError(t, err)
-
-	repo, err := database.NewRepository(dbPath)
-	require.NoError(t, err)
-	defer repo.Close()
-
-	server := api.NewServer(repo, telosConfig)
-	ts := httptest.NewServer(server.Router())
-	defer ts.Close()
+	ts, _ := setupTestServer(t, &testServerConfig{})
 
 	// Test concurrent creates
 	t.Run("ConcurrentCreates", func(t *testing.T) {
@@ -543,26 +498,7 @@ func TestDatabaseIntegrity(t *testing.T) {
 
 // TestAPIErrorHandling tests error scenarios
 func TestAPIErrorHandling(t *testing.T) {
-	tempDir := t.TempDir()
-	dbPath := filepath.Join(tempDir, "test.db")
-
-	telosPath := filepath.Join(tempDir, "telos.md")
-	telosContent := `# Telos
-## Core Goals
-- Goal 1
-`
-	require.NoError(t, os.WriteFile(telosPath, []byte(telosContent), 0644))
-
-	telosConfig, err := telos.ParseTelosFile(telosPath)
-	require.NoError(t, err)
-
-	repo, err := database.NewRepository(dbPath)
-	require.NoError(t, err)
-	defer repo.Close()
-
-	server := api.NewServer(repo, telosConfig)
-	ts := httptest.NewServer(server.Router())
-	defer ts.Close()
+	ts, _ := setupTestServer(t, &testServerConfig{})
 
 	t.Run("InvalidJSON", func(t *testing.T) {
 		resp, err := http.Post(ts.URL+"/api/v1/ideas", "application/json", bytes.NewBufferString("invalid json"))
@@ -605,22 +541,7 @@ func TestAPIErrorHandling(t *testing.T) {
 
 // TestHealthCheck tests the health endpoint
 func TestHealthCheck(t *testing.T) {
-	tempDir := t.TempDir()
-	dbPath := filepath.Join(tempDir, "test.db")
-
-	telosPath := filepath.Join(tempDir, "telos.md")
-	require.NoError(t, os.WriteFile(telosPath, []byte("# Telos\n## Core Goals\n- Goal 1"), 0644))
-
-	telosConfig, err := telos.ParseTelosFile(telosPath)
-	require.NoError(t, err)
-
-	repo, err := database.NewRepository(dbPath)
-	require.NoError(t, err)
-	defer repo.Close()
-
-	server := api.NewServer(repo, telosConfig)
-	ts := httptest.NewServer(server.Router())
-	defer ts.Close()
+	ts, _ := setupTestServer(t, &testServerConfig{})
 
 	resp, err := http.Get(ts.URL + "/health")
 	require.NoError(t, err)

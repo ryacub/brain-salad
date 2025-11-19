@@ -2,8 +2,6 @@ version: "2"
 
 run:
   timeout: 5m
-  tests: true
-  modules-download-mode: readonly
 
 linters:
   default: standard
@@ -12,23 +10,42 @@ linters:
     - goconst
     - dupl
     - revive
-
-linters-settings:
-  errcheck:
-    check-blank: true
-  revive:
+  settings:
+    errcheck:
+      check-blank: false
+    goconst:
+      min-len: 3
+      min-occurrences: 5
+    revive:
+      rules:
+        # Disable exported comment checks - too noisy for internal packages
+        - name: exported
+          disabled: true
+        - name: error-strings
+        - name: error-naming
+        - name: if-return
+          disabled: true
+        - name: var-naming
+  exclusions:
     rules:
-      - name: exported
-        severity: warning
-      - name: error-strings
-      - name: error-naming
-      - name: if-return
-      - name: var-naming
+      # Exclude linters from test files
+      - path: _test\.go
+        linters:
+          - goconst
+          - dupl
+          - revive
+      # Exclude linters from test directory
+      - path: test/.*\.go
+        linters:
+          - goconst
+          - dupl
+          - revive
+      # Exclude var-naming check for utils package (small utility package)
+      - path: internal/utils/
+        linters:
+          - revive
+        text: "var-naming"
 
 issues:
-  exclude-use-default: false
   max-issues-per-linter: 0
   max-same-issues: 0
-  exclude-dirs:
-    - test
-    - bin

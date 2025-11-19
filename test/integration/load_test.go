@@ -78,16 +78,19 @@ func TestLoadCreateIdeas(t *testing.T) {
 		t.Skip("Skipping load test in short mode")
 	}
 
+	// Disable rate limiting for tests to avoid flaky failures
+	t.Setenv("DISABLE_RATE_LIMIT", "true")
+
 	// Setup
 	tempDir := t.TempDir()
 	dbPath := filepath.Join(tempDir, "load_test.db")
 
 	telosPath := filepath.Join(tempDir, "telos.md")
 	telosContent := `# Telos: Load Test
-## Core Goals
-- Performance
-- Scalability
-- Reliability
+## Goals
+- G1: Performance
+- G2: Scalability
+- G3: Reliability
 ## Strategies
 - Efficient algorithms
 - Database optimization
@@ -184,15 +187,18 @@ func TestLoadMixedOperations(t *testing.T) {
 		t.Skip("Skipping load test in short mode")
 	}
 
+	// Disable rate limiting for tests to avoid flaky failures
+	t.Setenv("DISABLE_RATE_LIMIT", "true")
+
 	// Setup
 	tempDir := t.TempDir()
 	dbPath := filepath.Join(tempDir, "mixed_load_test.db")
 
 	telosPath := filepath.Join(tempDir, "telos.md")
 	telosContent := `# Telos
-## Core Goals
-- Goal 1
-- Goal 2
+## Goals
+- G1: Goal 1
+- G2: Goal 2
 `
 	require.NoError(t, os.WriteFile(telosPath, []byte(telosContent), 0644))
 

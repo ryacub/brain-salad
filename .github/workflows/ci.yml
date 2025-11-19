@@ -103,10 +103,10 @@ jobs:
           cache: true
 
       - name: Build CLI
-        run: go build -v ./cmd/cli
+        run: go build -v -o bin/cli ./cmd/cli
 
       - name: Build Web
-        run: go build -v ./cmd/web
+        run: go build -v -o bin/web ./cmd/web
 
   # Docker build (only on push)
   docker:
