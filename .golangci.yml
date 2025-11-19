@@ -23,14 +23,14 @@ linters:
         - name: var-naming
   exclusions:
     rules:
-      # Exclude goconst, dupl, and revive from test files
+      # Exclude linters from test files
       - path: _test\.go
         linters:
           - goconst
           - dupl
           - revive
-      # Exclude from test/ directory
-      - path: test/
+      # Exclude linters from test directory
+      - path: test/.*\.go
         linters:
           - goconst
           - dupl
