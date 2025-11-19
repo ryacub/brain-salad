@@ -100,17 +100,11 @@ func (cp *CSRFProtection) DeleteToken(sessionID string) {
 	delete(cp.tokens, sessionID)
 }
 
-// getSessionID extracts or creates a session ID from the request
-// In production, this should use a proper session management system
-func getSessionID(r *http.Request) string {
-	// Try to get from cookie
-	cookie, err := r.Cookie("session_id")
-	if err == nil && cookie.Value != "" {
-		return cookie.Value
-	}
-
-	// Fallback to IP address (not recommended for production)
-	return r.RemoteAddr
+// getSessionID extracts the session ID from the request
+// This function now properly retrieves the session ID from secure session management
+// SECURITY: No longer falls back to IP address - always requires valid session
+func getSessionID(r *http.Request) (string, error) {
+	return GetSessionID(r)
 }
 
 // CSRFMiddleware protects against CSRF attacks
@@ -124,7 +118,11 @@ func CSRFMiddleware(csrf *CSRFProtection) func(http.Handler) http.Handler {
 			}
 
 			// Get session ID
-			sessionID := getSessionID(r)
+			sessionID, err := getSessionID(r)
+			if err != nil {
+				respondError(w, http.StatusForbidden, "No valid session found")
+				return
+			}
 
 			// Get token from header
 			token := r.Header.Get("X-CSRF-Token")
@@ -142,7 +140,11 @@ func CSRFMiddleware(csrf *CSRFProtection) func(http.Handler) http.Handler {
 
 // GetCSRFTokenHandler returns a CSRF token for the current session
 func (s *Server) GetCSRFTokenHandler(w http.ResponseWriter, r *http.Request) {
-	sessionID := getSessionID(r)
+	sessionID, err := getSessionID(r)
+	if err != nil {
+		respondError(w, http.StatusForbidden, "No valid session found")
+		return
+	}
 
 	token, err := s.csrfProtection.GenerateToken(sessionID)
 	if err != nil {
