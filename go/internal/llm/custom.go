@@ -10,6 +10,8 @@ import (
 	"strings"
 	"text/template"
 	"time"
+
+	"github.com/rayyacub/telos-idea-matrix/internal/metrics"
 )
 
 // CustomProvider implements a generic HTTP/REST LLM provider that can work with any
@@ -72,18 +74,27 @@ func (p *CustomProvider) Analyze(req AnalysisRequest) (*AnalysisResult, error) {
 	start := time.Now()
 
 	if !p.IsAvailable() {
+		duration := time.Since(start)
+		metrics.RecordLLMRequest(p.Name(), false, duration)
+		metrics.RecordLLMError(p.Name(), "not_configured")
 		return nil, fmt.Errorf("custom provider not configured: CUSTOM_LLM_ENDPOINT not set")
 	}
 
 	// Build request body using template
 	requestBody, err := p.buildRequestBody(req)
 	if err != nil {
+		duration := time.Since(start)
+		metrics.RecordLLMRequest(p.Name(), false, duration)
+		metrics.RecordLLMError(p.Name(), "invalid_request")
 		return nil, fmt.Errorf("failed to build request body: %w", err)
 	}
 
 	// Create HTTP request
 	httpReq, err := http.NewRequest("POST", p.endpoint, bytes.NewBuffer(requestBody))
 	if err != nil {
+		duration := time.Since(start)
+		metrics.RecordLLMRequest(p.Name(), false, duration)
+		metrics.RecordLLMError(p.Name(), "invalid_request")
 		return nil, fmt.Errorf("failed to create HTTP request: %w", err)
 	}
 
@@ -100,6 +111,9 @@ func (p *CustomProvider) Analyze(req AnalysisRequest) (*AnalysisResult, error) {
 	// Send request
 	httpResp, err := p.httpClient.Do(httpReq)
 	if err != nil {
+		duration := time.Since(start)
+		metrics.RecordLLMRequest(p.Name(), false, duration)
+		metrics.RecordLLMError(p.Name(), classifyError(err))
 		return nil, fmt.Errorf("HTTP request failed: %w", err)
 	}
 	defer httpResp.Body.Close()
@@ -107,19 +121,39 @@ func (p *CustomProvider) Analyze(req AnalysisRequest) (*AnalysisResult, error) {
 	// Read response body
 	respBody, err := io.ReadAll(httpResp.Body)
 	if err != nil {
+		duration := time.Since(start)
+		metrics.RecordLLMRequest(p.Name(), false, duration)
+		metrics.RecordLLMError(p.Name(), "network_error")
 		return nil, fmt.Errorf("failed to read response body: %w", err)
 	}
 
+	duration := time.Since(start)
+
 	// Check for HTTP errors
 	if httpResp.StatusCode < 200 || httpResp.StatusCode >= 300 {
+		metrics.RecordLLMRequest(p.Name(), false, duration)
+		if httpResp.StatusCode >= 500 {
+			metrics.RecordLLMError(p.Name(), "provider_error")
+		} else if httpResp.StatusCode == 429 {
+			metrics.RecordLLMError(p.Name(), "rate_limit")
+		} else if httpResp.StatusCode == 401 || httpResp.StatusCode == 403 {
+			metrics.RecordLLMError(p.Name(), "auth_error")
+		} else {
+			metrics.RecordLLMError(p.Name(), "unknown")
+		}
 		return nil, fmt.Errorf("API error (HTTP %d): %s", httpResp.StatusCode, string(respBody))
 	}
 
 	// Parse response
 	result, err := p.parseResponse(respBody)
 	if err != nil {
+		metrics.RecordLLMRequest(p.Name(), false, duration)
+		metrics.RecordLLMError(p.Name(), "invalid_response")
 		return nil, fmt.Errorf("failed to parse response: %w", err)
 	}
+
+	// Record successful request
+	metrics.RecordLLMRequest(p.Name(), true, duration)
 
 	// Set metadata
 	result.Provider = p.Name()

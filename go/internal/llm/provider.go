@@ -3,11 +3,13 @@ package llm
 import (
 	"context"
 	"fmt"
+	"strings"
 	"time"
 
 	"github.com/rayyacub/telos-idea-matrix/internal/llm/client"
 	"github.com/rayyacub/telos-idea-matrix/internal/llm/processing"
 	"github.com/rayyacub/telos-idea-matrix/internal/llm/quality"
+	"github.com/rayyacub/telos-idea-matrix/internal/metrics"
 	"github.com/rayyacub/telos-idea-matrix/internal/models"
 	"github.com/rayyacub/telos-idea-matrix/internal/scoring"
 )
@@ -105,15 +107,31 @@ func (op *OllamaProvider) Analyze(req AnalysisRequest) (*AnalysisResult, error) 
 		Model:  op.model,
 		Prompt: prompt,
 	})
+
+	duration := time.Since(start)
+
+	// Record metrics
 	if err != nil {
+		// Import metrics package at the top if not already imported
+		// Record failure
+		metrics.RecordLLMRequest(op.Name(), false, duration)
+		metrics.RecordLLMError(op.Name(), classifyError(err))
 		return nil, fmt.Errorf("generate: %w", err)
 	}
 
 	// Process LLM response with fallback support
 	processed, err := op.processor.Process(resp.Response, req.IdeaContent)
 	if err != nil {
+		// Record failure
+		metrics.RecordLLMRequest(op.Name(), false, duration)
+		metrics.RecordLLMError(op.Name(), "invalid_response")
 		return nil, fmt.Errorf("process response: %w", err)
 	}
+
+	// Record successful request
+	metrics.RecordLLMRequest(op.Name(), true, duration)
+
+	// Note: Ollama doesn't provide token counts in response, so we can't track tokens
 
 	// Convert to AnalysisResult
 	result := &AnalysisResult{
@@ -178,6 +196,9 @@ func (rbp *RuleBasedProvider) Analyze(req AnalysisRequest) (*AnalysisResult, err
 	start := time.Now()
 
 	if req.Telos == nil {
+		duration := time.Since(start)
+		metrics.RecordLLMRequest(rbp.Name(), false, duration)
+		metrics.RecordLLMError(rbp.Name(), "invalid_request")
 		return nil, fmt.Errorf("telos is required for rule-based analysis")
 	}
 
@@ -186,9 +207,16 @@ func (rbp *RuleBasedProvider) Analyze(req AnalysisRequest) (*AnalysisResult, err
 
 	// Calculate scores
 	analysis, err := engine.CalculateScore(req.IdeaContent)
+	duration := time.Since(start)
+
 	if err != nil {
+		metrics.RecordLLMRequest(rbp.Name(), false, duration)
+		metrics.RecordLLMError(rbp.Name(), "calculation_error")
 		return nil, fmt.Errorf("calculate score: %w", err)
 	}
+
+	// Record successful request
+	metrics.RecordLLMRequest(rbp.Name(), true, duration)
 
 	// Convert to AnalysisResult
 	result := &AnalysisResult{
@@ -311,4 +339,31 @@ func CreateDefaultFallbackChain(config ProviderConfig, telos *models.Telos) *Fal
 	}
 
 	return NewFallbackProvider(providers...)
+}
+
+// classifyError categorizes errors into standard types for metrics tracking
+func classifyError(err error) string {
+	if err == nil {
+		return "unknown"
+	}
+
+	errStr := strings.ToLower(err.Error())
+
+	// Check for specific error types
+	switch {
+	case strings.Contains(errStr, "timeout") || strings.Contains(errStr, "deadline exceeded"):
+		return "timeout"
+	case strings.Contains(errStr, "rate limit") || strings.Contains(errStr, "too many requests") || strings.Contains(errStr, "429"):
+		return "rate_limit"
+	case strings.Contains(errStr, "unauthorized") || strings.Contains(errStr, "api key") || strings.Contains(errStr, "authentication") || strings.Contains(errStr, "401"):
+		return "auth_error"
+	case strings.Contains(errStr, "connection") || strings.Contains(errStr, "network") || strings.Contains(errStr, "dial"):
+		return "network_error"
+	case strings.Contains(errStr, "invalid") || strings.Contains(errStr, "malformed") || strings.Contains(errStr, "parse"):
+		return "invalid_response"
+	case strings.Contains(errStr, "500") || strings.Contains(errStr, "502") || strings.Contains(errStr, "503") || strings.Contains(errStr, "504"):
+		return "provider_error"
+	default:
+		return "unknown"
+	}
 }

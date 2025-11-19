@@ -10,6 +10,7 @@ import (
 	"os"
 	"time"
 
+	"github.com/rayyacub/telos-idea-matrix/internal/metrics"
 	"golang.org/x/time/rate"
 )
 
@@ -58,12 +59,18 @@ func (p *OpenAIProvider) Analyze(req AnalysisRequest) (*AnalysisResult, error) {
 	start := time.Now()
 
 	if !p.IsAvailable() {
+		duration := time.Since(start)
+		metrics.RecordLLMRequest(p.Name(), false, duration)
+		metrics.RecordLLMError(p.Name(), "auth_error")
 		return nil, fmt.Errorf("OpenAI provider not available (check OPENAI_API_KEY)")
 	}
 
 	// Build the analysis prompt
 	prompt, err := BuildAnalysisPrompt(req.IdeaContent, req.Telos)
 	if err != nil {
+		duration := time.Since(start)
+		metrics.RecordLLMRequest(p.Name(), false, duration)
+		metrics.RecordLLMError(p.Name(), "invalid_request")
 		return nil, fmt.Errorf("build prompt: %w", err)
 	}
 
@@ -100,20 +107,34 @@ func (p *OpenAIProvider) Analyze(req AnalysisRequest) (*AnalysisResult, error) {
 		}
 	}
 
+	duration := time.Since(start)
+
 	if lastErr != nil {
+		metrics.RecordLLMRequest(p.Name(), false, duration)
+		metrics.RecordLLMError(p.Name(), classifyError(lastErr))
 		return nil, fmt.Errorf("OpenAI request failed after %d retries: %w", p.maxRetries, lastErr)
 	}
 
 	// Parse response
 	if len(resp.Choices) == 0 {
+		metrics.RecordLLMRequest(p.Name(), false, duration)
+		metrics.RecordLLMError(p.Name(), "invalid_response")
 		return nil, fmt.Errorf("no response from OpenAI")
 	}
 
 	// Extract structured result from GPT response
 	llmResp, err := ParseLLMResponse(resp.Choices[0].Message.Content)
 	if err != nil {
+		metrics.RecordLLMRequest(p.Name(), false, duration)
+		metrics.RecordLLMError(p.Name(), "invalid_response")
 		return nil, fmt.Errorf("failed to parse OpenAI response: %w", err)
 	}
+
+	// Record successful request
+	metrics.RecordLLMRequest(p.Name(), true, duration)
+
+	// Record token usage
+	metrics.RecordLLMTokens(p.Name(), resp.Usage.PromptTokens, resp.Usage.CompletionTokens)
 
 	// Convert to AnalysisResult
 	result := &AnalysisResult{
