@@ -103,13 +103,13 @@ cd "$PROJECT_ROOT"
 # Environment-specific configuration
 case $ENV in
     dev)
-        COMPOSE_FILE="docker-compose.yml"
+        COMPOSE_FILE="docker compose.yml"
         ;;
     staging)
-        COMPOSE_FILE="docker-compose.staging.yml"
+        COMPOSE_FILE="docker compose.staging.yml"
         ;;
     prod)
-        COMPOSE_FILE="docker-compose.prod.yml"
+        COMPOSE_FILE="docker compose.prod.yml"
         ;;
 esac
 
@@ -124,16 +124,12 @@ cmd_build() {
     make build
     cd ..
 
-    # Build frontend
-    log_info "Building frontend..."
-    cd web
-    npm install
-    npm run build
-    cd ..
+    # Frontend build skipped (using static files for beta)
+    log_info "Using static frontend files..."
 
     # Build Docker images
     log_info "Building Docker images..."
-    docker-compose -f "$COMPOSE_FILE" build $NO_CACHE
+    docker compose -f "$COMPOSE_FILE" build $NO_CACHE
 
     log_info "Build complete!"
 }
@@ -161,12 +157,12 @@ cmd_deploy() {
     case $ENV in
         dev)
             log_info "Starting development environment..."
-            docker-compose -f "$COMPOSE_FILE" up -d
+            docker compose -f "$COMPOSE_FILE" up -d
             ;;
         staging|prod)
             log_info "Deploying to $ENV..."
             # In production, you might use a different orchestration system
-            docker-compose -f "$COMPOSE_FILE" up -d
+            docker compose -f "$COMPOSE_FILE" up -d
             ;;
     esac
 
@@ -182,15 +178,15 @@ cmd_start() {
         exit 1
     fi
 
-    docker-compose -f "$COMPOSE_FILE" up -d
+    docker compose -f "$COMPOSE_FILE" up -d
 
     log_info "Services started!"
-    docker-compose -f "$COMPOSE_FILE" ps
+    docker compose -f "$COMPOSE_FILE" ps
 }
 
 cmd_stop() {
     log_info "Stopping services..."
-    docker-compose -f "$COMPOSE_FILE" down
+    docker compose -f "$COMPOSE_FILE" down
     log_info "Services stopped!"
 }
 
@@ -202,7 +198,7 @@ cmd_restart() {
 
 cmd_logs() {
     log_info "Showing logs for $ENV environment..."
-    docker-compose -f "$COMPOSE_FILE" logs -f
+    docker compose -f "$COMPOSE_FILE" logs -f
 }
 
 cmd_test() {
@@ -259,7 +255,7 @@ cmd_clean() {
     read -p "Remove Docker images? (y/N) " -n 1 -r
     echo
     if [[ $REPLY =~ ^[Yy]$ ]]; then
-        docker-compose -f "$COMPOSE_FILE" down --rmi all
+        docker compose -f "$COMPOSE_FILE" down --rmi all
     fi
 
     log_info "Clean complete!"
@@ -267,7 +263,7 @@ cmd_clean() {
 
 cmd_status() {
     log_info "Service status:"
-    docker-compose -f "$COMPOSE_FILE" ps
+    docker compose -f "$COMPOSE_FILE" ps
 
     log_info ""
     log_info "Resource usage:"
