@@ -1,5 +1,15 @@
 # Execution Prompt: Go Migration of Telos Idea Matrix
 
+**⚠️ RECOMMENDED APPROACH: Use the new Subagent Orchestration method instead!**
+
+See **`SUBAGENT_ORCHESTRATION.md`** for the preferred execution strategy using specialized subagents for each phase.
+
+This document remains as reference for the original single-agent approach. For better effectiveness and parallel execution, use the subagent method with phase-specific prompts in `migration-prompts/`.
+
+---
+
+## Original Approach (Single Agent)
+
 **Use this prompt with Claude or another AI assistant to guide the migration implementation.**
 
 ---

@@ -1,5 +1,13 @@
 # Telos Idea Matrix: Go Migration Plan
 
+**⚠️ NEW: Subagent Orchestration Available!**
+
+For better execution effectiveness, see **`SUBAGENT_ORCHESTRATION.md`** which breaks this plan into discrete phases executable by specialized subagents. Copy-paste ready prompts available in `migration-prompts/`.
+
+This document remains as the comprehensive technical specification.
+
+---
+
 **Migration Strategy:** Rust CLI → Go CLI + Go API + SvelteKit Frontend
 **Timeline:** 6-8 weeks
 **Risk Level:** Medium
