@@ -407,6 +407,14 @@ func (r *Repository) DB() *sql.DB {
 	return r.db
 }
 
+// Ping verifies a connection to the database is still alive.
+func (r *Repository) Ping() error {
+	if r.db != nil {
+		return r.db.Ping()
+	}
+	return errors.New("database connection is nil")
+}
+
 // Close closes the database connection.
 func (r *Repository) Close() error {
 	if r.db != nil {
