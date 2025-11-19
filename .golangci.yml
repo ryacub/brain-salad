@@ -40,6 +40,11 @@ linters:
           - goconst
           - dupl
           - revive
+      # Exclude var-naming check for utils package (small utility package)
+      - path: internal/utils/
+        linters:
+          - revive
+        text: "var-naming"
 
 issues:
   max-issues-per-linter: 0
