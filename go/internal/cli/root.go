@@ -64,6 +64,7 @@ you focus on what truly matters.`,
 	rootCmd.AddCommand(newAnalyticsCommand())
 	rootCmd.AddCommand(newLinkCommand())
 	rootCmd.AddCommand(newHealthCommand())
+	rootCmd.AddCommand(NewBulkCommand())
 }
 
 // initializeCLI sets up the shared context for all commands
