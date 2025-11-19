@@ -1,11 +1,12 @@
 version: '3.8'
 
 services:
-  telos-matrix:
+  # CLI service
+  telos-cli:
     build:
       context: .
       dockerfile: Dockerfile
-    container_name: telos-matrix
+    container_name: telos-cli
     volumes:
       # Mount your telos.md file
       - ./telos.md:/config/telos.md:ro
@@ -15,7 +16,32 @@ services:
       - telos-logs:/logs
     environment:
       - TELOS_FILE=/config/telos.md
-      - RUST_LOG=info
+      - TZ=UTC
+    stdin_open: true
+    tty: true
+    command: ["--help"]
+
+  # Web API service
+  telos-web:
+    build:
+      context: .
+      dockerfile: Dockerfile
+    container_name: telos-web
+    entrypoint: ["tm-web"]
+    command: []
+    ports:
+      - "8080:8080"
+    volumes:
+      # Mount your telos.md file
+      - ./telos.md:/config/telos.md:ro
+      # Mount data directory for persistence
+      - telos-data:/data
+      # Mount logs directory
+      - telos-logs:/logs
+    environment:
+      - TELOS_FILE=/config/telos.md
+      - PORT=8080
+      - TZ=UTC
     stdin_open: true
     tty: true
 

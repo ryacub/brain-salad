@@ -1,43 +1,46 @@
 # Build stage
-FROM rust:1.75-slim as builder
+FROM golang:1.24-alpine AS builder
 
 WORKDIR /build
 
-# Install dependencies
-RUN apt-get update && apt-get install -y \
-    pkg-config \
-    libssl-dev \
-    sqlite3 \
-    && rm -rf /var/lib/apt/lists/*
+# Install build dependencies (gcc, musl-dev for CGO)
+RUN apk add --no-cache \
+    gcc \
+    musl-dev \
+    sqlite-dev
 
-# Copy source
-COPY Cargo.toml Cargo.lock ./
-COPY src ./src
-COPY migrations ./migrations
+# Copy go module files
+COPY go/go.mod go/go.sum ./
+RUN go mod download
 
-# Build release binary
-RUN cargo build --release
+# Copy source code
+COPY go/ .
+
+# Build CLI and API binaries
+RUN CGO_ENABLED=1 go build -o bin/tm ./cmd/cli
+RUN CGO_ENABLED=1 go build -o bin/tm-web ./cmd/web
 
 # Runtime stage
-FROM debian:bookworm-slim
+FROM alpine:latest
 
 WORKDIR /app
 
 # Install runtime dependencies
-RUN apt-get update && apt-get install -y \
+RUN apk add --no-cache \
     ca-certificates \
-    sqlite3 \
-    && rm -rf /var/lib/apt/lists/*
+    sqlite-libs \
+    tzdata
 
-# Copy binary from builder
-COPY --from=builder /build/target/release/tm /usr/local/bin/tm
+# Copy binaries from builder
+COPY --from=builder /build/bin/tm /usr/local/bin/tm
+COPY --from=builder /build/bin/tm-web /usr/local/bin/tm-web
 
-# Create data directory
+# Create data directories
 RUN mkdir -p /data /config /logs
 
-# Set environment
+# Set environment variables
 ENV TELOS_FILE=/config/telos.md
 
-# Default command
+# Default command (CLI)
 ENTRYPOINT ["tm"]
 CMD ["--help"]
