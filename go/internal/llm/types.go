@@ -56,9 +56,20 @@ type ProviderConfig struct {
 	OllamaTimeout int    // Timeout in seconds, default: 30
 
 	// Claude API configuration
-	ClaudeAPIKey string // Claude API key
-	ClaudeModel  string // Default: claude-3-5-sonnet-20241022
+	ClaudeAPIKey  string // Claude API key (or use ANTHROPIC_API_KEY env var)
+	ClaudeModel   string // Default: claude-3-5-sonnet-20241022
 	ClaudeTimeout int    // Timeout in seconds, default: 30
+
+	// OpenAI API configuration
+	OpenAIAPIKey  string // OpenAI API key (or use OPENAI_API_KEY env var)
+	OpenAIModel   string // Default: gpt-5.1
+	OpenAITimeout int    // Timeout in seconds, default: 30
+
+	// Custom provider configuration
+	CustomEndpoint       string // Custom LLM endpoint URL (or use CUSTOM_LLM_ENDPOINT env var)
+	CustomHeaders        string // Custom headers as comma-separated key:value pairs
+	CustomPromptTemplate string // Go template for request body
+	CustomTimeout        int    // Timeout in seconds, default: 30
 
 	// General configuration
 	EnableCache bool // Whether to cache results
@@ -73,6 +84,9 @@ func DefaultProviderConfig() ProviderConfig {
 		OllamaTimeout: 30,
 		ClaudeModel:   "claude-3-5-sonnet-20241022",
 		ClaudeTimeout: 30,
+		OpenAIModel:   "gpt-5.1",
+		OpenAITimeout: 30,
+		CustomTimeout: 30,
 		EnableCache:   true,
 		CacheTTL:      3600, // 1 hour
 	}

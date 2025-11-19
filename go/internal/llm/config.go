@@ -199,7 +199,7 @@ func ValidateConfig(config *Config) error {
 
 	// Validate default provider if set
 	if config.DefaultProvider != "" {
-		validProviders := []string{"openai", "claude", "ollama", "custom"}
+		validProviders := []string{"ollama", "claude", "openai", "custom", "rule_based"}
 		valid := false
 		for _, p := range validProviders {
 			if config.DefaultProvider == p {
