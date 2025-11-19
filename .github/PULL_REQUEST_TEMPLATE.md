@@ -25,10 +25,10 @@ Please check the relevant option(s):
 
 Please confirm that you have completed the following:
 
-- [ ] `cargo test` - All tests pass
-- [ ] `cargo clippy` - No clippy warnings
-- [ ] `cargo fmt` - Code is properly formatted
-- [ ] `cargo build --release` - Release build succeeds
+- [ ] `go test ./...` - All tests pass
+- [ ] `golangci-lint run` - No lint warnings (or `go vet ./...` for basic checks)
+- [ ] `go fmt ./...` - Code is properly formatted
+- [ ] `go build ./...` - Build succeeds
 - [ ] Added new tests for new functionality (if applicable)
 - [ ] All existing tests still pass
 - [ ] Manual testing performed (describe below if applicable)

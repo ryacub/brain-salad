@@ -43,7 +43,7 @@ cd "$PROJECT_DIR"
 ./make.sh -r  # Use our enhanced make script to build release
 
 # Check if the binary was created
-BINARY_PATH="$PROJECT_DIR/target/release/tm"
+BINARY_PATH="$PROJECT_DIR/bin/tm"
 if [ -f "$BINARY_PATH" ]; then
     # Copy binary to local bin (only if different or doesn't exist)
     if [ ! -f "$LOCAL_BIN/tm" ] || ! cmp -s "$BINARY_PATH" "$LOCAL_BIN/tm"; then
@@ -62,8 +62,9 @@ if [ -f "$BINARY_PATH" ]; then
     fi
 else
     echo -e "${RED}❌ Could not find built binary at $BINARY_PATH${NC}"
-    echo -e "${YELLOW}Trying cargo build...${NC}"
-    cargo build --release
+    echo -e "${YELLOW}Trying go build...${NC}"
+    mkdir -p "$PROJECT_DIR/bin"
+    go build -o "$BINARY_PATH" ./cmd/cli
     if [ -f "$BINARY_PATH" ]; then
         cp "$BINARY_PATH" "$LOCAL_BIN/tm"
         chmod +x "$LOCAL_BIN/tm"
