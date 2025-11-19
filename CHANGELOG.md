@@ -13,10 +13,30 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - Fixed rate limiter to properly handle proxy headers (X-Forwarded-For, X-Real-IP)
 - Added proper session cookie security (Secure, HttpOnly, SameSite flags)
 
+### Changed
+- Reorganized project structure to follow standard Go conventions
+  - Flattened structure by removing `/go` subdirectory
+  - Moved `cmd/`, `internal/`, `pkg/`, `test/` to project root
+  - Consolidated shell scripts into `/scripts` directory
+  - Organized deployment files into `/deployments` structure
+    - Docker files → `deployments/docker/`
+    - Nginx configs → `deployments/nginx/`
+    - Monitoring → `deployments/monitoring/`
+  - Merged duplicate documentation and examples directories
+  - Updated all import paths and file references
+  - Updated GitHub workflows and Docker configurations
+- Removed obsolete documentation (test reports, migration docs, Rust reference)
+- Updated DEVELOPMENT.md to reflect new project structure
+- Upgraded golangci-lint to v2 with updated configuration
+
 ### Fixed
 - Fixed unchecked errors in error handling paths
 - Reduced code duplication across the codebase
 - Fixed critical documentation mismatch in ARCHITECTURE.md
+- Fixed `.gitignore` patterns blocking `cmd/cli` directory
+- Fixed missing `internal/cli` and `internal/telos` directories in git
+- Fixed Docker workflow to use new Dockerfile location
+- Fixed CI workflows for golangci-lint v2 compatibility
 
 ## [2.0.0] - 2024-11-19
 
