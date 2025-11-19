@@ -157,7 +157,7 @@ func (sm *SessionManager) GetSession(sessionID string) (*Session, error) {
 	// Check if session has expired
 	if session.IsExpired() {
 		// Delete expired session
-		sm.DeleteSession(sessionID)
+		_ = sm.DeleteSession(sessionID)
 		return nil, errors.New("session expired")
 	}
 
@@ -165,7 +165,7 @@ func (sm *SessionManager) GetSession(sessionID string) (*Session, error) {
 	idleDeadline := session.LastSeen.Add(sm.config.IdleTimeout)
 	if time.Now().After(idleDeadline) {
 		// Session has been idle too long
-		sm.DeleteSession(sessionID)
+		_ = sm.DeleteSession(sessionID)
 		return nil, errors.New("session expired due to inactivity")
 	}
 
@@ -254,7 +254,7 @@ func (sm *SessionManager) cleanupExpired() {
 			DELETE FROM sessions
 			WHERE last_seen < ?
 		`
-		sm.db.Exec(deleteIdleQuery, idleDeadline)
+		_, _ = sm.db.Exec(deleteIdleQuery, idleDeadline)
 	}
 }
 
