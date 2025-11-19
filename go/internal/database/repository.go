@@ -13,6 +13,7 @@ import (
 
 	_ "github.com/mattn/go-sqlite3"
 	"github.com/rayyacub/telos-idea-matrix/internal/models"
+	"github.com/rs/zerolog/log"
 )
 
 //go:embed migrations/*.sql
@@ -60,7 +61,7 @@ func NewRepository(dbPath string) (*Repository, error) {
 
 	// Test connection
 	if err := db.Ping(); err != nil {
-		db.Close()
+		_ = db.Close()
 		return nil, fmt.Errorf("failed to connect to database: %w", err)
 	}
 
@@ -77,7 +78,7 @@ func NewRepository(dbPath string) (*Repository, error) {
 
 	for _, pragma := range pragmas {
 		if _, err := db.Exec(pragma); err != nil {
-			db.Close()
+			_ = db.Close()
 			return nil, fmt.Errorf("failed to execute %s: %w", pragma, err)
 		}
 	}
@@ -86,7 +87,7 @@ func NewRepository(dbPath string) (*Repository, error) {
 
 	// Run migrations
 	if err := repo.runMigrations(); err != nil {
-		db.Close()
+		_ = db.Close()
 		return nil, fmt.Errorf("failed to run migrations: %w", err)
 	}
 
@@ -343,6 +344,59 @@ func (r *Repository) Delete(id string) error {
 	return nil
 }
 
+// scanIdeaRow scans a single database row into an Idea struct
+func scanIdeaRow(rows *sql.Rows) (*models.Idea, error) {
+	var idea models.Idea
+	var patternsJSON string
+	var tagsJSON string
+	var createdAt string
+	var reviewedAt sql.NullString
+
+	err := rows.Scan(
+		&idea.ID,
+		&idea.Content,
+		&idea.RawScore,
+		&idea.FinalScore,
+		&patternsJSON,
+		&tagsJSON,
+		&idea.Recommendation,
+		&idea.AnalysisDetails,
+		&createdAt,
+		&reviewedAt,
+		&idea.Status,
+	)
+	if err != nil {
+		return nil, fmt.Errorf("failed to scan row: %w", err)
+	}
+
+	// Parse patterns JSON
+	if patternsJSON != "" && patternsJSON != "null" {
+		if err := json.Unmarshal([]byte(patternsJSON), &idea.Patterns); err != nil {
+			return nil, fmt.Errorf("failed to parse patterns: %w", err)
+		}
+	}
+
+	// Parse tags JSON
+	if tagsJSON != "" && tagsJSON != "null" {
+		if err := json.Unmarshal([]byte(tagsJSON), &idea.Tags); err != nil {
+			return nil, fmt.Errorf("failed to parse tags: %w", err)
+		}
+	}
+
+	// Parse timestamps
+	if parsedTime, err := time.Parse(time.RFC3339, createdAt); err == nil {
+		idea.CreatedAt = parsedTime
+	}
+
+	if reviewedAt.Valid {
+		if parsedTime, err := time.Parse(time.RFC3339, reviewedAt.String); err == nil {
+			idea.ReviewedAt = &parsedTime
+		}
+	}
+
+	return &idea, nil
+}
+
 // List retrieves ideas based on the provided options.
 func (r *Repository) List(options ListOptions) ([]*models.Idea, error) {
 	query := `
@@ -391,61 +445,20 @@ func (r *Repository) List(options ListOptions) ([]*models.Idea, error) {
 	if err != nil {
 		return nil, fmt.Errorf("failed to query ideas: %w", err)
 	}
-	defer rows.Close()
+	defer func() {
+		if err := rows.Close(); err != nil {
+			log.Warn().Err(err).Msg("failed to close rows")
+		}
+	}()
 
 	var ideas []*models.Idea
 
 	for rows.Next() {
-		var idea models.Idea
-		var patternsJSON string
-		var tagsJSON string
-		var createdAt string
-		var reviewedAt sql.NullString
-
-		err := rows.Scan(
-			&idea.ID,
-			&idea.Content,
-			&idea.RawScore,
-			&idea.FinalScore,
-			&patternsJSON,
-			&tagsJSON,
-			&idea.Recommendation,
-			&idea.AnalysisDetails,
-			&createdAt,
-			&reviewedAt,
-			&idea.Status,
-		)
-
+		idea, err := scanIdeaRow(rows)
 		if err != nil {
-			return nil, fmt.Errorf("failed to scan row: %w", err)
+			return nil, err
 		}
-
-		// Parse patterns JSON
-		if patternsJSON != "" && patternsJSON != "null" {
-			if err := json.Unmarshal([]byte(patternsJSON), &idea.Patterns); err != nil {
-				return nil, fmt.Errorf("failed to parse patterns: %w", err)
-			}
-		}
-
-		// Parse tags JSON
-		if tagsJSON != "" && tagsJSON != "null" {
-			if err := json.Unmarshal([]byte(tagsJSON), &idea.Tags); err != nil {
-				return nil, fmt.Errorf("failed to parse tags: %w", err)
-			}
-		}
-
-		// Parse timestamps
-		if parsedTime, err := time.Parse(time.RFC3339, createdAt); err == nil {
-			idea.CreatedAt = parsedTime
-		}
-
-		if reviewedAt.Valid {
-			if parsedTime, err := time.Parse(time.RFC3339, reviewedAt.String); err == nil {
-				idea.ReviewedAt = &parsedTime
-			}
-		}
-
-		ideas = append(ideas, &idea)
+		ideas = append(ideas, idea)
 	}
 
 	if err := rows.Err(); err != nil {
@@ -596,7 +609,11 @@ func (r *Repository) GetRelationshipsForIdea(ideaID string) ([]*models.IdeaRelat
 	if err != nil {
 		return nil, fmt.Errorf("failed to query relationships: %w", err)
 	}
-	defer rows.Close()
+	defer func() {
+		if err := rows.Close(); err != nil {
+			log.Warn().Err(err).Msg("failed to close rows")
+		}
+	}()
 
 	var relationships []*models.IdeaRelationship
 
@@ -665,61 +682,20 @@ func (r *Repository) GetRelatedIdeas(ideaID string, relType *models.Relationship
 	if err != nil {
 		return nil, fmt.Errorf("failed to query related ideas: %w", err)
 	}
-	defer rows.Close()
+	defer func() {
+		if err := rows.Close(); err != nil {
+			log.Warn().Err(err).Msg("failed to close rows")
+		}
+	}()
 
 	var ideas []*models.Idea
 
 	for rows.Next() {
-		var idea models.Idea
-		var patternsJSON string
-		var tagsJSON string
-		var createdAt string
-		var reviewedAt sql.NullString
-
-		err := rows.Scan(
-			&idea.ID,
-			&idea.Content,
-			&idea.RawScore,
-			&idea.FinalScore,
-			&patternsJSON,
-			&tagsJSON,
-			&idea.Recommendation,
-			&idea.AnalysisDetails,
-			&createdAt,
-			&reviewedAt,
-			&idea.Status,
-		)
-
+		idea, err := scanIdeaRow(rows)
 		if err != nil {
-			return nil, fmt.Errorf("failed to scan idea: %w", err)
+			return nil, err
 		}
-
-		// Parse patterns JSON
-		if patternsJSON != "" && patternsJSON != "null" {
-			if err := json.Unmarshal([]byte(patternsJSON), &idea.Patterns); err != nil {
-				return nil, fmt.Errorf("failed to parse patterns: %w", err)
-			}
-		}
-
-		// Parse tags JSON
-		if tagsJSON != "" && tagsJSON != "null" {
-			if err := json.Unmarshal([]byte(tagsJSON), &idea.Tags); err != nil {
-				return nil, fmt.Errorf("failed to parse tags: %w", err)
-			}
-		}
-
-		// Parse timestamps
-		if parsedTime, err := time.Parse(time.RFC3339, createdAt); err == nil {
-			idea.CreatedAt = parsedTime
-		}
-
-		if reviewedAt.Valid {
-			if parsedTime, err := time.Parse(time.RFC3339, reviewedAt.String); err == nil {
-				idea.ReviewedAt = &parsedTime
-			}
-		}
-
-		ideas = append(ideas, &idea)
+		ideas = append(ideas, idea)
 	}
 
 	if err := rows.Err(); err != nil {

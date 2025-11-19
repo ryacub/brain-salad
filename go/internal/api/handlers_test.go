@@ -56,8 +56,12 @@ func setupTestServer(t *testing.T) (*Server, *database.Repository, func()) {
 	require.NoError(t, err)
 
 	cleanup := func() {
-		repo.Close()
-		os.RemoveAll(tempDir)
+		if err := repo.Close(); err != nil {
+			t.Logf("failed to close repository: %v", err)
+		}
+		if err := os.RemoveAll(tempDir); err != nil {
+			t.Logf("failed to remove temp directory: %v", err)
+		}
 	}
 
 	return server, repo, cleanup

@@ -182,7 +182,7 @@ func (p *OpenAIProvider) sendRequest(req *openAIRequest) (*openAIResponse, error
 	if err != nil {
 		return nil, fmt.Errorf("HTTP request failed: %w", err)
 	}
-	defer httpResp.Body.Close()
+	defer func() { _ = httpResp.Body.Close() }()
 
 	// Read response
 	respBody, err := io.ReadAll(httpResp.Body)

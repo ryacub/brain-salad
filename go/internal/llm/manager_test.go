@@ -409,7 +409,7 @@ func TestManager_Stats(t *testing.T) {
 		available: true,
 	}
 	manager.RegisterProvider(provider)
-	manager.SetPrimaryProvider("test")
+	_ = manager.SetPrimaryProvider("test")
 
 	telos := createTestTelos()
 
@@ -457,7 +457,7 @@ func TestManager_StatsWithFailures(t *testing.T) {
 		err:       errors.New("test error"),
 	}
 	manager.RegisterProvider(provider)
-	manager.SetPrimaryProvider("test")
+	_ = manager.SetPrimaryProvider("test")
 
 	telos := createTestTelos()
 
@@ -520,7 +520,7 @@ func TestManager_ResetStats(t *testing.T) {
 		available: true,
 	}
 	manager.RegisterProvider(provider)
-	manager.SetPrimaryProvider("test")
+	_ = manager.SetPrimaryProvider("test")
 
 	telos := createTestTelos()
 
@@ -702,7 +702,7 @@ func TestManager_ConcurrentAccess(t *testing.T) {
 		available: true,
 	}
 	manager.RegisterProvider(provider)
-	manager.SetPrimaryProvider("test")
+	_ = manager.SetPrimaryProvider("test")
 
 	telos := createTestTelos()
 

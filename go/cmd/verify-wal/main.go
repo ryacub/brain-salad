@@ -18,28 +18,42 @@ func main() {
 	if err != nil {
 		log.Fatalf("Failed to create repository: %v", err)
 	}
-	defer repo.Close()
+	defer func() {
+		if err := repo.Close(); err != nil {
+			log.Printf("Warning: failed to close repository: %v", err)
+		}
+	}()
 
 	db := repo.DB()
 
 	var journalMode string
-	db.QueryRow("PRAGMA journal_mode").Scan(&journalMode)
+	if err := db.QueryRow("PRAGMA journal_mode").Scan(&journalMode); err != nil {
+		log.Printf("Warning: failed to get journal mode: %v", err)
+	}
 	fmt.Printf("Journal Mode: %s\n", journalMode)
 
 	var synchronous string
-	db.QueryRow("PRAGMA synchronous").Scan(&synchronous)
+	if err := db.QueryRow("PRAGMA synchronous").Scan(&synchronous); err != nil {
+		log.Printf("Warning: failed to get synchronous mode: %v", err)
+	}
 	fmt.Printf("Synchronous: %s\n", synchronous)
 
 	var busyTimeout int
-	db.QueryRow("PRAGMA busy_timeout").Scan(&busyTimeout)
+	if err := db.QueryRow("PRAGMA busy_timeout").Scan(&busyTimeout); err != nil {
+		log.Printf("Warning: failed to get busy timeout: %v", err)
+	}
 	fmt.Printf("Busy Timeout: %d ms\n", busyTimeout)
 
 	var cacheSize int
-	db.QueryRow("PRAGMA cache_size").Scan(&cacheSize)
+	if err := db.QueryRow("PRAGMA cache_size").Scan(&cacheSize); err != nil {
+		log.Printf("Warning: failed to get cache size: %v", err)
+	}
 	fmt.Printf("Cache Size: %d pages (negative = KB)\n", cacheSize)
 
 	var tempStore int
-	db.QueryRow("PRAGMA temp_store").Scan(&tempStore)
+	if err := db.QueryRow("PRAGMA temp_store").Scan(&tempStore); err != nil {
+		log.Printf("Warning: failed to get temp store: %v", err)
+	}
 	tempStoreStr := "DEFAULT"
 	if tempStore == 1 {
 		tempStoreStr = "FILE"
@@ -49,7 +63,9 @@ func main() {
 	fmt.Printf("Temp Store: %s\n", tempStoreStr)
 
 	var foreignKeys int
-	db.QueryRow("PRAGMA foreign_keys").Scan(&foreignKeys)
+	if err := db.QueryRow("PRAGMA foreign_keys").Scan(&foreignKeys); err != nil {
+		log.Printf("Warning: failed to get foreign keys setting: %v", err)
+	}
 	foreignKeysStr := "OFF"
 	if foreignKeys == 1 {
 		foreignKeysStr = "ON"

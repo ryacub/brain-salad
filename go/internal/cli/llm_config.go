@@ -5,6 +5,7 @@ import (
 	"os"
 
 	"github.com/rayyacub/telos-idea-matrix/internal/llm"
+	"github.com/rs/zerolog/log"
 	"github.com/spf13/cobra"
 )
 
@@ -72,9 +73,13 @@ func runLLMConfigSetDefault(cmd *cobra.Command, args []string) error {
 		return fmt.Errorf("failed to set default provider: %w", err)
 	}
 
-	successColor.Printf("✓ Default provider set to: %s\n", providerName)
+	if _, err := successColor.Printf("✓ Default provider set to: %s\n", providerName); err != nil {
+		log.Warn().Err(err).Msg("failed to print message")
+	}
 	fmt.Println()
-	warningColor.Println("⚠️  Note: This setting is only active for the current session.")
+	if _, err := warningColor.Println("⚠️  Note: This setting is only active for the current session."); err != nil {
+		log.Warn().Err(err).Msg("failed to print message")
+	}
 	fmt.Println("   To persist this setting, set environment variables in your shell profile.")
 
 	return nil
@@ -87,11 +92,15 @@ func runLLMConfigShow(cmd *cobra.Command, args []string) error {
 
 	// Display configuration
 	fmt.Println("═══════════════════════════════════════════════════════════════")
-	successColor.Println("⚙️  Current LLM Configuration")
+	if _, err := successColor.Println("⚙️  Current LLM Configuration"); err != nil {
+		log.Warn().Err(err).Msg("failed to print message")
+	}
 	fmt.Println("═══════════════════════════════════════════════════════════════")
 	fmt.Println()
 
-	successColor.Printf("Primary Provider: %s\n", primary)
+	if _, err := successColor.Printf("Primary Provider: %s\n", primary); err != nil {
+		log.Warn().Err(err).Msg("failed to print message")
+	}
 	fmt.Println()
 
 	// Show environment variables
@@ -131,7 +140,9 @@ func showEnvVars() {
 			} else {
 				displayValue = value
 			}
-			infoColor.Printf("  %-25s %s\n", env.name+":", displayValue)
+			if _, err := infoColor.Printf("  %-25s %s\n", env.name+":", displayValue); err != nil {
+				log.Warn().Err(err).Msg("failed to print message")
+			}
 		} else {
 			fmt.Printf("  %-25s %s\n", env.name+":", displayValue)
 		}

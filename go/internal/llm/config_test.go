@@ -30,8 +30,8 @@ func TestGetConfigPath(t *testing.T) {
 func TestLoadConfig_NewFile(t *testing.T) {
 	// Setup: ensure no config exists
 	configPath, _ := GetConfigPath()
-	os.Remove(configPath)
-	defer os.Remove(configPath)
+	_ = os.Remove(configPath)
+	defer func() { _ = os.Remove(configPath) }()
 
 	config, err := LoadConfig()
 	if err != nil {
@@ -54,7 +54,7 @@ func TestLoadConfig_NewFile(t *testing.T) {
 func TestSaveAndLoadConfig(t *testing.T) {
 	// Setup
 	configPath, _ := GetConfigPath()
-	defer os.Remove(configPath)
+	defer func() { _ = os.Remove(configPath) }()
 
 	// Create config
 	config := &Config{
@@ -87,7 +87,7 @@ func TestSaveAndLoadConfig(t *testing.T) {
 func TestSetAndGetDefaultProvider(t *testing.T) {
 	// Setup
 	configPath, _ := GetConfigPath()
-	defer os.Remove(configPath)
+	defer func() { _ = os.Remove(configPath) }()
 
 	// Set
 	err := SetDefaultProvider("claude")
@@ -109,7 +109,7 @@ func TestSetAndGetDefaultProvider(t *testing.T) {
 func TestClearDefaultProvider(t *testing.T) {
 	// Setup
 	configPath, _ := GetConfigPath()
-	defer os.Remove(configPath)
+	defer func() { _ = os.Remove(configPath) }()
 
 	// Set a provider
 	err := SetDefaultProvider("claude")
@@ -137,7 +137,7 @@ func TestClearDefaultProvider(t *testing.T) {
 func TestProviderSettings(t *testing.T) {
 	// Setup
 	configPath, _ := GetConfigPath()
-	defer os.Remove(configPath)
+	defer func() { _ = os.Remove(configPath) }()
 
 	// Set settings
 	err := SetProviderSetting("openai", "model", "gpt-4")
@@ -182,7 +182,7 @@ func TestProviderSettings(t *testing.T) {
 func TestGetProviderSetting_NotFound(t *testing.T) {
 	// Setup
 	configPath, _ := GetConfigPath()
-	defer os.Remove(configPath)
+	defer func() { _ = os.Remove(configPath) }()
 
 	// Try to get non-existent setting
 	_, err := GetProviderSetting("openai", "nonexistent")
@@ -199,7 +199,7 @@ func TestGetProviderSetting_NotFound(t *testing.T) {
 func TestGetAllProviderSettings_Empty(t *testing.T) {
 	// Setup
 	configPath, _ := GetConfigPath()
-	defer os.Remove(configPath)
+	defer func() { _ = os.Remove(configPath) }()
 
 	// Get settings for provider with no settings
 	settings, err := GetAllProviderSettings("openai")
@@ -215,12 +215,12 @@ func TestGetAllProviderSettings_Empty(t *testing.T) {
 func TestGetAllProviderSettings_MultipleProviders(t *testing.T) {
 	// Setup
 	configPath, _ := GetConfigPath()
-	defer os.Remove(configPath)
+	defer func() { _ = os.Remove(configPath) }()
 
 	// Set settings for multiple providers
-	SetProviderSetting("openai", "model", "gpt-4")
-	SetProviderSetting("claude", "model", "claude-3")
-	SetProviderSetting("openai", "temperature", "0.7")
+	_ = SetProviderSetting("openai", "model", "gpt-4")
+	_ = SetProviderSetting("claude", "model", "claude-3")
+	_ = SetProviderSetting("openai", "temperature", "0.7")
 
 	// Get settings for openai only
 	settings, err := GetAllProviderSettings("openai")
@@ -277,7 +277,7 @@ func TestResetConfig(t *testing.T) {
 func TestResetConfig_AlreadyReset(t *testing.T) {
 	// Setup
 	configPath, _ := GetConfigPath()
-	os.Remove(configPath)
+	_ = os.Remove(configPath)
 
 	// Reset when file doesn't exist
 	err := ResetConfig()
@@ -368,11 +368,11 @@ func TestValidateConfig(t *testing.T) {
 func TestGetConfigSummary(t *testing.T) {
 	// Setup
 	configPath, _ := GetConfigPath()
-	defer os.Remove(configPath)
+	defer func() { _ = os.Remove(configPath) }()
 
 	// Set some config
-	SetDefaultProvider("claude")
-	SetProviderSetting("openai", "model", "gpt-4")
+	_ = SetDefaultProvider("claude")
+	_ = SetProviderSetting("openai", "model", "gpt-4")
 
 	// Get summary
 	summary, err := GetConfigSummary()
@@ -401,7 +401,7 @@ func TestGetConfigSummary(t *testing.T) {
 func TestGetConfigSummary_Empty(t *testing.T) {
 	// Setup
 	configPath, _ := GetConfigPath()
-	defer os.Remove(configPath)
+	defer func() { _ = os.Remove(configPath) }()
 
 	// Get summary with no config
 	summary, err := GetConfigSummary()
@@ -418,7 +418,7 @@ func TestGetConfigSummary_Empty(t *testing.T) {
 func TestConfigPersistence(t *testing.T) {
 	// Setup
 	configPath, _ := GetConfigPath()
-	defer os.Remove(configPath)
+	defer func() { _ = os.Remove(configPath) }()
 
 	// Set default provider
 	err := SetDefaultProvider("claude")
@@ -440,7 +440,7 @@ func TestConfigPersistence(t *testing.T) {
 func TestConfigFilePermissions(t *testing.T) {
 	// Setup
 	configPath, _ := GetConfigPath()
-	defer os.Remove(configPath)
+	defer func() { _ = os.Remove(configPath) }()
 
 	// Save config
 	config := &Config{
@@ -469,7 +469,7 @@ func TestConfigFilePermissions(t *testing.T) {
 func TestLoadConfig_InvalidJSON(t *testing.T) {
 	// Setup
 	configPath, _ := GetConfigPath()
-	defer os.Remove(configPath)
+	defer func() { _ = os.Remove(configPath) }()
 
 	// Write invalid JSON
 	err := os.WriteFile(configPath, []byte("invalid json {{{"), 0600)
@@ -491,7 +491,7 @@ func TestLoadConfig_InvalidJSON(t *testing.T) {
 func TestLoadConfig_InitializesNilMap(t *testing.T) {
 	// Setup
 	configPath, _ := GetConfigPath()
-	defer os.Remove(configPath)
+	defer func() { _ = os.Remove(configPath) }()
 
 	// Write config with null provider_settings
 	jsonData := `{
@@ -519,7 +519,7 @@ func TestLoadConfig_InitializesNilMap(t *testing.T) {
 func TestLoadConfig_MigratesVersion(t *testing.T) {
 	// Setup
 	configPath, _ := GetConfigPath()
-	defer os.Remove(configPath)
+	defer func() { _ = os.Remove(configPath) }()
 
 	// Write config without version
 	jsonData := `{

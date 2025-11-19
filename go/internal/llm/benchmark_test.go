@@ -140,7 +140,7 @@ func BenchmarkFallbackProvider_SecondSuccess(b *testing.B) {
 func BenchmarkOllamaProvider_IsAvailable(b *testing.B) {
 	server := httptest.NewServer(http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
 		w.WriteHeader(http.StatusOK)
-		w.Write([]byte(`{"models":[]}`))
+		_, _ = w.Write([]byte(`{"models":[]}`))
 	}))
 	defer server.Close()
 

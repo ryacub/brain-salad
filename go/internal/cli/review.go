@@ -5,6 +5,7 @@ import (
 	"strings"
 
 	"github.com/rayyacub/telos-idea-matrix/internal/database"
+	"github.com/rs/zerolog/log"
 	"github.com/spf13/cobra"
 )
 
@@ -62,13 +63,17 @@ func runReview(cmd *cobra.Command, args []string) error {
 	}
 
 	if len(ideas) == 0 {
-		warningColor.Println("No ideas found matching your filters.")
+		if _, err := warningColor.Println("No ideas found matching your filters."); err != nil {
+			log.Warn().Err(err).Msg("failed to print message")
+		}
 		return nil
 	}
 
 	// Display results
 	fmt.Println(strings.Repeat("═", 80))
-	successColor.Printf(" %d Ideas Found\n", len(ideas))
+	if _, err := successColor.Printf(" %d Ideas Found\n", len(ideas)); err != nil {
+		log.Warn().Err(err).Msg("failed to print message")
+	}
 	fmt.Println(strings.Repeat("═", 80))
 	fmt.Println()
 
@@ -78,7 +83,9 @@ func runReview(cmd *cobra.Command, args []string) error {
 
 		// Header
 		fmt.Printf("%d. ", i+1)
-		scoreColor.Printf("%.1f/10", idea.FinalScore)
+		if _, err := scoreColor.Printf("%.1f/10", idea.FinalScore); err != nil {
+			log.Warn().Err(err).Msg("failed to print score")
+		}
 		fmt.Printf(" - ID: %s\n", idea.ID[:8])
 
 		// Content
@@ -87,12 +94,16 @@ func runReview(cmd *cobra.Command, args []string) error {
 		// Recommendation
 		if idea.Recommendation != "" {
 			recColor := getRecommendationColor(idea.Recommendation)
-			recColor.Printf("   %s\n", idea.Recommendation)
+			if _, err := recColor.Printf("   %s\n", idea.Recommendation); err != nil {
+				log.Warn().Err(err).Msg("failed to print recommendation")
+			}
 		}
 
 		// Patterns
 		if len(idea.Patterns) > 0 {
-			warningColor.Printf("   Patterns: %d detected\n", len(idea.Patterns))
+			if _, err := warningColor.Printf("   Patterns: %d detected\n", len(idea.Patterns)); err != nil {
+				log.Warn().Err(err).Msg("failed to print message")
+			}
 		}
 
 		// Created date
@@ -102,7 +113,9 @@ func runReview(cmd *cobra.Command, args []string) error {
 	}
 
 	fmt.Println(strings.Repeat("═", 80))
-	infoColor.Printf("Showing %d of your ideas (use --limit to see more)\n", len(ideas))
+	if _, err := infoColor.Printf("Showing %d of your ideas (use --limit to see more)\n", len(ideas)); err != nil {
+		log.Warn().Err(err).Msg("failed to print message")
+	}
 	fmt.Println(strings.Repeat("═", 80))
 
 	return nil

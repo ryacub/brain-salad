@@ -7,6 +7,7 @@ import (
 
 	"github.com/rayyacub/telos-idea-matrix/internal/database"
 	"github.com/rayyacub/telos-idea-matrix/internal/models"
+	"github.com/rs/zerolog/log"
 	"github.com/spf13/cobra"
 )
 
@@ -102,7 +103,9 @@ func runAnalyze(cmd *cobra.Command, args []string, useAI bool, provider, model s
 			// Use LLM for analysis
 			analysis, err = runLLMAnalysisForAnalyze(ideaText, provider, model)
 			if err != nil {
-				warningColor.Printf("⚠️  LLM analysis failed, falling back to rule-based: %v\n", err)
+				if _, printErr := warningColor.Printf("⚠️  LLM analysis failed, falling back to rule-based: %v\n", err); printErr != nil {
+					log.Warn().Err(printErr).Msg("failed to print warning")
+				}
 				// Fall back to rule-based scoring
 				analysis, err = ctx.Engine.CalculateScore(ideaText)
 				if err != nil {
@@ -141,51 +144,5 @@ func runAnalyze(cmd *cobra.Command, args []string, useAI bool, provider, model s
 
 // runLLMAnalysisForAnalyze performs LLM-based analysis for the analyze command
 func runLLMAnalysisForAnalyze(ideaText, provider, model string) (*models.Analysis, error) {
-	// Set provider if specified
-	if provider != "" {
-		if err := ctx.LLMManager.SetPrimaryProvider(provider); err != nil {
-			return nil, fmt.Errorf("failed to set provider: %w", err)
-		}
-	}
-
-	// TODO: Support model selection when LLM providers support it
-	_ = model
-
-	// Run LLM analysis
-	result, err := ctx.LLMManager.AnalyzeWithTelos(ideaText, ctx.Telos)
-	if err != nil {
-		return nil, err
-	}
-
-	// Convert LLM result to models.Analysis format
-	analysis := &models.Analysis{
-		RawScore:   result.FinalScore,
-		FinalScore: result.FinalScore,
-		Mission: models.MissionScores{
-			Total: result.Scores.MissionAlignment,
-			// LLM doesn't break down into sub-scores, so distribute proportionally
-			DomainExpertise:  result.Scores.MissionAlignment * 0.30,
-			AIAlignment:      result.Scores.MissionAlignment * 0.375,
-			ExecutionSupport: result.Scores.MissionAlignment * 0.20,
-			RevenuePotential: result.Scores.MissionAlignment * 0.125,
-		},
-		AntiChallenge: models.AntiChallengeScores{
-			Total: result.Scores.AntiChallenge,
-			// Distribute proportionally
-			ContextSwitching:  result.Scores.AntiChallenge * 0.343,
-			RapidPrototyping:  result.Scores.AntiChallenge * 0.286,
-			Accountability:    result.Scores.AntiChallenge * 0.229,
-			IncomeAnxiety:     result.Scores.AntiChallenge * 0.143,
-		},
-		Strategic: models.StrategicScores{
-			Total: result.Scores.StrategicFit,
-			// Distribute proportionally
-			StackCompatibility:     result.Scores.StrategicFit * 0.40,
-			ShippingHabit:          result.Scores.StrategicFit * 0.32,
-			PublicAccountability:   result.Scores.StrategicFit * 0.16,
-			RevenueTesting:         result.Scores.StrategicFit * 0.12,
-		},
-	}
-
-	return analysis, nil
+	return runLLMAnalysisWithProvider(ideaText, provider, model, ctx.LLMManager, ctx.Telos)
 }

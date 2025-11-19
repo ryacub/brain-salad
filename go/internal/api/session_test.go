@@ -17,7 +17,7 @@ func setupTestDB(t *testing.T) (*database.Repository, func()) {
 	// Create temp database file
 	tmpfile, err := os.CreateTemp("", "session_test_*.db")
 	require.NoError(t, err)
-	tmpfile.Close()
+	_ = tmpfile.Close()
 
 	dbPath := tmpfile.Name()
 
@@ -27,11 +27,11 @@ func setupTestDB(t *testing.T) (*database.Repository, func()) {
 
 	// Return cleanup function
 	cleanup := func() {
-		repo.Close()
-		os.Remove(dbPath)
+		_ = repo.Close()
+		_ = os.Remove(dbPath)
 		// Clean up WAL files
-		os.Remove(dbPath + "-wal")
-		os.Remove(dbPath + "-shm")
+		_ = os.Remove(dbPath + "-wal")
+		_ = os.Remove(dbPath + "-shm")
 	}
 
 	return repo, cleanup

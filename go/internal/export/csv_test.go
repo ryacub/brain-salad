@@ -17,7 +17,7 @@ func TestCSV_Export(t *testing.T) {
 	// Create temp directory for test files
 	tmpDir, err := os.MkdirTemp("", "csv-export-test-*")
 	require.NoError(t, err)
-	defer os.RemoveAll(tmpDir)
+	defer func() { _ = os.RemoveAll(tmpDir) }()
 
 	// Create test ideas
 	ideas := []*models.Idea{
@@ -70,7 +70,7 @@ func TestCSV_Import(t *testing.T) {
 	// Create temp directory for test files
 	tmpDir, err := os.MkdirTemp("", "csv-import-test-*")
 	require.NoError(t, err)
-	defer os.RemoveAll(tmpDir)
+	defer func() { _ = os.RemoveAll(tmpDir) }()
 
 	// Create test CSV file
 	csvPath := filepath.Join(tmpDir, "ideas.csv")
@@ -106,7 +106,7 @@ test-id-2,"Learn new language",3.0,2.5,"context-switching","AVOID","Misaligned",
 func TestCSV_HandleMalformed(t *testing.T) {
 	tmpDir, err := os.MkdirTemp("", "csv-malformed-test-*")
 	require.NoError(t, err)
-	defer os.RemoveAll(tmpDir)
+	defer func() { _ = os.RemoveAll(tmpDir) }()
 
 	tests := []struct {
 		name        string
@@ -163,7 +163,7 @@ test-id,"Test","invalid",7.0,"","","","2025-01-15T10:00:00Z","active"
 func TestCSV_Export_LargeDataset(t *testing.T) {
 	tmpDir, err := os.MkdirTemp("", "csv-large-test-*")
 	require.NoError(t, err)
-	defer os.RemoveAll(tmpDir)
+	defer func() { _ = os.RemoveAll(tmpDir) }()
 
 	// Create 1000 test ideas
 	ideas := make([]*models.Idea, 1000)
@@ -199,7 +199,7 @@ func TestCSV_Export_LargeDataset(t *testing.T) {
 func TestCSV_ExportJSON(t *testing.T) {
 	tmpDir, err := os.MkdirTemp("", "json-export-test-*")
 	require.NoError(t, err)
-	defer os.RemoveAll(tmpDir)
+	defer func() { _ = os.RemoveAll(tmpDir) }()
 
 	// Create test ideas
 	ideas := []*models.Idea{
@@ -235,7 +235,7 @@ func TestCSV_ExportJSON(t *testing.T) {
 func TestCSV_ExportJSON_Compact(t *testing.T) {
 	tmpDir, err := os.MkdirTemp("", "json-compact-test-*")
 	require.NoError(t, err)
-	defer os.RemoveAll(tmpDir)
+	defer func() { _ = os.RemoveAll(tmpDir) }()
 
 	ideas := []*models.Idea{
 		{

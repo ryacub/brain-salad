@@ -12,6 +12,7 @@ import (
 	"github.com/rayyacub/telos-idea-matrix/internal/export"
 	"github.com/rayyacub/telos-idea-matrix/internal/llm"
 	"github.com/rayyacub/telos-idea-matrix/internal/models"
+	"github.com/rs/zerolog/log"
 	"github.com/spf13/cobra"
 )
 
@@ -109,7 +110,9 @@ Use --min-score, --search, and --limit to control which ideas are tagged.`,
 				if !strings.Contains(idea.AnalysisDetails, tagName) {
 					idea.AnalysisDetails = fmt.Sprintf("%s [tag:%s]", idea.AnalysisDetails, tagName)
 					if err := ctx.Repository.Update(idea); err != nil {
-						warningColor.Printf("⚠  Failed to tag idea %s: %v\n", idea.ID, err)
+						if _, printErr := warningColor.Printf("⚠  Failed to tag idea %s: %v\n", idea.ID, err); printErr != nil {
+							log.Warn().Err(printErr).Msg("failed to print error message")
+						}
 						errorCount++
 						continue
 					}
@@ -123,10 +126,14 @@ Use --min-score, --search, and --limit to control which ideas are tagged.`,
 			}
 
 			if errorCount > 0 {
-				warningColor.Printf("⚠  %d ideas failed to tag\n", errorCount)
+				if _, err := warningColor.Printf("⚠  %d ideas failed to tag\n", errorCount); err != nil {
+					log.Warn().Err(err).Msg("failed to print warning message")
+				}
 			}
 
-			successColor.Printf("✅ Tagged %d ideas with '%s'\n", successCount, tagName)
+			if _, err := successColor.Printf("✅ Tagged %d ideas with '%s'\n", successCount, tagName); err != nil {
+				log.Warn().Err(err).Msg("failed to print success message")
+			}
 			return nil
 		},
 	}
@@ -209,7 +216,9 @@ Use --max-score to archive ideas below a score threshold.`,
 			}
 
 			if dryRun {
-				infoColor.Println("\n🔍 DRY RUN - No changes will be made")
+				if _, err := infoColor.Println("\n🔍 DRY RUN - No changes will be made"); err != nil {
+					log.Warn().Err(err).Msg("failed to print message")
+				}
 				return nil
 			}
 
@@ -225,7 +234,9 @@ Use --max-score to archive ideas below a score threshold.`,
 			for i, idea := range ideas {
 				idea.Status = "archived"
 				if err := ctx.Repository.Update(idea); err != nil {
-					warningColor.Printf("⚠  Failed to archive idea %s: %v\n", idea.ID, err)
+					if _, printErr := warningColor.Printf("⚠  Failed to archive idea %s: %v\n", idea.ID, err); printErr != nil {
+						log.Warn().Err(printErr).Msg("failed to print error message")
+					}
 					errorCount++
 					continue
 				}
@@ -238,10 +249,14 @@ Use --max-score to archive ideas below a score threshold.`,
 			}
 
 			if errorCount > 0 {
-				warningColor.Printf("⚠  %d ideas failed to archive\n", errorCount)
+				if _, err := warningColor.Printf("⚠  %d ideas failed to archive\n", errorCount); err != nil {
+					log.Warn().Err(err).Msg("failed to print warning message")
+				}
 			}
 
-			successColor.Printf("✅ Archived %d ideas\n", successCount)
+			if _, err := successColor.Printf("✅ Archived %d ideas\n", successCount); err != nil {
+				log.Warn().Err(err).Msg("failed to print success message")
+			}
 			return nil
 		},
 	}
@@ -305,7 +320,9 @@ Always requires confirmation for safety.`,
 			}
 
 			// Show preview
-			errorColor.Printf("⚠️  WARNING: About to PERMANENTLY DELETE %d ideas:\n", len(ideas))
+			if _, err := errorColor.Printf("⚠️  WARNING: About to PERMANENTLY DELETE %d ideas:\n", len(ideas)); err != nil {
+				log.Warn().Err(err).Msg("failed to print warning message")
+			}
 			for i, idea := range ideas {
 				if i < 5 {
 					fmt.Printf("  - %s (score: %.1f)\n",
@@ -331,7 +348,9 @@ Always requires confirmation for safety.`,
 			errorCount := 0
 			for i, idea := range ideas {
 				if err := ctx.Repository.Delete(idea.ID); err != nil {
-					warningColor.Printf("⚠  Failed to delete idea %s: %v\n", idea.ID, err)
+					if _, printErr := warningColor.Printf("⚠  Failed to delete idea %s: %v\n", idea.ID, err); printErr != nil {
+						log.Warn().Err(printErr).Msg("failed to print error message")
+					}
 					errorCount++
 					continue
 				}
@@ -344,10 +363,14 @@ Always requires confirmation for safety.`,
 			}
 
 			if errorCount > 0 {
-				warningColor.Printf("⚠  %d ideas failed to delete\n", errorCount)
+				if _, err := warningColor.Printf("⚠  %d ideas failed to delete\n", errorCount); err != nil {
+					log.Warn().Err(err).Msg("failed to print warning message")
+				}
 			}
 
-			errorColor.Printf("🗑️  Permanently deleted %d ideas\n", successCount)
+			if _, err := errorColor.Printf("🗑️  Permanently deleted %d ideas\n", successCount); err != nil {
+				log.Warn().Err(err).Msg("failed to print message")
+			}
 			return nil
 		},
 	}
@@ -410,13 +433,17 @@ ID,Content,RawScore,FinalScore,Patterns,Recommendation,AnalysisDetails,CreatedAt
 			for i, idea := range ideas {
 				// Validate idea before import
 				if err := idea.Validate(); err != nil {
-					warningColor.Printf("⚠  Skipping invalid idea: %v\n", err)
+					if _, printErr := warningColor.Printf("⚠  Skipping invalid idea: %v\n", err); printErr != nil {
+						log.Warn().Err(printErr).Msg("failed to print warning")
+					}
 					errorCount++
 					continue
 				}
 
 				if err := ctx.Repository.Create(idea); err != nil {
-					warningColor.Printf("⚠  Failed to import idea: %v\n", err)
+					if _, printErr := warningColor.Printf("⚠  Failed to import idea: %v\n", err); printErr != nil {
+						log.Warn().Err(printErr).Msg("failed to print error message")
+					}
 					errorCount++
 					continue
 				}
@@ -429,10 +456,14 @@ ID,Content,RawScore,FinalScore,Patterns,Recommendation,AnalysisDetails,CreatedAt
 			}
 
 			if errorCount > 0 {
-				warningColor.Printf("⚠  %d ideas failed to import\n", errorCount)
+				if _, err := warningColor.Printf("⚠  %d ideas failed to import\n", errorCount); err != nil {
+					log.Warn().Err(err).Msg("failed to print warning message")
+				}
 			}
 
-			successColor.Printf("✅ Imported %d ideas from '%s'\n", successCount, filename)
+			if _, err := successColor.Printf("✅ Imported %d ideas from '%s'\n", successCount, filename); err != nil {
+				log.Warn().Err(err).Msg("failed to print success message")
+			}
 			return nil
 		},
 	}
@@ -506,8 +537,10 @@ Use filters to control which ideas are exported.`,
 				return fmt.Errorf("failed to export: %w", err)
 			}
 
-			successColor.Printf("✅ Exported %d ideas to '%s' (%s format)\n",
-				len(ideas), filename, format)
+			if _, err := successColor.Printf("✅ Exported %d ideas to '%s' (%s format)\n",
+				len(ideas), filename, format); err != nil {
+				log.Warn().Err(err).Msg("failed to print success message")
+			}
 			return nil
 		},
 	}
@@ -678,7 +711,9 @@ func runBulkUpdate(opts bulkUpdateOptions) error {
 	fmt.Println()
 
 	if opts.dryRun {
-		infoColor.Println("🔍 DRY RUN - Showing affected ideas and changes:")
+		if _, err := infoColor.Println("🔍 DRY RUN - Showing affected ideas and changes:"); err != nil {
+			log.Warn().Err(err).Msg("failed to print message")
+		}
 		for i, idea := range ideas {
 			if i >= 10 {
 				fmt.Printf("\n... and %d more ideas\n", len(ideas)-10)
@@ -855,7 +890,9 @@ func truncate(s string, maxLen int) string {
 func confirm(prompt string) bool {
 	fmt.Printf("%s [y/N]: ", prompt)
 	var response string
-	fmt.Scanln(&response)
+	if _, err := fmt.Scanln(&response); err != nil {
+		log.Warn().Err(err).Msg("failed to read user input")
+	}
 	response = strings.ToLower(strings.TrimSpace(response))
 	return response == "y" || response == "yes"
 }
@@ -1033,7 +1070,9 @@ func runBulkAnalyze(opts bulkAnalyzeOptions) error {
 	fmt.Println()
 
 	if opts.dryRun {
-		infoColor.Println("🔍 DRY RUN - No changes will be made")
+		if _, err := infoColor.Println("🔍 DRY RUN - No changes will be made"); err != nil {
+			log.Warn().Err(err).Msg("failed to print message")
+		}
 		fmt.Println()
 		for i, idea := range ideas {
 			if i < 10 { // Show first 10
@@ -1062,11 +1101,15 @@ func runBulkAnalyze(opts bulkAnalyzeOptions) error {
 		if err := llmManager.SetPrimaryProvider(opts.provider); err != nil {
 			return fmt.Errorf("failed to set provider: %w", err)
 		}
-		infoColor.Printf("🤖 Using provider: %s\n", opts.provider)
+		if _, err := infoColor.Printf("🤖 Using provider: %s\n", opts.provider); err != nil {
+			log.Warn().Err(err).Msg("failed to print message")
+		}
 	} else {
 		primaryProvider := llmManager.GetPrimaryProvider()
 		if primaryProvider != nil {
-			infoColor.Printf("🤖 Using provider: %s\n", primaryProvider.Name())
+			if _, err := infoColor.Printf("🤖 Using provider: %s\n", primaryProvider.Name()); err != nil {
+				log.Warn().Err(err).Msg("failed to print message")
+			}
 		}
 	}
 	fmt.Println()
@@ -1134,10 +1177,14 @@ func runBulkAnalyze(opts bulkAnalyzeOptions) error {
 	fmt.Println()
 
 	// Show summary
-	successColor.Printf("✅ Re-analysis complete:\n")
+	if _, err := successColor.Printf("✅ Re-analysis complete:\n"); err != nil {
+		log.Warn().Err(err).Msg("failed to print success message")
+	}
 	fmt.Printf("  ✓ Successful: %d\n", successful)
 	if failed > 0 {
-		warningColor.Printf("  ✗ Failed: %d\n", failed)
+		if _, err := warningColor.Printf("  ✗ Failed: %d\n", failed); err != nil {
+			log.Warn().Err(err).Msg("failed to print failed count")
+		}
 		if len(errors) > 0 && len(errors) <= 10 {
 			fmt.Println("\nErrors:")
 			for _, errMsg := range errors {
@@ -1178,13 +1225,11 @@ func parseDuration(s string) (time.Duration, error) {
 		return time.ParseDuration(s)
 	}
 
-	n, err := fmt.Sscanf(value, "%d", new(int))
+	var numValue int
+	n, err := fmt.Sscanf(value, "%d", &numValue)
 	if err != nil || n != 1 {
 		return 0, fmt.Errorf("invalid duration value: %w", err)
 	}
-
-	var numValue int
-	fmt.Sscanf(value, "%d", &numValue)
 
 	return time.Duration(numValue) * multiplier, nil
 }
