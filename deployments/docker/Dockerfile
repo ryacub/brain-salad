@@ -1,5 +1,5 @@
 # Multi-stage build for Telos Matrix (Go implementation)
-FROM golang:1.21-alpine AS builder
+FROM golang:1.25-alpine AS builder
 
 WORKDIR /build
 

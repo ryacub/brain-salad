@@ -1001,12 +1001,12 @@ func TestCalculatePercentile(t *testing.T) {
 
 func TestCalculateScoreDistribution(t *testing.T) {
 	ideas := []*models.Idea{
-		{FinalScore: 1.0},  // 0-2
-		{FinalScore: 3.0},  // 2-4
-		{FinalScore: 5.0},  // 4-6
-		{FinalScore: 7.0},  // 6-8
-		{FinalScore: 9.0},  // 8-10
-		{FinalScore: 5.5},  // 4-6
+		{FinalScore: 1.0}, // 0-2
+		{FinalScore: 3.0}, // 2-4
+		{FinalScore: 5.0}, // 4-6
+		{FinalScore: 7.0}, // 6-8
+		{FinalScore: 9.0}, // 8-10
+		{FinalScore: 5.5}, // 4-6
 	}
 
 	metrics := calculateScoreDistribution(ideas)

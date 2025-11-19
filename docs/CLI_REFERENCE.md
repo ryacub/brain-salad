@@ -549,7 +549,7 @@ tm version --json
 Telos Idea Matrix
 Version: 1.0.0
 Build: 2025-11-19T10:30:00Z
-Go Version: go1.24.7
+Go Version: go1.25.4
 Platform: linux/amd64
 ```
 

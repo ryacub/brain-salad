@@ -89,14 +89,14 @@ func TestIdea_Validate_ValidStatuses(t *testing.T) {
 func TestIdea_JSONSerialization_RoundTrip(t *testing.T) {
 	now := time.Now().UTC()
 	original := &models.Idea{
-		ID:          uuid.New().String(),
-		Content:     "Build an AI automation tool",
-		RawScore:    8.5,
-		FinalScore:  8.2,
-		CreatedAt:   now,
-		ReviewedAt:  &now,
-		Status:      "active",
-		Patterns:    []string{"context-switching", "perfectionism"},
+		ID:             uuid.New().String(),
+		Content:        "Build an AI automation tool",
+		RawScore:       8.5,
+		FinalScore:     8.2,
+		CreatedAt:      now,
+		ReviewedAt:     &now,
+		Status:         "active",
+		Patterns:       []string{"context-switching", "perfectionism"},
 		Recommendation: "=% PRIORITIZE NOW",
 	}
 
@@ -418,18 +418,18 @@ func TestAnalysis_JSONSerialization_RoundTrip(t *testing.T) {
 		RawScore:   9.2,
 		FinalScore: 9.2,
 		Mission: models.MissionScores{
-			DomainExpertise:   1.1,
-			AIAlignment:       1.4,
-			ExecutionSupport:  0.75,
+			DomainExpertise:  1.1,
+			AIAlignment:      1.4,
+			ExecutionSupport: 0.75,
 			RevenuePotential: 0.45,
-			Total:             3.7,
+			Total:            3.7,
 		},
 		AntiChallenge: models.AntiChallengeScores{
-			ContextSwitching:  1.15,
-			RapidPrototyping:  0.95,
-			Accountability:    0.7,
-			IncomeAnxiety:     0.45,
-			Total:             3.25,
+			ContextSwitching: 1.15,
+			RapidPrototyping: 0.95,
+			Accountability:   0.7,
+			IncomeAnxiety:    0.45,
+			Total:            3.25,
 		},
 		Strategic: models.StrategicScores{
 			StackCompatibility:   0.9,

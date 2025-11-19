@@ -152,7 +152,7 @@ test-id,"Test","invalid",7.0,"","","","2025-01-15T10:00:00Z","active"
 				assert.NoError(t, err)
 				// Empty file or header only should return empty slice
 				if strings.TrimSpace(tt.csvContent) == "" ||
-				   strings.Count(tt.csvContent, "\n") <= 1 {
+					strings.Count(tt.csvContent, "\n") <= 1 {
 					assert.Empty(t, ideas)
 				}
 			}

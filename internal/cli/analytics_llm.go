@@ -57,33 +57,33 @@ type llmAnalyticsOptions struct {
 }
 
 type llmAnalyticsData struct {
-	Providers    []providerMetrics `json:"providers"`
-	CacheStats   cacheMetrics      `json:"cache_stats"`
-	Fallbacks    []fallbackMetric  `json:"fallbacks"`
-	TotalCost    costSummary       `json:"total_cost"`
-	GeneratedAt  time.Time         `json:"generated_at"`
+	Providers   []providerMetrics `json:"providers"`
+	CacheStats  cacheMetrics      `json:"cache_stats"`
+	Fallbacks   []fallbackMetric  `json:"fallbacks"`
+	TotalCost   costSummary       `json:"total_cost"`
+	GeneratedAt time.Time         `json:"generated_at"`
 }
 
 type providerMetrics struct {
-	Name           string            `json:"name"`
-	TotalRequests  int64             `json:"total_requests"`
-	SuccessCount   int64             `json:"success_count"`
-	FailureCount   int64             `json:"failure_count"`
-	SuccessRate    float64           `json:"success_rate"`
-	AvgLatencyMs   float64           `json:"avg_latency_ms"`
-	P50LatencyMs   float64           `json:"p50_latency_ms"`
-	P95LatencyMs   float64           `json:"p95_latency_ms"`
-	P99LatencyMs   float64           `json:"p99_latency_ms"`
-	InputTokens    int64             `json:"input_tokens"`
-	OutputTokens   int64             `json:"output_tokens"`
-	EstimatedCost  float64           `json:"estimated_cost_usd"`
-	Errors         map[string]int64  `json:"errors"`
+	Name          string           `json:"name"`
+	TotalRequests int64            `json:"total_requests"`
+	SuccessCount  int64            `json:"success_count"`
+	FailureCount  int64            `json:"failure_count"`
+	SuccessRate   float64          `json:"success_rate"`
+	AvgLatencyMs  float64          `json:"avg_latency_ms"`
+	P50LatencyMs  float64          `json:"p50_latency_ms"`
+	P95LatencyMs  float64          `json:"p95_latency_ms"`
+	P99LatencyMs  float64          `json:"p99_latency_ms"`
+	InputTokens   int64            `json:"input_tokens"`
+	OutputTokens  int64            `json:"output_tokens"`
+	EstimatedCost float64          `json:"estimated_cost_usd"`
+	Errors        map[string]int64 `json:"errors"`
 }
 
 type cacheMetrics struct {
-	Hits     int64   `json:"hits"`
-	Misses   int64   `json:"misses"`
-	HitRate  float64 `json:"hit_rate"`
+	Hits    int64   `json:"hits"`
+	Misses  int64   `json:"misses"`
+	HitRate float64 `json:"hit_rate"`
 }
 
 type fallbackMetric struct {
@@ -93,8 +93,8 @@ type fallbackMetric struct {
 }
 
 type costSummary struct {
-	TotalCostUSD   float64 `json:"total_cost_usd"`
-	ByProvider     map[string]float64 `json:"by_provider"`
+	TotalCostUSD float64            `json:"total_cost_usd"`
+	ByProvider   map[string]float64 `json:"by_provider"`
 }
 
 func runLLMAnalytics(opts llmAnalyticsOptions) error {

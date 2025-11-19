@@ -17,12 +17,12 @@ type Engine struct {
 	telos *models.Telos
 
 	// Compiled regex patterns for keyword matching
-	aiCoreRegex        *regexp.Regexp
-	aiSignificantRegex *regexp.Regexp
-	fastTimelineRegex  *regexp.Regexp
-	revenueHighRegex   *regexp.Regexp
-	revenueMediumRegex *regexp.Regexp
-	stackPenaltyRegex  *regexp.Regexp
+	aiCoreRegex         *regexp.Regexp
+	aiSignificantRegex  *regexp.Regexp
+	fastTimelineRegex   *regexp.Regexp
+	revenueHighRegex    *regexp.Regexp
+	revenueMediumRegex  *regexp.Regexp
+	stackPenaltyRegex   *regexp.Regexp
 	accountabilityRegex *regexp.Regexp
 }
 

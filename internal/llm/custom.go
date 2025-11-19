@@ -27,9 +27,10 @@ import (
 //   - CUSTOM_LLM_TIMEOUT: Request timeout in seconds (default: 30)
 //
 // Example configuration:
-//   CUSTOM_LLM_ENDPOINT="http://localhost:8080/v1/analyze"
-//   CUSTOM_LLM_HEADERS="Authorization:Bearer token123,Content-Type:application/json"
-//   CUSTOM_LLM_PROMPT_TEMPLATE='{"prompt": "{{.IdeaContent}}", "context": "{{.Telos}}"}'
+//
+//	CUSTOM_LLM_ENDPOINT="http://localhost:8080/v1/analyze"
+//	CUSTOM_LLM_HEADERS="Authorization:Bearer token123,Content-Type:application/json"
+//	CUSTOM_LLM_PROMPT_TEMPLATE='{"prompt": "{{.IdeaContent}}", "context": "{{.Telos}}"}'
 type CustomProvider struct {
 	name           string
 	endpoint       string
@@ -45,9 +46,9 @@ func NewCustomProvider() *CustomProvider {
 	timeoutSeconds := getEnvAsInt("CUSTOM_LLM_TIMEOUT", 30)
 
 	return &CustomProvider{
-		name:           getEnv("CUSTOM_LLM_NAME", "Custom LLM"),
-		endpoint:       os.Getenv("CUSTOM_LLM_ENDPOINT"),
-		headers:        parseHeaders(os.Getenv("CUSTOM_LLM_HEADERS")),
+		name:     getEnv("CUSTOM_LLM_NAME", "Custom LLM"),
+		endpoint: os.Getenv("CUSTOM_LLM_ENDPOINT"),
+		headers:  parseHeaders(os.Getenv("CUSTOM_LLM_HEADERS")),
 		httpClient: &http.Client{
 			Timeout: time.Duration(timeoutSeconds) * time.Second,
 		},
@@ -281,7 +282,7 @@ func (p *CustomProvider) parseTextResponse(content string) (*AnalysisResult, err
 	// Basic text parsing fallback - returns moderate scores
 	result := &AnalysisResult{
 		Scores: ScoreBreakdown{
-			MissionAlignment: 2.0, // Middle of 0-4.0 range
+			MissionAlignment: 2.0,  // Middle of 0-4.0 range
 			AntiChallenge:    1.75, // Middle of 0-3.5 range
 			StrategicFit:     1.25, // Middle of 0-2.5 range
 		},

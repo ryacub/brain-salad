@@ -285,11 +285,11 @@ func TestNewIdeaRelationship_AllTypes(t *testing.T) {
 // TestNewIdeaRelationship_ValidationErrors tests error cases
 func TestNewIdeaRelationship_ValidationErrors(t *testing.T) {
 	tests := []struct {
-		name      string
-		sourceID  string
-		targetID  string
-		relType   models.RelationshipType
-		errorMsg  string
+		name     string
+		sourceID string
+		targetID string
+		relType  models.RelationshipType
+		errorMsg string
 	}{
 		{
 			name:     "self-referential relationship",

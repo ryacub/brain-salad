@@ -13,11 +13,11 @@ type Detector struct {
 	telos *models.Telos
 
 	// Compiled regex patterns
-	contextSwitchingRegex   *regexp.Regexp
-	perfectionismRegex      *regexp.Regexp
-	procrastinationRegex    *regexp.Regexp
-	accountabilityNegRegex  *regexp.Regexp
-	accountabilityPosRegex  *regexp.Regexp
+	contextSwitchingRegex  *regexp.Regexp
+	perfectionismRegex     *regexp.Regexp
+	procrastinationRegex   *regexp.Regexp
+	accountabilityNegRegex *regexp.Regexp
+	accountabilityPosRegex *regexp.Regexp
 }
 
 // NewDetector creates a new pattern detector with the given telos configuration.

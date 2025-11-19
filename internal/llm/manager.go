@@ -29,12 +29,12 @@ type healthStatus struct {
 
 // providerStats tracks statistics for a provider
 type providerStats struct {
-	totalRequests  int64
-	successCount   int64
-	failureCount   int64
-	totalLatency   int64 // in nanoseconds
-	lastUsed       time.Time
-	mu             sync.RWMutex
+	totalRequests int64
+	successCount  int64
+	failureCount  int64
+	totalLatency  int64 // in nanoseconds
+	lastUsed      time.Time
+	mu            sync.RWMutex
 }
 
 // ManagerConfig contains configuration for the provider manager

@@ -1,13 +1,13 @@
 #!/bin/bash
 
 # File watcher for automatic build on changes
-# This script monitors Rust source files and automatically builds when changes are detected
+# This script monitors Go source files and automatically builds when changes are detected
 
 set -e
 
 PROJECT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
-WATCH_DIR="$PROJECT_DIR/src"
-BUILD_SCRIPT="$PROJECT_DIR/make.sh"
+WATCH_DIR="$PROJECT_DIR"
+BUILD_SCRIPT="$PROJECT_DIR/Makefile"
 
 # Colors for output
 RED='\033[0;31m'
@@ -22,7 +22,7 @@ echo "${BLUE}📁 Watching directory: $WATCH_DIR${NC}"
 # Function to run build
 run_build() {
     echo "${YELLOW}🔄 Change detected, building...${NC}"
-    "$BUILD_SCRIPT" -d -q  # Build development version for faster builds, quiet output
+    make build  # Build Go project
     if [ $? -eq 0 ]; then
         echo "${GREEN}✅ Build completed successfully!${NC}"
     else
@@ -44,7 +44,7 @@ if command -v fswatch &> /dev/null; then
 # Check if inotifywait is available (Linux)
 elif command -v inotifywait &> /dev/null; then
     echo "${BLUE}✅ Using inotifywait for file monitoring${NC}"
-    while inotifywait -r -e modify,create,delete "$WATCH_DIR" --include=".*\.rs$"; do
+    while inotifywait -r -e modify,create,delete "$WATCH_DIR" --include=".*\.go$"; do
         run_build
     done
 # Fallback to find with sleep (works on most systems)
@@ -53,12 +53,12 @@ else
     echo "${YELLOW}⚠️  This method may be slower and less efficient.${NC}"
     
     # Store initial file modification times
-    PREV_MOD_TIME=$(find "$WATCH_DIR" -name "*.rs" -exec stat -c "%Y %n" {} \; 2>/dev/null | sort | md5sum)
-    
+    PREV_MOD_TIME=$(find "$WATCH_DIR" -name "*.go" -exec stat -f "%m %N" {} \; 2>/dev/null | sort | md5)
+
     while true; do
         sleep 2  # Check every 2 seconds
-        CURRENT_MOD_TIME=$(find "$WATCH_DIR" -name "*.rs" -exec stat -c "%Y %n" {} \; 2>/dev/null | sort | md5sum)
-        
+        CURRENT_MOD_TIME=$(find "$WATCH_DIR" -name "*.go" -exec stat -f "%m %N" {} \; 2>/dev/null | sort | md5)
+
         if [ "$PREV_MOD_TIME" != "$CURRENT_MOD_TIME" ]; then
             PREV_MOD_TIME="$CURRENT_MOD_TIME"
             run_build

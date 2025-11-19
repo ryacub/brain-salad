@@ -232,7 +232,7 @@ type claudeRequest struct {
 
 // claudeMessage represents a message in the Claude API request.
 type claudeMessage struct {
-	Role    string `json:"role"`    // "user" or "assistant"
+	Role    string `json:"role"` // "user" or "assistant"
 	Content string `json:"content"`
 }
 

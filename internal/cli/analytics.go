@@ -64,7 +64,7 @@ func runAnalytics(cmd *cobra.Command, args []string) error {
 	// Calculate statistics
 	var totalScore float64
 	var highScore, lowScore float64 = 0, 10
-	highCount := 0  // >= 7.0
+	highCount := 0   // >= 7.0
 	mediumCount := 0 // 5.0-7.0
 	lowCount := 0    // < 5.0
 
@@ -437,7 +437,7 @@ type systemMetrics struct {
 }
 
 type overviewMetrics struct {
-	TotalIdeas   int     `json:"total_ideas"`
+	TotalIdeas    int     `json:"total_ideas"`
 	TotalPatterns int     `json:"total_patterns"`
 	AverageScore  float64 `json:"average_score"`
 	MedianScore   float64 `json:"median_score"`

@@ -181,9 +181,9 @@ func TestMetricsCollector_HistogramStats(t *testing.T) {
 
 func TestMetricsCollector_MetricTypes(t *testing.T) {
 	tests := []struct {
-		name     string
-		setup    func(*Collector)
-		metricName string
+		name         string
+		setup        func(*Collector)
+		metricName   string
 		expectedType MetricType
 	}{
 		{
@@ -191,7 +191,7 @@ func TestMetricsCollector_MetricTypes(t *testing.T) {
 			setup: func(c *Collector) {
 				c.RecordCounter("test", 1.0)
 			},
-			metricName: "test",
+			metricName:   "test",
 			expectedType: Counter,
 		},
 		{
@@ -199,7 +199,7 @@ func TestMetricsCollector_MetricTypes(t *testing.T) {
 			setup: func(c *Collector) {
 				c.RecordGauge("test", 1.0)
 			},
-			metricName: "test",
+			metricName:   "test",
 			expectedType: Gauge,
 		},
 		{
@@ -207,7 +207,7 @@ func TestMetricsCollector_MetricTypes(t *testing.T) {
 			setup: func(c *Collector) {
 				c.RecordHistogram("test", 1.0)
 			},
-			metricName: "test",
+			metricName:   "test",
 			expectedType: Histogram,
 		},
 	}

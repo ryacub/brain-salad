@@ -31,7 +31,7 @@ A clear and concise description of what actually happened.
 ## Environment
 
 - **OS**: [e.g., macOS 14.0, Ubuntu 22.04, Windows 11]
-- **Rust Version**: [e.g., 1.75.0 - run `rustc --version`]
+- **Go Version**: [e.g., 1.25.4 - run `go version`]
 - **Project Version/Commit**: [e.g., v0.1.0 or commit hash]
 - **Database**: [e.g., PostgreSQL 15.0]
 

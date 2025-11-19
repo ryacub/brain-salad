@@ -104,8 +104,8 @@ func NewRepository(dbPath string) (*Repository, error) {
 		"PRAGMA synchronous = NORMAL",
 		"PRAGMA busy_timeout = 5000",
 		"PRAGMA cache_size = -64000", // 64MB cache
-		"PRAGMA temp_store = MEMORY",  // Keep temp tables in memory
-		"PRAGMA foreign_keys = ON",    // Enable foreign keys
+		"PRAGMA temp_store = MEMORY", // Keep temp tables in memory
+		"PRAGMA foreign_keys = ON",   // Enable foreign keys
 	}
 
 	for _, pragma := range pragmas {

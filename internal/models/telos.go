@@ -8,14 +8,14 @@ import (
 // Telos represents the user's goals, strategies, and values.
 // This is parsed from the telos.md file.
 type Telos struct {
-	Problems        []Problem  `json:"problems"`
-	Missions        []Mission  `json:"missions"`
-	Goals           []Goal     `json:"goals"`
+	Problems        []Problem   `json:"problems"`
+	Missions        []Mission   `json:"missions"`
+	Goals           []Goal      `json:"goals"`
 	Challenges      []Challenge `json:"challenges"`
-	Strategies      []Strategy `json:"strategies"`
-	Stack           Stack      `json:"stack"`
-	FailurePatterns []Pattern  `json:"failure_patterns"`
-	LoadedAt        time.Time  `json:"loaded_at"`
+	Strategies      []Strategy  `json:"strategies"`
+	Stack           Stack       `json:"stack"`
+	FailurePatterns []Pattern   `json:"failure_patterns"`
+	LoadedAt        time.Time   `json:"loaded_at"`
 }
 
 // Validate validates the telos configuration.

@@ -98,10 +98,10 @@ func TestProvider_FallbackChain(t *testing.T) {
 			},
 		},
 		{
-			name:      "skip unavailable provider",
-			providers: []Provider{unavailableProvider, successProvider},
+			name:         "skip unavailable provider",
+			providers:    []Provider{unavailableProvider, successProvider},
 			wantProvider: "success",
-			wantError: false,
+			wantError:    false,
 			wantCallCount: map[string]int{
 				"unavailable": 0,
 				"success":     1,
@@ -245,10 +245,10 @@ func TestRuleBasedProvider_WithDifferentIdeas(t *testing.T) {
 	provider := NewRuleBasedProvider()
 
 	tests := []struct {
-		name          string
-		idea          string
-		minScore      float64
-		maxScore      float64
+		name     string
+		idea     string
+		minScore float64
+		maxScore float64
 	}{
 		{
 			name:     "high quality idea with AI and revenue",

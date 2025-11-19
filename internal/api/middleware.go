@@ -15,11 +15,11 @@ import (
 
 // CacheEntry represents a cached HTTP response
 type CacheEntry struct {
-	StatusCode  int
-	Headers     http.Header
-	Body        []byte
-	CachedAt    time.Time
-	TTL         time.Duration
+	StatusCode int
+	Headers    http.Header
+	Body       []byte
+	CachedAt   time.Time
+	TTL        time.Duration
 }
 
 // IsExpired checks if the cache entry has expired
@@ -182,11 +182,11 @@ func CacheMiddleware(cache *Cache) func(http.Handler) http.Handler {
 			// Only cache successful responses (2xx status codes)
 			if rw.statusCode >= 200 && rw.statusCode < 300 {
 				entry := &CacheEntry{
-					StatusCode:  rw.statusCode,
-					Headers:     w.Header().Clone(),
-					Body:        rw.body.Bytes(),
-					CachedAt:    time.Now(),
-					TTL:         cache.ttl,
+					StatusCode: rw.statusCode,
+					Headers:    w.Header().Clone(),
+					Body:       rw.body.Bytes(),
+					CachedAt:   time.Now(),
+					TTL:        cache.ttl,
 				}
 				cache.Set(key, entry)
 			}
@@ -200,8 +200,8 @@ func CacheMiddleware(cache *Cache) func(http.Handler) http.Handler {
 type RateLimiter struct {
 	visitors map[string]*visitor
 	mu       sync.RWMutex
-	rate     int           // requests per minute
-	burst    int           // max burst size
+	rate     int // requests per minute
+	burst    int // max burst size
 	stopCh   chan struct{}
 }
 

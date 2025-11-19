@@ -331,10 +331,10 @@ func TestClaudeProvider_extractPrompts(t *testing.T) {
 	provider := NewClaudeProvider("test-key", "")
 
 	tests := []struct {
-		name               string
-		fullPrompt         string
-		expectedSystem     string
-		expectedUser       string
+		name           string
+		fullPrompt     string
+		expectedSystem string
+		expectedUser   string
 	}{
 		{
 			name: "prompt with TASK section",
