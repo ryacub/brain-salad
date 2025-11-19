@@ -377,6 +377,6 @@ export CUSTOM_LLM_HEADERS="Authorization:Bearer correct-token"
 
 ## Next Steps
 
-- See `/home/user/brain-salad/go/internal/llm/custom_test.go` for detailed test examples
-- Check `/home/user/brain-salad/go/internal/llm/provider.go` for the Provider interface
+- See `/home/user/brain-salad/internal/llm/custom_test.go` for detailed test examples
+- Check `/home/user/brain-salad/internal/llm/provider.go` for the Provider interface
 - Review the integration with fallback chains in your application
