@@ -190,7 +190,6 @@ func (op *OllamaProvider) Analyze(req AnalysisRequest) (*AnalysisResult, error) 
 // RuleBasedProvider implements the Provider interface using rule-based scoring.
 // This provider always works and serves as the ultimate fallback.
 type RuleBasedProvider struct {
-	engine *scoring.Engine
 }
 
 // NewRuleBasedProvider creates a new rule-based provider.
@@ -349,7 +348,7 @@ func (fp *FallbackProvider) Analyze(req AnalysisRequest) (*AnalysisResult, error
 
 // CreateDefaultFallbackChain creates the default fallback chain:
 // Ollama → Claude API → Rule-based
-func CreateDefaultFallbackChain(config ProviderConfig, telos *models.Telos) *FallbackProvider {
+func CreateDefaultFallbackChain(config ProviderConfig, _ *models.Telos) *FallbackProvider {
 	providers := []Provider{
 		NewOllamaProvider(config.OllamaBaseURL, config.OllamaModel),
 		NewClaudeProvider(config.ClaudeAPIKey, config.ClaudeModel),

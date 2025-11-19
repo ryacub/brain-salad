@@ -60,7 +60,7 @@ func TestClaudeProvider_IsAvailable_NoAPIKey(t *testing.T) {
 
 func TestClaudeProvider_IsAvailable_WithMockServer(t *testing.T) {
 	// Create mock server
-	server := httptest.NewServer(http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
+	server := httptest.NewServer(http.HandlerFunc(func(w http.ResponseWriter, _ *http.Request) {
 		w.Header().Set("Content-Type", "application/json")
 		w.WriteHeader(http.StatusOK)
 		_ = json.NewEncoder(w).Encode(map[string]interface{}{
@@ -159,7 +159,7 @@ func TestClaudeProvider_Headers(t *testing.T) {
 
 func TestClaudeProvider_Analyze_Success(t *testing.T) {
 	// Create mock server
-	server := httptest.NewServer(http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
+	server := httptest.NewServer(http.HandlerFunc(func(w http.ResponseWriter, _ *http.Request) {
 		w.Header().Set("Content-Type", "application/json")
 		w.WriteHeader(http.StatusOK)
 		_ = json.NewEncoder(w).Encode(map[string]interface{}{
@@ -239,7 +239,7 @@ func TestClaudeProvider_Analyze_Success(t *testing.T) {
 
 func TestClaudeProvider_Analyze_APIError(t *testing.T) {
 	// Create mock server that returns an error
-	server := httptest.NewServer(http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
+	server := httptest.NewServer(http.HandlerFunc(func(w http.ResponseWriter, _ *http.Request) {
 		w.Header().Set("Content-Type", "application/json")
 		w.WriteHeader(http.StatusUnauthorized)
 		_ = json.NewEncoder(w).Encode(map[string]interface{}{
@@ -380,7 +380,7 @@ func TestClaudeProvider_RetryLogic(t *testing.T) {
 	isAvailableAttempts := 0
 
 	// Create mock server that fails initially then succeeds
-	server := httptest.NewServer(http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
+	server := httptest.NewServer(http.HandlerFunc(func(w http.ResponseWriter, _ *http.Request) {
 		attempts++
 
 		// First request is from IsAvailable - always succeed

@@ -1,3 +1,4 @@
+// Package client provides HTTP client implementations for interacting with LLM APIs like Ollama.
 package client
 
 import (

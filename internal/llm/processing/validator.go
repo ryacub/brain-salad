@@ -53,9 +53,9 @@ func (v *Validator) Validate(result *ProcessedResult) error {
 }
 
 // validateScore checks if a score is within valid range
-func (v *Validator) validateScore(score, min, max float64, name string) error {
-	if score < min || score > max {
-		return fmt.Errorf("%s score %v is out of valid range [%v, %v]", name, score, min, max)
+func (v *Validator) validateScore(score, minVal, maxVal float64, name string) error {
+	if score < minVal || score > maxVal {
+		return fmt.Errorf("%s score %v is out of valid range [%v, %v]", name, score, minVal, maxVal)
 	}
 	return nil
 }

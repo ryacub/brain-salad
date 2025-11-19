@@ -1,3 +1,4 @@
+// Package cache provides LRU caching with similarity-based matching for LLM analysis results.
 package cache
 
 import (

@@ -270,7 +270,7 @@ func (rl *RateLimiter) Allow(ip string) bool {
 	// Calculate tokens to add based on time elapsed
 	elapsed := now.Sub(v.lastSeen)
 	tokensToAdd := elapsed.Seconds() * (float64(rl.rate) / 60.0)
-	v.tokens = min(v.tokens+tokensToAdd, float64(rl.burst))
+	v.tokens = minFloat(v.tokens+tokensToAdd, float64(rl.burst))
 	v.lastSeen = now
 
 	if v.tokens >= 1.0 {
@@ -281,7 +281,7 @@ func (rl *RateLimiter) Allow(ip string) bool {
 	return false
 }
 
-func min(a, b float64) float64 {
+func minFloat(a, b float64) float64 {
 	if a < b {
 		return a
 	}

@@ -368,25 +368,6 @@ func extractString(data map[string]interface{}, keys ...string) string {
 	return ""
 }
 
-// extractStringArray tries to extract a string array from a map.
-// Returns empty slice if key doesn't exist or value is not an array.
-func extractStringArray(data map[string]interface{}, keys ...string) []string {
-	for _, key := range keys {
-		if val, ok := data[key]; ok {
-			if arr, ok := val.([]interface{}); ok {
-				result := make([]string, 0, len(arr))
-				for _, item := range arr {
-					if s, ok := item.(string); ok {
-						result = append(result, s)
-					}
-				}
-				return result
-			}
-		}
-	}
-	return []string{}
-}
-
 // generateRecommendation generates a recommendation based on final score.
 func generateRecommendation(score float64) string {
 	switch {

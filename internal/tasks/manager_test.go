@@ -30,7 +30,7 @@ func TestTaskManager_SpawnTask(t *testing.T) {
 	executed := atomic.Bool{}
 	task := &mockTask{
 		name: "test-task",
-		runFunc: func(ctx context.Context) error {
+		runFunc: func(_ context.Context) error {
 			executed.Store(true)
 			return nil
 		},
@@ -103,7 +103,7 @@ func TestTaskManager_TaskCompletion(t *testing.T) {
 
 	task := &mockTask{
 		name: "quick-task",
-		runFunc: func(ctx context.Context) error {
+		runFunc: func(_ context.Context) error {
 			time.Sleep(50 * time.Millisecond)
 			return nil
 		},
@@ -141,7 +141,7 @@ func TestTaskManager_TaskFailure(t *testing.T) {
 	expectedErr := errors.New("task failed")
 	task := &mockTask{
 		name: "failing-task",
-		runFunc: func(ctx context.Context) error {
+		runFunc: func(_ context.Context) error {
 			return expectedErr
 		},
 		timeout: 2 * time.Second,
@@ -178,7 +178,7 @@ func TestTaskManager_ConcurrentTasks(t *testing.T) {
 	for i := 0; i < numTasks; i++ {
 		task := &mockTask{
 			name: "concurrent-task",
-			runFunc: func(ctx context.Context) error {
+			runFunc: func(_ context.Context) error {
 				counter.Add(1)
 				time.Sleep(50 * time.Millisecond)
 				return nil
@@ -209,7 +209,7 @@ func TestTaskManager_ShutdownTimeout(t *testing.T) {
 
 	task := &mockTask{
 		name: "stuck-task",
-		runFunc: func(ctx context.Context) error {
+		runFunc: func(_ context.Context) error {
 			// Ignore cancellation and sleep
 			time.Sleep(5 * time.Second)
 			return nil
@@ -246,7 +246,7 @@ func TestTaskManager_NoGoroutineLeaks(t *testing.T) {
 	for i := 0; i < 20; i++ {
 		task := &mockTask{
 			name: "leak-test-task",
-			runFunc: func(ctx context.Context) error {
+			runFunc: func(_ context.Context) error {
 				time.Sleep(10 * time.Millisecond)
 				return nil
 			},
@@ -307,7 +307,7 @@ func TestScheduledTask(t *testing.T) {
 	tm := NewTaskManager()
 
 	counter := atomic.Int32{}
-	task := NewScheduledTask("periodic-task", 100*time.Millisecond, func(ctx context.Context) error {
+	task := NewScheduledTask("periodic-task", 100*time.Millisecond, func(_ context.Context) error {
 		counter.Add(1)
 		return nil
 	})
@@ -330,7 +330,7 @@ func TestScheduledTask_Cancellation(t *testing.T) {
 	tm := NewTaskManager()
 
 	counter := atomic.Int32{}
-	task := NewScheduledTask("periodic-task", 50*time.Millisecond, func(ctx context.Context) error {
+	task := NewScheduledTask("periodic-task", 50*time.Millisecond, func(_ context.Context) error {
 		counter.Add(1)
 		return nil
 	})
@@ -357,7 +357,7 @@ func TestScheduledTask_Cancellation(t *testing.T) {
 // TestFuncTask verifies FuncTask works correctly
 func TestFuncTask(t *testing.T) {
 	executed := atomic.Bool{}
-	task := NewFuncTask("func-task", 2*time.Second, func(ctx context.Context) error {
+	task := NewFuncTask("func-task", 2*time.Second, func(_ context.Context) error {
 		executed.Store(true)
 		return nil
 	})
@@ -395,7 +395,7 @@ func TestBaseTask(t *testing.T) {
 
 // TestScheduledTask_WithTimeout verifies WithTimeout works
 func TestScheduledTask_WithTimeout(t *testing.T) {
-	task := NewScheduledTask("test", 100*time.Millisecond, func(ctx context.Context) error {
+	task := NewScheduledTask("test", 100*time.Millisecond, func(_ context.Context) error {
 		return nil
 	}).WithTimeout(10 * time.Second)
 
@@ -415,7 +415,7 @@ func TestTaskManager_TaskCount(t *testing.T) {
 	for i := 0; i < 5; i++ {
 		task := &mockTask{
 			name: "test-task",
-			runFunc: func(ctx context.Context) error {
+			runFunc: func(_ context.Context) error {
 				time.Sleep(50 * time.Millisecond)
 				return nil
 			},
@@ -437,7 +437,7 @@ func TestScheduledTask_ErrorHandling(t *testing.T) {
 	tm := NewTaskManager()
 
 	counter := atomic.Int32{}
-	task := NewScheduledTask("error-task", 50*time.Millisecond, func(ctx context.Context) error {
+	task := NewScheduledTask("error-task", 50*time.Millisecond, func(_ context.Context) error {
 		count := counter.Add(1)
 		if count%2 == 0 {
 			return errors.New("simulated error")
@@ -461,7 +461,7 @@ func TestScheduledTask_ErrorHandling(t *testing.T) {
 // mockTask is a test implementation of the Task interface
 type mockTask struct {
 	name    string
-	runFunc func(ctx context.Context) error
+	runFunc func(_ context.Context) error
 	timeout time.Duration
 }
 

@@ -47,7 +47,7 @@ func (bt *BaseTask) Timeout() time.Duration {
 }
 
 // Run must be implemented by tasks that embed BaseTask
-func (bt *BaseTask) Run(ctx context.Context) error {
+func (bt *BaseTask) Run(_ context.Context) error {
 	return errors.New("Run() must be implemented by tasks that embed BaseTask")
 }
 

@@ -1142,7 +1142,7 @@ func runBulkAnalyze(opts bulkAnalyzeOptions) error {
 
 		// Format explanations as JSON for storage
 		analysisDetails := ""
-		if result.Explanations != nil && len(result.Explanations) > 0 {
+		if len(result.Explanations) > 0 {
 			detailsMap := map[string]interface{}{
 				"explanations": result.Explanations,
 				"provider":     result.Provider,

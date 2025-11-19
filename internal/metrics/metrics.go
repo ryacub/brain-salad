@@ -51,7 +51,7 @@ func RecordAPIRequestDuration(duration time.Duration) {
 }
 
 // RecordHTTPRequest increments the counter for HTTP requests
-func RecordHTTPRequest(method, path string, statusCode int) {
+func RecordHTTPRequest(_, path string, statusCode int) {
 	GetGlobalCollector().RecordCounter("http_requests_total", 1)
 
 	// Also track by status code category

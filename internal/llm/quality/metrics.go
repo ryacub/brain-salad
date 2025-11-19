@@ -1,3 +1,4 @@
+// Package quality provides quality assessment metrics for evaluating LLM analysis output.
 package quality
 
 import "strings"

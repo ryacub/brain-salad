@@ -1,3 +1,4 @@
+// Package processing provides LLM response processing and validation for structured analysis output.
 package processing
 
 import (

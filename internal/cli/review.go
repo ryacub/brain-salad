@@ -39,7 +39,7 @@ Examples:
 	return cmd
 }
 
-func runReview(cmd *cobra.Command, args []string) error {
+func runReview(cmd *cobra.Command, _ []string) error {
 	// Build list options
 	opts := database.ListOptions{
 		Status:  reviewStatus,

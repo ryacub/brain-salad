@@ -401,7 +401,7 @@ func loadTelosQuiet() (string, error) {
 }
 
 // detectBasicPatterns performs simple pattern detection
-func detectBasicPatterns(content, telos string) []string {
+func detectBasicPatterns(content, _ string) []string {
 	patterns := []string{}
 	contentLower := strings.ToLower(content)
 

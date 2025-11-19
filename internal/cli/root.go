@@ -91,7 +91,7 @@ func initializeCLI(cmd *cobra.Command, args []string) error {
 
 	// Check if telos.md exists
 	if _, err := os.Stat(telosPath); os.IsNotExist(err) {
-		if _, printErr := warningColor.Fprintf(os.Stderr, "�  Telos file not found at %s\n", telosPath); printErr != nil {
+		if _, printErr := warningColor.Fprintf(os.Stderr, "⚠️  Telos file not found at %s\n", telosPath); printErr != nil {
 			log.Warn().Err(printErr).Msg("failed to print warning")
 		}
 		fmt.Fprintf(os.Stderr, "Please create a telos.md file with your goals, strategies, and stack.\n")

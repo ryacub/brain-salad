@@ -1,3 +1,4 @@
+// Package logging provides structured logging configuration with file rotation support.
 package logging
 
 import (

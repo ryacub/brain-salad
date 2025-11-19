@@ -1,3 +1,4 @@
+// Package metrics provides application metrics collection for counters, gauges, and histograms.
 package metrics
 
 import (

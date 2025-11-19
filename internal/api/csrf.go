@@ -1,3 +1,4 @@
+// Package api provides CSRF token management and validation for secure API requests.
 package api
 
 import (

@@ -1,3 +1,4 @@
+// Package telos provides parsing and validation for telos.md configuration files.
 package telos
 
 import (

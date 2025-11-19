@@ -326,7 +326,7 @@ func TestDetermineRecommendation(t *testing.T) {
 	}
 
 	for _, tt := range tests {
-		t.Run("", func(t *testing.T) {
+		t.Run("", func(_ *testing.T) {
 			got := DetermineRecommendation(tt.score)
 			if got != tt.want {
 				t.Errorf("DetermineRecommendation(%v) = %v, want %v", tt.score, got, tt.want)

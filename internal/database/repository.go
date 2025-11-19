@@ -1,3 +1,4 @@
+// Package database provides SQLite database operations and migration management for idea storage.
 package database
 
 import (

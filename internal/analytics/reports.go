@@ -1,3 +1,4 @@
+// Package analytics provides comprehensive analytics reporting for idea analysis and trends.
 package analytics
 
 import (
