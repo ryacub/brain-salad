@@ -53,6 +53,10 @@ jobs:
       with:
         version: v2.6.2
         args: --timeout=5m
+        # Fix: Skip config verification to avoid CI environment issues
+        skip-pkg-cache: true
+        # Use local config file path relative to workspace
+        config: .golangci.yml
 
   build:
     name: Build
