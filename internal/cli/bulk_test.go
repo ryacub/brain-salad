@@ -972,8 +972,6 @@ func TestBulkUpdate_SetStatus(t *testing.T) {
 	// Test bulk update to archive low-scoring ideas
 	cmd := GetRootCmd()
 	cmd.SetArgs([]string{
-		"--telos", cliCtx.TelosPath,
-		"--db", cliCtx.DBPath,
 		"bulk", "update",
 		"--score-max", "3.0",
 		"--set-status", "archived",
@@ -1066,8 +1064,6 @@ func TestBulkUpdate_RemovePatterns(t *testing.T) {
 	// Test bulk update to remove patterns
 	cmd := GetRootCmd()
 	cmd.SetArgs([]string{
-		"--telos", cliCtx.TelosPath,
-		"--db", cliCtx.DBPath,
 		"bulk", "update",
 		"--remove-patterns", "old-pattern,remove-pattern",
 		"--yes",
@@ -1110,8 +1106,6 @@ func TestBulkUpdate_AddTags(t *testing.T) {
 	// Test bulk update to add tags
 	cmd := GetRootCmd()
 	cmd.SetArgs([]string{
-		"--telos", cliCtx.TelosPath,
-		"--db", cliCtx.DBPath,
 		"bulk", "update",
 		"--status", "archived",
 		"--add-tags", "reviewed,processed",
@@ -1154,8 +1148,6 @@ func TestBulkUpdate_DryRun(t *testing.T) {
 	// Test bulk update with dry-run
 	cmd := GetRootCmd()
 	cmd.SetArgs([]string{
-		"--telos", cliCtx.TelosPath,
-		"--db", cliCtx.DBPath,
 		"bulk", "update",
 		"--score-max", "4.0",
 		"--set-status", "archived",
@@ -1198,8 +1190,6 @@ func TestBulkUpdate_CombinedOperations(t *testing.T) {
 	// Test bulk update with multiple operations
 	cmd := GetRootCmd()
 	cmd.SetArgs([]string{
-		"--telos", cliCtx.TelosPath,
-		"--db", cliCtx.DBPath,
 		"bulk", "update",
 		"--score-min", "7.0",
 		"--set-status", "archived",
