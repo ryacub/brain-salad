@@ -97,3 +97,8 @@ arboard = "3.3"
 
 [dev-dependencies]
 tempfile = "3.8"
+
+# Test profile - optimize for faster test execution and immediate output
+[profile.test]
+opt-level = 1  # Minimal optimization for faster compilation, reasonable test speed
+incremental = true  # Faster recompilation during test development
