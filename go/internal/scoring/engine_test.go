@@ -78,8 +78,8 @@ func TestEngine_CalculateScore_HighScoreIdea_MissionAlignment(t *testing.T) {
 	assert.GreaterOrEqual(t, analysis.Mission.ExecutionSupport, 0.65, "30-day MVP is fast")
 	assert.LessOrEqual(t, analysis.Mission.ExecutionSupport, 0.8)
 
-	assert.GreaterOrEqual(t, analysis.Mission.RevenueoPotential, 0.4, "$2K/month is clear monetization")
-	assert.LessOrEqual(t, analysis.Mission.RevenueoPotential, 0.5)
+	assert.GreaterOrEqual(t, analysis.Mission.RevenuePotential, 0.4, "$2K/month is clear monetization")
+	assert.LessOrEqual(t, analysis.Mission.RevenuePotential, 0.5)
 
 	assert.GreaterOrEqual(t, analysis.Mission.Total, 3.5, "Mission total should be >= 3.5")
 	assert.LessOrEqual(t, analysis.Mission.Total, 4.0)
@@ -186,7 +186,7 @@ func TestEngine_CalculateScore_LowScoreIdea_MissionAlignment(t *testing.T) {
 	assert.LessOrEqual(t, analysis.Mission.DomainExpertise, 0.3, "New stack = low domain score")
 	assert.LessOrEqual(t, analysis.Mission.AIAlignment, 0.4, "No AI = low AI score")
 	assert.LessOrEqual(t, analysis.Mission.ExecutionSupport, 0.25, "Learning-focused = low execution")
-	assert.LessOrEqual(t, analysis.Mission.RevenueoPotential, 0.1, "No revenue = low potential")
+	assert.LessOrEqual(t, analysis.Mission.RevenuePotential, 0.1, "No revenue = low potential")
 
 	assert.LessOrEqual(t, analysis.Mission.Total, 1.0, "Mission total should be <= 1.0 for low score")
 }
@@ -380,7 +380,7 @@ func TestEngine_DetectsRevenueModel_HighRevenueScore(t *testing.T) {
 	require.NoError(t, err)
 
 	// Should detect clear revenue model
-	assert.GreaterOrEqual(t, analysis.Mission.RevenueoPotential, 0.4, "Clear monetization should score high")
+	assert.GreaterOrEqual(t, analysis.Mission.RevenuePotential, 0.4, "Clear monetization should score high")
 }
 
 func TestEngine_DetectsNoRevenue_LowRevenueScore(t *testing.T) {
@@ -393,5 +393,5 @@ func TestEngine_DetectsNoRevenue_LowRevenueScore(t *testing.T) {
 	require.NoError(t, err)
 
 	// Should recognize no revenue
-	assert.LessOrEqual(t, analysis.Mission.RevenueoPotential, 0.1, "No revenue should score low")
+	assert.LessOrEqual(t, analysis.Mission.RevenuePotential, 0.1, "No revenue should score low")
 }
