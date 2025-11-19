@@ -13,17 +13,26 @@ import (
 
 // Parser parses telos.md files into Telos structs.
 type Parser struct {
-	goalRegex     *regexp.Regexp
-	strategyRegex *regexp.Regexp
-	deadlineRegex *regexp.Regexp
-	patternRegex  *regexp.Regexp
+	problemRegex   *regexp.Regexp
+	missionRegex   *regexp.Regexp
+	goalRegex      *regexp.Regexp
+	challengeRegex *regexp.Regexp
+	strategyRegex  *regexp.Regexp
+	deadlineRegex  *regexp.Regexp
+	patternRegex   *regexp.Regexp
 }
 
 // NewParser creates a new Telos parser with compiled regex patterns.
 func NewParser() *Parser {
 	return &Parser{
+		// Matches: - P1: Description
+		problemRegex: regexp.MustCompile(`^-\s+(P\d+):\s+(.+)$`),
+		// Matches: - M1: Description
+		missionRegex: regexp.MustCompile(`^-\s+(M\d+):\s+(.+)$`),
 		// Matches: - G1: Description (Deadline: 2025-12-31)
 		goalRegex: regexp.MustCompile(`^-\s+(G\d+):\s+(.+?)(?:\s+\(Deadline:\s+(.+?)\))?$`),
+		// Matches: - C1: Description
+		challengeRegex: regexp.MustCompile(`^-\s+(C\d+):\s+(.+)$`),
 		// Matches: - S1: Description
 		strategyRegex: regexp.MustCompile(`^-\s+(S\d+):\s+(.+)$`),
 		// Matches: YYYY-MM-DD format
@@ -64,9 +73,21 @@ func (p *Parser) ParseFile(path string) (*models.Telos, error) {
 
 		// Parse content based on current section
 		switch currentSection {
+		case "Problems":
+			if problem := p.parseProblem(line); problem != nil {
+				telos.Problems = append(telos.Problems, *problem)
+			}
+		case "Missions":
+			if mission := p.parseMission(line); mission != nil {
+				telos.Missions = append(telos.Missions, *mission)
+			}
 		case "Goals":
 			if goal := p.parseGoal(line); goal != nil {
 				telos.Goals = append(telos.Goals, *goal)
+			}
+		case "Challenges":
+			if challenge := p.parseChallenge(line); challenge != nil {
+				telos.Challenges = append(telos.Challenges, *challenge)
 			}
 		case "Strategies":
 			if strategy := p.parseStrategy(line); strategy != nil {
@@ -93,6 +114,42 @@ func (p *Parser) ParseFile(path string) (*models.Telos, error) {
 	return telos, nil
 }
 
+// parseSimpleItem is a helper that parses simple list items with ID and description.
+// Returns (id, description, success) tuple.
+func parseSimpleItem(regex *regexp.Regexp, line string) (string, string, bool) {
+	matches := regex.FindStringSubmatch(line)
+	if len(matches) < 3 {
+		return "", "", false
+	}
+	return matches[1], strings.TrimSpace(matches[2]), true
+}
+
+// parseProblem parses a problem line and returns a Problem struct.
+// Expected format: - P1: Description
+func (p *Parser) parseProblem(line string) *models.Problem {
+	id, description, ok := parseSimpleItem(p.problemRegex, line)
+	if !ok {
+		return nil
+	}
+	return &models.Problem{
+		ID:          id,
+		Description: description,
+	}
+}
+
+// parseMission parses a mission line and returns a Mission struct.
+// Expected format: - M1: Description
+func (p *Parser) parseMission(line string) *models.Mission {
+	id, description, ok := parseSimpleItem(p.missionRegex, line)
+	if !ok {
+		return nil
+	}
+	return &models.Mission{
+		ID:          id,
+		Description: description,
+	}
+}
+
 // parseGoal parses a goal line and returns a Goal struct.
 // Expected format: - G1: Description (Deadline: YYYY-MM-DD)
 func (p *Parser) parseGoal(line string) *models.Goal {
@@ -117,17 +174,29 @@ func (p *Parser) parseGoal(line string) *models.Goal {
 	return goal
 }
 
+// parseChallenge parses a challenge line and returns a Challenge struct.
+// Expected format: - C1: Description
+func (p *Parser) parseChallenge(line string) *models.Challenge {
+	id, description, ok := parseSimpleItem(p.challengeRegex, line)
+	if !ok {
+		return nil
+	}
+	return &models.Challenge{
+		ID:          id,
+		Description: description,
+	}
+}
+
 // parseStrategy parses a strategy line and returns a Strategy struct.
 // Expected format: - S1: Description
 func (p *Parser) parseStrategy(line string) *models.Strategy {
-	matches := p.strategyRegex.FindStringSubmatch(line)
-	if len(matches) < 3 {
+	id, description, ok := parseSimpleItem(p.strategyRegex, line)
+	if !ok {
 		return nil
 	}
-
 	return &models.Strategy{
-		ID:          matches[1],
-		Description: strings.TrimSpace(matches[2]),
+		ID:          id,
+		Description: description,
 	}
 }
 
