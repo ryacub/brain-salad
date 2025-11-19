@@ -10,6 +10,7 @@ Complete command-line interface reference for the Telos Idea Matrix tool.
   - [analyze](#analyze)
   - [dump](#dump)
   - [list](#list)
+  - [link](#link)
   - [review](#review)
   - [server](#server)
   - [version](#version)
@@ -286,6 +287,97 @@ ID                                     Content                          Score  S
 id,content,raw_score,final_score,status,created_at
 550e8400-e29b-41d4-a716-446655440000,"Build testing framework",9.0,8.5,active,2025-11-19T10:30:00Z
 ```
+
+---
+
+### link
+
+Manage relationships between ideas.
+
+For complete documentation, see:
+- **[Link Command User Guide](user-guide/link-command.md)** - Comprehensive guide
+- **[Getting Started Tutorial](tutorials/getting-started-with-links.md)** - Beginner tutorial
+- **[Cheat Sheet](quick-reference/link-cheatsheet.md)** - Quick reference
+- **[FAQ](faq/link-command-faq.md)** - Common questions
+
+#### Subcommands
+
+**Create a relationship:**
+```bash
+tm link create <source-id> <target-id> <type> [--no-confirm]
+```
+
+**List relationships:**
+```bash
+tm link list <idea-id>
+```
+
+**Show related ideas:**
+```bash
+tm link show <idea-id> [--type <type>]
+```
+
+**Remove a relationship:**
+```bash
+tm link remove <relationship-id> [--no-confirm]
+```
+
+**Find paths:**
+```bash
+tm link path <from-id> <to-id> [--max-depth N]
+```
+
+#### Relationship Types
+
+- `depends_on` - Source depends on target
+- `blocked_by` - Source is blocked by target
+- `blocks` - Source blocks target
+- `part_of` - Source is part of target
+- `parent` - Source is parent of target
+- `child` - Source is child of target
+- `related_to` - Ideas are related (symmetric)
+- `similar_to` - Ideas are similar (symmetric)
+- `duplicate` - Ideas are duplicates (symmetric)
+
+#### Examples
+
+```bash
+# Create a dependency
+tm link create api-123 db-456 depends_on
+
+# View all relationships for an idea
+tm link list api-123
+
+# Show related ideas with details
+tm link show api-123 --type depends_on
+
+# Find path between two ideas
+tm link path ui-789 db-456
+
+# Remove a relationship
+tm link remove rel-xyz
+
+# Skip confirmation
+tm link create idea1 idea2 duplicate --no-confirm
+```
+
+#### Quick Start
+
+```bash
+# Project breakdown
+tm link create task project part_of
+
+# Track dependencies
+tm link create taskA taskB depends_on
+
+# Mark duplicates
+tm link create idea1 idea2 duplicate
+
+# Track blockers
+tm link create task blocker blocked_by
+```
+
+See the [Link Command User Guide](user-guide/link-command.md) for detailed workflows, best practices, and troubleshooting.
 
 ---
 
