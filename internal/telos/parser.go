@@ -43,6 +43,12 @@ func NewParser() *Parser {
 	}
 }
 
+// ParseTelosFile is a convenience function that creates a parser and parses a file.
+func ParseTelosFile(path string) (*models.Telos, error) {
+	parser := NewParser()
+	return parser.ParseFile(path)
+}
+
 // ParseFile parses a telos.md file and returns a Telos struct.
 func (p *Parser) ParseFile(path string) (*models.Telos, error) {
 	file, err := os.Open(path)
