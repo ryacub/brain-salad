@@ -4,7 +4,9 @@ import (
 	"bytes"
 	"crypto/sha256"
 	"encoding/hex"
+	"net"
 	"net/http"
+	"strings"
 	"sync"
 	"time"
 )
@@ -253,12 +255,46 @@ func min(a, b float64) float64 {
 	return b
 }
 
+// getClientIP extracts the real client IP from the request, handling proxy headers
+// It checks X-Forwarded-For and X-Real-IP headers with validation
+func getClientIP(r *http.Request) string {
+	// Try X-Forwarded-For header first (most common for proxies)
+	// Format: X-Forwarded-For: client, proxy1, proxy2
+	if xff := r.Header.Get("X-Forwarded-For"); xff != "" {
+		// Take the first IP in the chain (the original client)
+		ips := strings.Split(xff, ",")
+		if len(ips) > 0 {
+			clientIP := strings.TrimSpace(ips[0])
+			// Validate it's a proper IP address
+			if ip := net.ParseIP(clientIP); ip != nil {
+				return clientIP
+			}
+		}
+	}
+
+	// Try X-Real-IP header (used by some proxies like nginx)
+	if xri := r.Header.Get("X-Real-IP"); xri != "" {
+		// Validate it's a proper IP address
+		if ip := net.ParseIP(xri); ip != nil {
+			return xri
+		}
+	}
+
+	// Fall back to RemoteAddr, but strip the port
+	ip, _, err := net.SplitHostPort(r.RemoteAddr)
+	if err != nil {
+		// If SplitHostPort fails, it might be just an IP without port
+		return r.RemoteAddr
+	}
+	return ip
+}
+
 // RateLimitMiddleware is a middleware that rate limits requests
 func RateLimitMiddleware(limiter *RateLimiter) func(http.Handler) http.Handler {
 	return func(next http.Handler) http.Handler {
 		return http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
-			// Get client IP (simplified - in production use X-Forwarded-For with validation)
-			ip := r.RemoteAddr
+			// Get real client IP, handling proxy headers with validation
+			ip := getClientIP(r)
 
 			if !limiter.Allow(ip) {
 				w.Header().Set("X-RateLimit-Limit", string(rune(limiter.rate)))
