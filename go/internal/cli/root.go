@@ -7,6 +7,7 @@ import (
 
 	"github.com/fatih/color"
 	"github.com/rayyacub/telos-idea-matrix/internal/database"
+	"github.com/rayyacub/telos-idea-matrix/internal/llm"
 	"github.com/rayyacub/telos-idea-matrix/internal/models"
 	"github.com/rayyacub/telos-idea-matrix/internal/patterns"
 	"github.com/rayyacub/telos-idea-matrix/internal/scoring"
@@ -20,6 +21,7 @@ type CLIContext struct {
 	Engine     *scoring.Engine
 	Detector   *patterns.Detector
 	Telos      *models.Telos
+	LLMManager *llm.Manager
 	DBPath     string
 	TelosPath  string
 }
@@ -66,7 +68,10 @@ you focus on what truly matters.`,
 	rootCmd.AddCommand(newHealthCommand())
 	rootCmd.AddCommand(NewBulkCommand())
 
-	// LLM commands
+	// LLM commands (new hierarchical structure)
+	rootCmd.AddCommand(NewLLMCommand())
+
+	// Legacy LLM commands (flat structure - may be deprecated)
 	rootCmd.AddCommand(newAnalyzeLLMCommand())
 	rootCmd.AddCommand(newLLMListCommand())
 	rootCmd.AddCommand(newLLMConfigCommand())
@@ -106,12 +111,17 @@ func initializeCLI(cmd *cobra.Command, args []string) error {
 	engine := scoring.NewEngine(telosData)
 	detector := patterns.NewDetector(telosData)
 
+	// Initialize LLM Manager
+	llmConfig := llm.DefaultManagerConfig()
+	llmManager := llm.NewManager(llmConfig)
+
 	// Store in shared context
 	ctx = &CLIContext{
 		Repository: repo,
 		Engine:     engine,
 		Detector:   detector,
 		Telos:      telosData,
+		LLMManager: llmManager,
 		DBPath:     dbPath,
 		TelosPath:  telosPath,
 	}

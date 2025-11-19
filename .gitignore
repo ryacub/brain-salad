@@ -3,6 +3,12 @@
 **/*.rs.bk
 Cargo.lock
 
+# Go
+/tm
+/telos
+*.test
+*.out
+
 # IDE
 .vscode/
 .idea/

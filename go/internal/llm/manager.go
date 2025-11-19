@@ -122,6 +122,20 @@ func (m *Manager) selectPrimaryProvider() {
 	m.mu.Lock()
 	defer m.mu.Unlock()
 
+	// Try to load saved preference from persistent config
+	if defaultProvider, err := GetDefaultProvider(); err == nil && defaultProvider != "" {
+		// Try to set the saved provider
+		for _, p := range m.providers {
+			if p.Name() == defaultProvider && p.IsAvailable() {
+				m.primary = p
+				fmt.Printf("[Manager] Loaded default provider from config: %s\n", defaultProvider)
+				return
+			}
+		}
+		fmt.Printf("[Manager] Warning: Saved provider '%s' not available, using fallback\n", defaultProvider)
+	}
+
+	// Fallback to priority order - select first available
 	for _, p := range m.providers {
 		if p.IsAvailable() {
 			m.primary = p
