@@ -162,10 +162,12 @@ telos-idea-matrix-go/
 ├── go.mod
 ├── go.sum
 ├── Makefile
-├── Dockerfile                  # Docker configuration (TBD)
-├── docker-compose.yml          # Docker Compose (TBD)
 ├── README.md
-└── RUST_REFERENCE.md           # Rust implementation reference
+├── deployments/                # Deployment configurations
+│   ├── docker/                 # Docker files and compose configs
+│   ├── nginx/                  # Nginx configuration
+│   └── monitoring/             # Prometheus, Grafana configs
+└── scripts/                    # Build and utility scripts
 ```
 
 ### Directory Conventions
@@ -557,7 +559,7 @@ go test ./internal/scoring
 1. Update `internal/models/analysis.go` with new field
 2. Add scoring function in `internal/scoring/engine.go`
 3. Write tests in `internal/scoring/engine_test.go`
-4. Update `RUST_REFERENCE.md` if behavior changes
+4. Update documentation in `docs/ARCHITECTURE.md` if behavior changes
 
 ### Add a Database Field
 
@@ -629,10 +631,12 @@ make clean
 
 ### Project-Specific
 
-- **RUST_REFERENCE.md** - Detailed Rust implementation reference
 - **README.md** - Project overview
-- **API.md** - API documentation (coming in Phase 3)
-- **CLI.md** - CLI documentation (coming in Phase 2)
+- **docs/ARCHITECTURE.md** - System design and architecture
+- **docs/API.md** - API documentation
+- **docs/CLI_REFERENCE.md** - CLI command reference
+- **docs/CONFIGURATION.md** - Configuration guide
+- **docs/DOCKER_GUIDE.md** - Docker deployment guide
 
 ---
 
