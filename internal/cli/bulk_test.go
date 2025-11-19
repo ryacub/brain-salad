@@ -16,12 +16,18 @@ import (
 	"github.com/stretchr/testify/require"
 )
 
-func TestBulkTag_WithFilters(t *testing.T) {
+// setupBulkTestCLI sets up CLI context for bulk operation tests
+// Returns context and cleanup function - cleanup is automatically deferred
+func setupBulkTestCLI(t *testing.T) (*CLIContext, func()) {
+	t.Helper()
 	cliCtx, cleanup := setupTestCLI(t)
-	defer cleanup()
-
-	// Set the global CLI context for commands to use
 	SetContext(cliCtx)
+	return cliCtx, cleanup
+}
+
+func TestBulkTag_WithFilters(t *testing.T) {
+	cliCtx, cleanup := setupBulkTestCLI(t)
+	defer cleanup()
 
 	// Create test ideas with varying scores
 	ideas := []*models.Idea{
@@ -76,11 +82,8 @@ func TestBulkTag_WithFilters(t *testing.T) {
 }
 
 func TestBulkArchive_WithFilters(t *testing.T) {
-	cliCtx, cleanup := setupTestCLI(t)
+	cliCtx, cleanup := setupBulkTestCLI(t)
 	defer cleanup()
-
-	// Set the global CLI context for commands to use
-	SetContext(cliCtx)
 
 	// Create old and new ideas
 	oldIdea := &models.Idea{
@@ -401,11 +404,8 @@ func TestBulkArchive_DryRun(t *testing.T) {
 }
 
 func TestBulkAnalyze_WithFilters(t *testing.T) {
-	cliCtx, cleanup := setupTestCLI(t)
+	cliCtx, cleanup := setupBulkTestCLI(t)
 	defer cleanup()
-
-	// Set the global CLI context for commands to use
-	SetContext(cliCtx)
 
 	// Create test ideas with varying scores
 	ideas := []*models.Idea{
@@ -934,11 +934,8 @@ func TestTruncate(t *testing.T) {
 // Integration tests for bulk update
 
 func TestBulkUpdate_SetStatus(t *testing.T) {
-	cliCtx, cleanup := setupTestCLI(t)
+	cliCtx, cleanup := setupBulkTestCLI(t)
 	defer cleanup()
-
-	// Set the global CLI context for commands to use
-	SetContext(cliCtx)
 
 	// Create test ideas
 	ideas := []*models.Idea{
@@ -991,11 +988,8 @@ func TestBulkUpdate_SetStatus(t *testing.T) {
 }
 
 func TestBulkUpdate_AddPatterns(t *testing.T) {
-	cliCtx, cleanup := setupTestCLI(t)
+	cliCtx, cleanup := setupBulkTestCLI(t)
 	defer cleanup()
-
-	// Set the global CLI context for commands to use
-	SetContext(cliCtx)
 
 	// Create test idea
 	idea := &models.Idea{
@@ -1042,11 +1036,8 @@ func TestBulkUpdate_AddPatterns(t *testing.T) {
 }
 
 func TestBulkUpdate_RemovePatterns(t *testing.T) {
-	cliCtx, cleanup := setupTestCLI(t)
+	cliCtx, cleanup := setupBulkTestCLI(t)
 	defer cleanup()
-
-	// Set the global CLI context for commands to use
-	SetContext(cliCtx)
 
 	// Create test idea
 	idea := &models.Idea{
@@ -1086,11 +1077,8 @@ func TestBulkUpdate_RemovePatterns(t *testing.T) {
 }
 
 func TestBulkUpdate_AddTags(t *testing.T) {
-	cliCtx, cleanup := setupTestCLI(t)
+	cliCtx, cleanup := setupBulkTestCLI(t)
 	defer cleanup()
-
-	// Set the global CLI context for commands to use
-	SetContext(cliCtx)
 
 	// Create test idea
 	idea := &models.Idea{
@@ -1130,11 +1118,8 @@ func TestBulkUpdate_AddTags(t *testing.T) {
 }
 
 func TestBulkUpdate_DryRun(t *testing.T) {
-	cliCtx, cleanup := setupTestCLI(t)
+	cliCtx, cleanup := setupBulkTestCLI(t)
 	defer cleanup()
-
-	// Set the global CLI context for commands to use
-	SetContext(cliCtx)
 
 	// Create test idea
 	idea := &models.Idea{
@@ -1173,11 +1158,8 @@ func TestBulkUpdate_DryRun(t *testing.T) {
 }
 
 func TestBulkUpdate_CombinedOperations(t *testing.T) {
-	cliCtx, cleanup := setupTestCLI(t)
+	cliCtx, cleanup := setupBulkTestCLI(t)
 	defer cleanup()
-
-	// Set the global CLI context for commands to use
-	SetContext(cliCtx)
 
 	// Create test idea
 	idea := &models.Idea{
