@@ -1,0 +1,140 @@
+# Provider Manager Configuration Example
+# Copy this file to provider-config.yaml and customize for your environment
+
+# Manager Configuration
+manager:
+  # Default provider to use (must be in the providers list)
+  # Options: ollama, claude, openai, custom, rule_based
+  default_provider: "ollama"
+
+  # Enable automatic fallback to other providers when primary fails
+  fallback_enabled: true
+
+  # How often to check provider health (in seconds)
+  health_check_interval: 30
+
+  # Provider priority order (highest to lowest)
+  # Manager will try providers in this order during fallback
+  priority:
+    - ollama        # Try local Ollama first (fastest)
+    - claude        # Then Claude API
+    - openai        # Then OpenAI API
+    - custom        # Then custom provider
+    - rule_based    # Finally rule-based (always works)
+
+# Provider-Specific Configuration
+providers:
+  # Ollama (Local LLM)
+  ollama:
+    enabled: true
+    base_url: "http://localhost:11434"
+    model: "llama2"
+    timeout: 30  # seconds
+
+  # Claude (Anthropic API)
+  claude:
+    enabled: true
+    api_key: "${CLAUDE_API_KEY}"  # Use environment variable
+    model: "claude-3-5-sonnet-20241022"
+    timeout: 30  # seconds
+    max_tokens: 4096
+
+  # OpenAI (OpenAI API)
+  openai:
+    enabled: false  # Enable when implemented
+    api_key: "${OPENAI_API_KEY}"
+    model: "gpt-4"
+    timeout: 30
+    max_tokens: 4096
+
+  # Custom Provider
+  custom:
+    enabled: false  # Enable when needed
+    endpoint: "https://your-api.example.com"
+    api_key: "${CUSTOM_API_KEY}"
+    timeout: 30
+
+  # Rule-Based Provider
+  rule_based:
+    enabled: true  # Always enabled as ultimate fallback
+    # No additional configuration needed
+
+# Cache Configuration
+cache:
+  enabled: true
+  ttl: 3600  # Cache TTL in seconds (1 hour)
+  max_size: 1000  # Maximum number of cached results
+
+# Logging
+logging:
+  level: "info"  # debug, info, warn, error
+  format: "json"  # json or text
+  output: "stdout"  # stdout, stderr, or file path
+
+# Monitoring
+monitoring:
+  # Enable metrics collection
+  metrics_enabled: true
+
+  # Metrics export interval (seconds)
+  metrics_interval: 60
+
+  # Alert thresholds
+  alerts:
+    # Alert when provider failure rate exceeds this percentage
+    failure_rate_threshold: 50
+
+    # Alert when average latency exceeds this (seconds)
+    latency_threshold: 10
+
+    # Alert when no providers are available
+    no_providers_available: true
+
+# Advanced Settings
+advanced:
+  # Maximum concurrent requests per provider
+  max_concurrent_requests: 10
+
+  # Request timeout (seconds)
+  request_timeout: 60
+
+  # Retry configuration
+  retry:
+    enabled: true
+    max_attempts: 3
+    backoff_multiplier: 2  # Exponential backoff: 1s, 2s, 4s
+
+  # Circuit breaker (prevent cascading failures)
+  circuit_breaker:
+    enabled: true
+    failure_threshold: 5  # Open circuit after N failures
+    timeout: 60  # Seconds before attempting to close circuit
+    half_open_requests: 2  # Test requests before fully closing
+
+# Environment-Specific Overrides
+environments:
+  development:
+    manager:
+      default_provider: "rule_based"  # Use deterministic provider in dev
+      fallback_enabled: true
+    logging:
+      level: "debug"
+
+  staging:
+    manager:
+      default_provider: "ollama"
+      fallback_enabled: true
+    logging:
+      level: "info"
+
+  production:
+    manager:
+      default_provider: "claude"
+      fallback_enabled: true
+      health_check_interval: 15  # More frequent health checks
+    logging:
+      level: "warn"
+    monitoring:
+      metrics_enabled: true
+      alerts:
+        failure_rate_threshold: 25  # Stricter threshold in production

@@ -302,11 +302,11 @@ func (fp *FallbackProvider) Analyze(req AnalysisRequest) (*AnalysisResult, error
 // ============================================================================
 
 // CreateDefaultFallbackChain creates the default fallback chain:
-// Ollama → Claude API (stub) → Rule-based
+// Ollama → Claude API → Rule-based
 func CreateDefaultFallbackChain(config ProviderConfig, telos *models.Telos) *FallbackProvider {
 	providers := []Provider{
 		NewOllamaProvider(config.OllamaBaseURL, config.OllamaModel),
-		// TODO: Add Claude provider when Track 5B is implemented
+		NewClaudeProvider(config.ClaudeAPIKey, config.ClaudeModel),
 		NewRuleBasedProvider(),
 	}
 

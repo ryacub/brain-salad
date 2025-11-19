@@ -65,6 +65,12 @@ you focus on what truly matters.`,
 	rootCmd.AddCommand(newLinkCommand())
 	rootCmd.AddCommand(newHealthCommand())
 	rootCmd.AddCommand(NewBulkCommand())
+
+	// LLM commands
+	rootCmd.AddCommand(newAnalyzeLLMCommand())
+	rootCmd.AddCommand(newLLMListCommand())
+	rootCmd.AddCommand(newLLMConfigCommand())
+	rootCmd.AddCommand(newLLMHealthCommand())
 }
 
 // initializeCLI sets up the shared context for all commands

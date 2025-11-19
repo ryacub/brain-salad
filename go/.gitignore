@@ -52,4 +52,6 @@ web/node_modules/
 web/.svelte-kit/
 web/build/
 web/.env
-cli
+
+# CLI binary (not the directory)
+/cli
