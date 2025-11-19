@@ -1,0 +1,145 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Telos Idea Matrix - Beta</title>
+    <style>
+        * { margin: 0; padding: 0; box-sizing: border-box; }
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+            background: #0f172a;
+            color: #e2e8f0;
+            padding: 2rem;
+        }
+        .container { max-width: 1200px; margin: 0 auto; }
+        .hero {
+            text-align: center;
+            padding: 3rem 0;
+            border-bottom: 2px solid #1e293b;
+            margin-bottom: 2rem;
+        }
+        h1 { font-size: 3rem; color: #3b82f6; margin-bottom: 0.5rem; }
+        .subtitle { color: #94a3b8; font-size: 1.25rem; }
+        .status {
+            margin-top: 1rem;
+            display: inline-block;
+            padding: 0.5rem 1rem;
+            border-radius: 9999px;
+            font-weight: 600;
+        }
+        .status.connected { background: #10b981; }
+        .status.checking { background: #f59e0b; }
+        .status.error { background: #ef4444; }
+        .card {
+            background: #1e293b;
+            border: 1px solid #334155;
+            border-radius: 0.5rem;
+            padding: 1.5rem;
+            margin-bottom: 1.5rem;
+        }
+        .card h2, .card h3 { color: #f1f5f9; margin-bottom: 1rem; }
+        .card p, .card li { line-height: 1.6; color: #cbd5e1; margin-bottom: 0.5rem; }
+        .card a { color: #3b82f6; text-decoration: none; }
+        .card a:hover { text-decoration: underline; }
+        code {
+            background: #0f172a;
+            padding: 0.25rem 0.5rem;
+            border-radius: 0.25rem;
+            color: #22d3ee;
+            font-family: 'Courier New', monospace;
+        }
+        ol, ul { padding-left: 1.5rem; }
+        li { margin: 0.5rem 0; }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <div class="hero">
+            <h1>Telos Idea Matrix</h1>
+            <p class="subtitle">Beta Release - v1.0.0-beta</p>
+            <div id="status" class="status checking">Checking API...</div>
+        </div>
+
+        <div class="card">
+            <h2>Welcome to the Beta!</h2>
+            <p>
+                Thank you for testing Telos Idea Matrix. This beta release includes the CLI and RESTful API.
+                The full web interface will be available in a future release.
+            </p>
+        </div>
+
+        <div class="card">
+            <h3>🚀 Getting Started</h3>
+            <ol>
+                <li>Create your <code>telos.md</code> file with your goals, strategies, and failure patterns</li>
+                <li>Dump an idea: <code>docker exec telos-api-staging tm dump "Your idea here"</code></li>
+                <li>Review ideas: <code>docker exec telos-api-staging tm review</code></li>
+                <li>Access the API at <a href="http://localhost:8080/ideas" target="_blank">http://localhost:8080/ideas</a></li>
+            </ol>
+        </div>
+
+        <div class="card">
+            <h3>📡 API Endpoints</h3>
+            <ul>
+                <li><a href="http://localhost:8080/health" target="_blank">/health</a> - Health check</li>
+                <li><a href="http://localhost:8080/version" target="_blank">/version</a> - Version information</li>
+                <li><a href="http://localhost:8080/ideas" target="_blank">/ideas</a> - List all ideas (GET) or create new (POST)</li>
+                <li><a href="http://localhost:8080/telos" target="_blank">/telos</a> - View your telos configuration</li>
+            </ul>
+        </div>
+
+        <div class="card">
+            <h3>📋 CLI Commands</h3>
+            <ul>
+                <li><code>tm dump "idea"</code> - Capture and analyze an idea</li>
+                <li><code>tm review</code> - Review all captured ideas</li>
+                <li><code>tm review --min-score 7</code> - Filter by minimum score</li>
+                <li><code>tm export --format json</code> - Export ideas to JSON</li>
+                <li><code>tm --help</code> - View all available commands</li>
+            </ul>
+        </div>
+
+        <div class="card">
+            <h3>💬 Provide Feedback</h3>
+            <p>Found a bug or have a suggestion? We'd love to hear from you!</p>
+            <ul>
+                <li><a href="https://github.com/rayyacub/telos-idea-matrix/issues" target="_blank">Report a Bug</a></li>
+                <li><a href="https://github.com/rayyacub/telos-idea-matrix/discussions" target="_blank">Join Discussions</a></li>
+                <li>See <code>docs/BETA_FEEDBACK.md</code> for the feedback survey</li>
+            </ul>
+        </div>
+
+        <div class="card">
+            <h3>📚 Documentation</h3>
+            <ul>
+                <li><code>docs/BETA_MIGRATION_GUIDE.md</code> - Setup and migration instructions</li>
+                <li><code>docs/BETA_TESTING_PROGRAM.md</code> - Beta testing guide</li>
+                <li><code>README.md</code> - Full documentation</li>
+            </ul>
+        </div>
+    </div>
+
+    <script>
+        async function checkAPI() {
+            const statusEl = document.getElementById('status');
+            try {
+                const response = await fetch('http://localhost:8080/health');
+                if (response.ok) {
+                    statusEl.textContent = 'API Connected ✓';
+                    statusEl.className = 'status connected';
+                } else {
+                    statusEl.textContent = 'API Error';
+                    statusEl.className = 'status error';
+                }
+            } catch (e) {
+                statusEl.textContent = 'API Offline (Start services with: ./scripts/deploy.sh start --env staging)';
+                statusEl.className = 'status error';
+            }
+        }
+
+        checkAPI();
+        setInterval(checkAPI, 30000); // Check every 30 seconds
+    </script>
+</body>
+</html>

@@ -1,0 +1,45 @@
+global:
+  scrape_interval: 15s
+  evaluation_interval: 15s
+  external_labels:
+    monitor: 'telos-matrix'
+
+scrape_configs:
+  # Prometheus self-monitoring
+  - job_name: 'prometheus'
+    static_configs:
+      - targets: ['localhost:9090']
+
+  # Telos API monitoring
+  - job_name: 'telos-api'
+    metrics_path: '/metrics'
+    static_configs:
+      - targets: ['telos-api:8080']
+    relabel_configs:
+      - source_labels: [__address__]
+        target_label: instance
+        replacement: 'telos-api'
+
+  # Frontend monitoring (if metrics enabled)
+  - job_name: 'telos-frontend'
+    static_configs:
+      - targets: ['telos-frontend:3000']
+    relabel_configs:
+      - source_labels: [__address__]
+        target_label: instance
+        replacement: 'telos-frontend'
+
+  # Node exporter (system metrics) - optional
+  # - job_name: 'node'
+  #   static_configs:
+  #     - targets: ['node-exporter:9100']
+
+alerting:
+  alertmanagers:
+    - static_configs:
+        - targets: []
+          # - alertmanager:9093
+
+# Load alerting rules
+rule_files:
+  # - "alerts.yml"
