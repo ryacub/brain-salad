@@ -50,6 +50,11 @@ pub fn init_logging(config: LoggingConfig) -> Result<(), Box<dyn std::error::Err
     let env_filter = EnvFilter::try_from_default_env()
         .unwrap_or_else(|_| EnvFilter::new(format!("telos_idea_matrix={}", config.level)));
 
+    // Check if we're running in test mode - skip expensive file logging
+    let is_test = std::env::var("CARGO_TEST").is_ok()
+        || std::env::var("RUST_TEST_THREADS").is_ok()
+        || cfg!(test);
+
     // Create a subscriber with only error logs going to console for clean user experience
     let console_subscriber = tracing_subscriber::registry().with(
         tracing_subscriber::fmt::layer()
@@ -59,6 +64,12 @@ pub fn init_logging(config: LoggingConfig) -> Result<(), Box<dyn std::error::Err
             .with_ansi(true)
             .with_filter(tracing_subscriber::filter::LevelFilter::ERROR),
     );
+
+    // Skip file logging during tests to avoid I/O overhead and delays
+    if is_test {
+        console_subscriber.init();
+        return Ok(());
+    }
 
     // Determine log directory
     let log_dir = if let Some(configured_dir) = &config.log_directory {

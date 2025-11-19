@@ -4,7 +4,8 @@
 
 set -e
 
-PROJECT_DIR="/Users/rayyacub/Documents/CCResearch/telos-idea-matrix"
+# Use the directory containing this script as the project directory
+PROJECT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
 BINARY_PATH="$PROJECT_DIR/target/release/tm"
 
 # Colors for output
@@ -171,7 +172,7 @@ if [ "$RUN_TESTS" = true ]; then
     if [ "$QUIET" != true ]; then
         echo "${BLUE}🧪 Running tests...${NC}"
     fi
-    cargo test
+    cargo test -- --nocapture --show-output
     if [ "$QUIET" != true ]; then
         echo "${GREEN}✅ All tests passed!${NC}"
     fi
