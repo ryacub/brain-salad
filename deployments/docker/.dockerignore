@@ -60,16 +60,16 @@ go/vendor/
 go/coverage.html
 go/coverage.out
 
-# Rust specific (legacy - project is migrating to Go)
-target/
-**/*.rs.bk
-*.pdb
-Cargo.lock
-rust-toolchain
-rust-toolchain.toml
-src/
-Cargo.toml
-migrations/
+# Rust specific (removed - project has migrated to Go)
+# These entries are kept for historical reference but should not exist
+# target/
+# **/*.rs.bk
+# *.pdb
+# Cargo.lock
+# rust-toolchain
+# rust-toolchain.toml
+# src/
+# Cargo.toml
 
 # macOS
 .DS_Store

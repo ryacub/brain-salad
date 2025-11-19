@@ -203,10 +203,10 @@ func (r *LLMResponse) Validate() error {
 	}
 
 	validRecommendations := map[string]bool{
-		"PRIORITIZE NOW":  true,
-		"GOOD ALIGNMENT":  true,
-		"CONSIDER LATER":  true,
-		"AVOID FOR NOW":   true,
+		"PRIORITIZE NOW": true,
+		"GOOD ALIGNMENT": true,
+		"CONSIDER LATER": true,
+		"AVOID FOR NOW":  true,
 	}
 	if !validRecommendations[r.Recommendation] {
 		return fmt.Errorf("invalid recommendation: %s", r.Recommendation)

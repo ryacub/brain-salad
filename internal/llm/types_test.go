@@ -33,8 +33,8 @@ func TestAnalysisResult(t *testing.T) {
 		Explanations: map[string]string{
 			"mission_alignment": "Strong AI focus",
 		},
-		Provider: "ollama",
-		Duration: 2 * time.Second,
+		Provider:  "ollama",
+		Duration:  2 * time.Second,
 		FromCache: false,
 	}
 

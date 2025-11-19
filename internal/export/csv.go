@@ -18,7 +18,11 @@ func ExportCSV(ideas []*models.Idea, filename string) error {
 	if err != nil {
 		return fmt.Errorf("create file: %w", err)
 	}
-	defer func() { if err := file.Close(); err != nil { log.Warn().Err(err).Msg("failed to close file") } }()
+	defer func() {
+		if err := file.Close(); err != nil {
+			log.Warn().Err(err).Msg("failed to close file")
+		}
+	}()
 
 	writer := csv.NewWriter(file)
 	defer writer.Flush()
@@ -70,7 +74,11 @@ func ImportCSV(filename string) ([]*models.Idea, error) {
 	if err != nil {
 		return nil, fmt.Errorf("open file: %w", err)
 	}
-	defer func() { if err := file.Close(); err != nil { log.Warn().Err(err).Msg("failed to close file") } }()
+	defer func() {
+		if err := file.Close(); err != nil {
+			log.Warn().Err(err).Msg("failed to close file")
+		}
+	}()
 
 	reader := csv.NewReader(file)
 	records, err := reader.ReadAll()

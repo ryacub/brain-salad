@@ -10,9 +10,9 @@ import (
 )
 
 var (
-	llmProvider  string
+	llmProvider   string
 	llmNoFallback bool
-	llmVerbose   bool
+	llmVerbose    bool
 )
 
 func newAnalyzeLLMCommand() *cobra.Command {

@@ -8,16 +8,16 @@ import (
 // Analysis represents the complete scoring breakdown and analysis of an idea.
 // This matches the Score struct in the Rust implementation.
 type Analysis struct {
-	RawScore         float64               `json:"raw_score"`
-	FinalScore       float64               `json:"final_score"`
-	Mission          MissionScores         `json:"mission"`
-	AntiChallenge    AntiChallengeScores   `json:"anti_challenge"`
-	Strategic        StrategicScores       `json:"strategic"`
-	DetectedPatterns []DetectedPattern     `json:"detected_patterns"`
-	Recommendations  []string              `json:"recommendations"`
-	ScoringDetails   []string              `json:"scoring_details,omitempty"`
-	Explanations     map[string]string     `json:"explanations,omitempty"`
-	AnalyzedAt       time.Time             `json:"analyzed_at"`
+	RawScore         float64             `json:"raw_score"`
+	FinalScore       float64             `json:"final_score"`
+	Mission          MissionScores       `json:"mission"`
+	AntiChallenge    AntiChallengeScores `json:"anti_challenge"`
+	Strategic        StrategicScores     `json:"strategic"`
+	DetectedPatterns []DetectedPattern   `json:"detected_patterns"`
+	Recommendations  []string            `json:"recommendations"`
+	ScoringDetails   []string            `json:"scoring_details,omitempty"`
+	Explanations     map[string]string   `json:"explanations,omitempty"`
+	AnalyzedAt       time.Time           `json:"analyzed_at"`
 }
 
 // GetRecommendation returns the recommendation based on the final score.
@@ -38,31 +38,31 @@ func (a *Analysis) GetRecommendation() string {
 // MissionScores represents the mission alignment scoring breakdown.
 // Max total: 4.0 points (40% of total score)
 type MissionScores struct {
-	DomainExpertise   float64 `json:"domain_expertise"`   // 0-1.2 points max
-	AIAlignment       float64 `json:"ai_alignment"`       // 0-1.5 points max
-	ExecutionSupport  float64 `json:"execution_support"`  // 0-0.8 points max
-	RevenuePotential  float64 `json:"revenue_potential"`  // 0-0.5 points max
-	Total             float64 `json:"total"`              // max 4.0 points
+	DomainExpertise  float64 `json:"domain_expertise"`  // 0-1.2 points max
+	AIAlignment      float64 `json:"ai_alignment"`      // 0-1.5 points max
+	ExecutionSupport float64 `json:"execution_support"` // 0-0.8 points max
+	RevenuePotential float64 `json:"revenue_potential"` // 0-0.5 points max
+	Total            float64 `json:"total"`             // max 4.0 points
 }
 
 // AntiChallengeScores represents the anti-challenge scoring breakdown.
 // Max total: 3.5 points (35% of total score)
 type AntiChallengeScores struct {
-	ContextSwitching  float64 `json:"context_switching"`  // 0-1.2 points max
-	RapidPrototyping  float64 `json:"rapid_prototyping"`  // 0-1.0 points max
-	Accountability    float64 `json:"accountability"`     // 0-0.8 points max
-	IncomeAnxiety     float64 `json:"income_anxiety"`     // 0-0.5 points max
-	Total             float64 `json:"total"`              // max 3.5 points
+	ContextSwitching float64 `json:"context_switching"` // 0-1.2 points max
+	RapidPrototyping float64 `json:"rapid_prototyping"` // 0-1.0 points max
+	Accountability   float64 `json:"accountability"`    // 0-0.8 points max
+	IncomeAnxiety    float64 `json:"income_anxiety"`    // 0-0.5 points max
+	Total            float64 `json:"total"`             // max 3.5 points
 }
 
 // StrategicScores represents the strategic fit scoring breakdown.
 // Max total: 2.5 points (25% of total score)
 type StrategicScores struct {
-	StackCompatibility   float64 `json:"stack_compatibility"`    // 0-1.0 points max
-	ShippingHabit        float64 `json:"shipping_habit"`         // 0-0.8 points max
-	PublicAccountability float64 `json:"public_accountability"`  // 0-0.4 points max
-	RevenueTesting       float64 `json:"revenue_testing"`        // 0-0.3 points max
-	Total                float64 `json:"total"`                  // max 2.5 points
+	StackCompatibility   float64 `json:"stack_compatibility"`   // 0-1.0 points max
+	ShippingHabit        float64 `json:"shipping_habit"`        // 0-0.8 points max
+	PublicAccountability float64 `json:"public_accountability"` // 0-0.4 points max
+	RevenueTesting       float64 `json:"revenue_testing"`       // 0-0.3 points max
+	Total                float64 `json:"total"`                 // max 2.5 points
 }
 
 // DetectedPattern represents a detected anti-pattern or positive pattern.

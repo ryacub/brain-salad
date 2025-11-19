@@ -27,13 +27,13 @@ type Metric struct {
 
 // HistogramStats contains statistical data for histogram metrics
 type HistogramStats struct {
-	Count  int64
-	Min    float64
-	Max    float64
-	Mean   float64
-	P50    float64
-	P95    float64
-	P99    float64
+	Count int64
+	Min   float64
+	Max   float64
+	Mean  float64
+	P50   float64
+	P95   float64
+	P99   float64
 }
 
 // Collector manages metrics collection in a thread-safe manner

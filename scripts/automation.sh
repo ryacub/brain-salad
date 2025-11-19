@@ -6,8 +6,8 @@
 set -e
 
 PROJECT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
-BUILD_SCRIPT="$PROJECT_DIR/make.sh"
-BINARY_PATH="$PROJECT_DIR/target/release/tm"
+BUILD_SCRIPT="$PROJECT_DIR/Makefile"
+BINARY_PATH="$PROJECT_DIR/bin/tm"
 
 # Colors for output
 RED='\033[0;31m'
@@ -33,7 +33,7 @@ usage() {
 # Function to run development build
 dev_build() {
     echo "${YELLOW}🔄 Running development build...${NC}"
-    "$BUILD_SCRIPT" -d -q  # Quick quiet dev build
+    make build  # Build Go project
     if [ $? -eq 0 ]; then
         echo "${GREEN}✅ Development build completed!${NC}"
     else
@@ -44,7 +44,7 @@ dev_build() {
 # Function to run release build
 release_build() {
     echo "${BLUE}🚀 Running release build...${NC}"
-    "$BUILD_SCRIPT" -q  # Quiet release build
+    make build  # Build Go project for release
     if [ $? -eq 0 ]; then
         echo "${GREEN}✅ Release build completed!${NC}"
         echo "${CYAN}📦 Binary available at: $BINARY_PATH${NC}"
@@ -56,16 +56,16 @@ release_build() {
 # Function to start file watcher
 start_watcher() {
     echo "${BLUE}🔍 Starting file watcher for automatic builds...${NC}"
-    echo "${BLUE}📁 Watching source directory: $PROJECT_DIR/src${NC}"
+    echo "${BLUE}📁 Watching Go source files in: $PROJECT_DIR${NC}"
     echo "${YELLOW}💡 Press Ctrl+C to stop watching${NC}"
 
     # Store initial file modification times
-    PREV_MOD_TIME=$(find "$PROJECT_DIR/src" -name "*.rs" -exec stat -c "%Y %n" {} \; 2>/dev/null | sort | md5sum)
-    
+    PREV_MOD_TIME=$(find "$PROJECT_DIR" -name "*.go" -exec stat -f "%m %N" {} \; 2>/dev/null | sort | md5)
+
     while true; do
         sleep 2  # Check every 2 seconds
-        CURRENT_MOD_TIME=$(find "$PROJECT_DIR/src" -name "*.rs" -exec stat -c "%Y %n" {} \; 2>/dev/null | sort | md5sum)
-        
+        CURRENT_MOD_TIME=$(find "$PROJECT_DIR" -name "*.go" -exec stat -f "%m %N" {} \; 2>/dev/null | sort | md5)
+
         if [ "$PREV_MOD_TIME" != "$CURRENT_MOD_TIME" ]; then
             PREV_MOD_TIME="$CURRENT_MOD_TIME"
             dev_build

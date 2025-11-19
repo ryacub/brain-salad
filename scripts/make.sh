@@ -1,12 +1,12 @@
 #!/bin/bash
 
-# Quick build script with options
+# Quick build script with options for Go project
 
 set -e
 
-# Use the directory containing this script as the project directory
-PROJECT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
-BINARY_PATH="$PROJECT_DIR/target/release/tm"
+# Use the parent directory as the project root (scripts is a subdirectory)
+PROJECT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")/.." && pwd)"
+BINARY_PATH="$PROJECT_DIR/bin/tm"
 
 # Colors for output
 RED='\033[0;31m'
@@ -27,7 +27,6 @@ usage() {
     echo "  -f, --force    Force clean build"
     echo "  -d, --dev      Build development binary (debug, faster)"
     echo "  -r, --release  Build release version (optimized)"
-    echo "  -i, --incremental  Use incremental compilation (default)"
     echo ""
 }
 
@@ -77,11 +76,6 @@ while [[ $# -gt 0 ]]; do
             DEV_BUILD=false  # Don't do both
             shift
             ;;
-        -i|--incremental)
-            # Already enabled by default, but we'll make sure
-            echo "${BLUE}💡 Incremental compilation is enabled by default in .cargo/config.toml${NC}"
-            shift
-            ;;
         *)
             echo "Unknown option: $1"
             usage
@@ -101,6 +95,9 @@ fi
 # Change to project directory
 cd "$PROJECT_DIR"
 
+# Ensure bin directory exists
+mkdir -p "$PROJECT_DIR/bin"
+
 if [ "$VERBOSE" = true ]; then
     echo "${BLUE}🏗️  Building Telos Matrix CLI...${NC}"
 fi
@@ -110,7 +107,8 @@ if [ "$FORCE_CLEAN" = true ]; then
     if [ "$QUIET" != true ]; then
         echo "${YELLOW}🧹 Cleaning previous builds...${NC}"
     fi
-    cargo clean
+    rm -rf "$PROJECT_DIR/bin"
+    mkdir -p "$PROJECT_DIR/bin"
 fi
 
 # Check only
@@ -118,7 +116,7 @@ if [ "$CHECK_ONLY" = true ]; then
     if [ "$QUIET" != true ]; then
         echo "${BLUE}🔍 Checking compilation...${NC}"
     fi
-    cargo check
+    go build ./...
     if [ "$QUIET" != true ]; then
         echo "${GREEN}✅ Compilation check passed!${NC}"
     fi
@@ -130,20 +128,18 @@ if [ "$DEV_BUILD" = true ]; then
     if [ "$QUIET" != true ]; then
         echo "${BLUE}🔧 Building development version (faster compilation)...${NC}"
     fi
-    time cargo build
-    BINARY_PATH="$PROJECT_DIR/target/debug/tm"
+    time go build -o "$BINARY_PATH" ./cmd/cli
 elif [ "$RELEASE_BUILD" = true ]; then
     if [ "$QUIET" != true ]; then
         echo "${BLUE}🚀 Building release version (optimized but slower)...${NC}"
     fi
-    time cargo build --release
+    time go build -ldflags="-s -w" -o "$BINARY_PATH" ./cmd/cli
 else
     # Default case - should be covered by defaults but just in case
     if [ "$QUIET" != true ]; then
         echo "${BLUE}🔧 Building development version (faster compilation)...${NC}"
     fi
-    time cargo build
-    BINARY_PATH="$PROJECT_DIR/target/debug/tm"
+    time go build -o "$BINARY_PATH" ./cmd/cli
 fi
 
 # Check if build succeeded
@@ -154,7 +150,8 @@ fi
 
 # Update symlink only for release builds
 if [ "$DEV_BUILD" != true ]; then
-    ln -sf "$PROJECT_DIR/target/release/tm" "$HOME/.local/bin/tm"
+    mkdir -p "$HOME/.local/bin"
+    ln -sf "$BINARY_PATH" "$HOME/.local/bin/tm"
 fi
 
 if [ "$QUIET" != true ]; then
@@ -172,7 +169,7 @@ if [ "$RUN_TESTS" = true ]; then
     if [ "$QUIET" != true ]; then
         echo "${BLUE}🧪 Running tests...${NC}"
     fi
-    cargo test -- --nocapture --show-output
+    go test -v ./...
     if [ "$QUIET" != true ]; then
         echo "${GREEN}✅ All tests passed!${NC}"
     fi
@@ -181,7 +178,7 @@ fi
 # Quick verification
 if [ "$QUIET" != true ] && [ "$DEV_BUILD" != true ]; then
     echo "${BLUE}🔍 Quick verification...${NC}"
-    tm --version >/dev/null 2>&1
+    "$BINARY_PATH" --version >/dev/null 2>&1
     if [ $? -eq 0 ]; then
         echo "${GREEN}✅ tm command is working!${NC}"
     else

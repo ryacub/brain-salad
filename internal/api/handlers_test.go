@@ -98,8 +98,8 @@ func TestAnalyzeHandler(t *testing.T) {
 		checkResponse  func(t *testing.T, body []byte)
 	}{
 		{
-			name: "valid idea analysis",
-			body: `{"content":"Build a Go-based AI code review tool that ships in 2 weeks"}`,
+			name:           "valid idea analysis",
+			body:           `{"content":"Build a Go-based AI code review tool that ships in 2 weeks"}`,
 			expectedStatus: http.StatusOK,
 			checkResponse: func(t *testing.T, body []byte) {
 				var response AnalyzeResponse
@@ -160,8 +160,8 @@ func TestCreateIdeaHandler(t *testing.T) {
 		checkResponse  func(t *testing.T, body []byte)
 	}{
 		{
-			name: "valid idea creation",
-			body: `{"content":"Build AI-powered Go code reviewer"}`,
+			name:           "valid idea creation",
+			body:           `{"content":"Build AI-powered Go code reviewer"}`,
 			expectedStatus: http.StatusCreated,
 			checkResponse: func(t *testing.T, body []byte) {
 				var response IdeaResponse

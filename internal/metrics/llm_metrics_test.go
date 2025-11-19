@@ -418,8 +418,8 @@ func TestHistogramStatistics(t *testing.T) {
 }
 
 func TestEstimateMonthlyCost(t *testing.T) {
-	dailyInput := 1_000_000  // 1M tokens per day
-	dailyOutput := 500_000   // 500K tokens per day
+	dailyInput := 1_000_000 // 1M tokens per day
+	dailyOutput := 500_000  // 500K tokens per day
 
 	monthlyCost := EstimateMonthlyCost(dailyInput, dailyOutput, "claude")
 

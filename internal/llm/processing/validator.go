@@ -6,19 +6,19 @@ import (
 
 // Validator validates processed results
 type Validator struct {
-	maxMissionScore      float64
+	maxMissionScore       float64
 	maxAntiChallengeScore float64
-	maxStrategicScore    float64
-	maxFinalScore        float64
+	maxStrategicScore     float64
+	maxFinalScore         float64
 }
 
 // NewValidator creates a new validator with default thresholds
 func NewValidator() *Validator {
 	return &Validator{
-		maxMissionScore:      4.0,
+		maxMissionScore:       4.0,
 		maxAntiChallengeScore: 3.5,
-		maxStrategicScore:    2.5,
-		maxFinalScore:        10.0,
+		maxStrategicScore:     2.5,
+		maxFinalScore:         10.0,
 	}
 }
 
@@ -63,10 +63,10 @@ func (v *Validator) validateScore(score, min, max float64, name string) error {
 // validateRecommendation checks if recommendation is valid
 func (v *Validator) validateRecommendation(recommendation string) error {
 	validRecommendations := map[string]bool{
-		"PRIORITIZE NOW":  true,
-		"GOOD ALIGNMENT":  true,
-		"CONSIDER LATER":  true,
-		"AVOID FOR NOW":   true,
+		"PRIORITIZE NOW": true,
+		"GOOD ALIGNMENT": true,
+		"CONSIDER LATER": true,
+		"AVOID FOR NOW":  true,
 	}
 
 	if !validRecommendations[recommendation] {
