@@ -58,7 +58,7 @@ cat > ~/.telos/telos.md <<'TELOS'
 
 ## Stack
 - Primary: Go, TypeScript, Python
-- Secondary: Rust, React
+- Secondary: React
 
 ## Failure Patterns
 - Context-switching between too many technologies
@@ -222,27 +222,6 @@ See [Configuration Guide](./docs/CONFIGURATION.md) for full details.
 - [API Documentation](./docs/API.md) - REST API reference
 - [Development](./CONTRIBUTING.md) - Contributing guide
 
-## Migration History
-
-This project was originally implemented in Rust (22,934 lines) and successfully migrated to Go with 100% feature parity achieved on 2024-11-19.
-
-### Why Go?
-- Faster iteration (5s builds vs 50s)
-- Better ecosystem for web/API development
-- Easier testing and debugging
-- More accessible to contributors
-
-### What's Better in Go:
-- 5 LLM providers (vs Rust's 1)
-- Interactive and quick dump modes
-- 18 test packages (vs limited Rust tests)
-- Comprehensive benchmarks
-
-### Rust Archive:
-- Full source: `archive/rust-implementation-2024` branch
-- Docs: `docs/rust-reference/`
-- Report: [MIGRATION_COMPLETE.md](./docs/MIGRATION_COMPLETE.md)
-
 ## Contributing
 
 Contributions welcome! See [CONTRIBUTING.md](./CONTRIBUTING.md) for guidelines.
@@ -278,5 +257,3 @@ Built with:
 - [Cobra](https://github.com/spf13/cobra) - CLI framework
 - [SQLite](https://www.sqlite.org/) - Database
 - [Ollama](https://ollama.ai/) - Local LLM support
-
-Original Rust implementation (22,934 lines) served as the foundation and reference for this migration.
