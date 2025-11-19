@@ -14,6 +14,7 @@ import (
 	"github.com/rayyacub/telos-idea-matrix/internal/telos"
 	"github.com/rs/zerolog/log"
 	"github.com/spf13/cobra"
+	"github.com/spf13/pflag"
 )
 
 // CLIContext holds shared dependencies for all commands
@@ -144,6 +145,26 @@ func Execute() error {
 	return rootCmd.Execute()
 }
 
+// resetCommandFlags recursively resets all flags for a command and its subcommands
+func resetCommandFlags(cmd *cobra.Command) {
+	// Reset local flags
+	cmd.Flags().VisitAll(func(flag *pflag.Flag) {
+		flag.Changed = false
+		_ = flag.Value.Set(flag.DefValue)
+	})
+
+	// Reset persistent flags
+	cmd.PersistentFlags().VisitAll(func(flag *pflag.Flag) {
+		flag.Changed = false
+		_ = flag.Value.Set(flag.DefValue)
+	})
+
+	// Reset all subcommands recursively
+	for _, subCmd := range cmd.Commands() {
+		resetCommandFlags(subCmd)
+	}
+}
+
 // GetRootCmd returns the root command for testing
 func GetRootCmd() *cobra.Command {
 	// Reset command state for testing
@@ -151,6 +172,9 @@ func GetRootCmd() *cobra.Command {
 	if rootCmd != nil {
 		rootCmd.SilenceUsage = false
 		rootCmd.SilenceErrors = false
+
+		// Reset all flags recursively for root and all subcommands
+		resetCommandFlags(rootCmd)
 	}
 	return rootCmd
 }
