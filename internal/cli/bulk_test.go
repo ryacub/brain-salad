@@ -20,6 +20,9 @@ func TestBulkTag_WithFilters(t *testing.T) {
 	cliCtx, cleanup := setupTestCLI(t)
 	defer cleanup()
 
+	// Set the global CLI context for commands to use
+	SetContext(cliCtx)
+
 	// Create test ideas with varying scores
 	ideas := []*models.Idea{
 		{
@@ -75,6 +78,9 @@ func TestBulkTag_WithFilters(t *testing.T) {
 func TestBulkArchive_WithFilters(t *testing.T) {
 	cliCtx, cleanup := setupTestCLI(t)
 	defer cleanup()
+
+	// Set the global CLI context for commands to use
+	SetContext(cliCtx)
 
 	// Create old and new ideas
 	oldIdea := &models.Idea{
@@ -397,6 +403,9 @@ func TestBulkArchive_DryRun(t *testing.T) {
 func TestBulkAnalyze_WithFilters(t *testing.T) {
 	cliCtx, cleanup := setupTestCLI(t)
 	defer cleanup()
+
+	// Set the global CLI context for commands to use
+	SetContext(cliCtx)
 
 	// Create test ideas with varying scores
 	ideas := []*models.Idea{
@@ -928,6 +937,9 @@ func TestBulkUpdate_SetStatus(t *testing.T) {
 	cliCtx, cleanup := setupTestCLI(t)
 	defer cleanup()
 
+	// Set the global CLI context for commands to use
+	SetContext(cliCtx)
+
 	// Create test ideas
 	ideas := []*models.Idea{
 		{
@@ -983,6 +995,9 @@ func TestBulkUpdate_AddPatterns(t *testing.T) {
 	cliCtx, cleanup := setupTestCLI(t)
 	defer cleanup()
 
+	// Set the global CLI context for commands to use
+	SetContext(cliCtx)
+
 	// Create test idea
 	idea := &models.Idea{
 		ID:         uuid.New().String(),
@@ -1025,6 +1040,9 @@ func TestBulkUpdate_RemovePatterns(t *testing.T) {
 	cliCtx, cleanup := setupTestCLI(t)
 	defer cleanup()
 
+	// Set the global CLI context for commands to use
+	SetContext(cliCtx)
+
 	// Create test idea
 	idea := &models.Idea{
 		ID:         uuid.New().String(),
@@ -1065,6 +1083,9 @@ func TestBulkUpdate_RemovePatterns(t *testing.T) {
 func TestBulkUpdate_AddTags(t *testing.T) {
 	cliCtx, cleanup := setupTestCLI(t)
 	defer cleanup()
+
+	// Set the global CLI context for commands to use
+	SetContext(cliCtx)
 
 	// Create test idea
 	idea := &models.Idea{
@@ -1107,6 +1128,9 @@ func TestBulkUpdate_DryRun(t *testing.T) {
 	cliCtx, cleanup := setupTestCLI(t)
 	defer cleanup()
 
+	// Set the global CLI context for commands to use
+	SetContext(cliCtx)
+
 	// Create test idea
 	idea := &models.Idea{
 		ID:         uuid.New().String(),
@@ -1147,6 +1171,9 @@ func TestBulkUpdate_DryRun(t *testing.T) {
 func TestBulkUpdate_CombinedOperations(t *testing.T) {
 	cliCtx, cleanup := setupTestCLI(t)
 	defer cleanup()
+
+	// Set the global CLI context for commands to use
+	SetContext(cliCtx)
 
 	// Create test idea
 	idea := &models.Idea{
