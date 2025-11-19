@@ -6,6 +6,7 @@ import (
 	"sync/atomic"
 	"time"
 
+	"github.com/rayyacub/telos-idea-matrix/internal/metrics"
 	"github.com/rayyacub/telos-idea-matrix/internal/models"
 )
 
@@ -171,6 +172,11 @@ func (m *Manager) Analyze(req AnalysisRequest) (*AnalysisResult, error) {
 	fallbackEnabled := m.fallbackEnabled
 	m.mu.RUnlock()
 
+	var primaryProviderName string
+	if primary != nil {
+		primaryProviderName = primary.Name()
+	}
+
 	// Try primary provider
 	if primary != nil {
 		result, err := m.analyzeWithProvider(primary, req)
@@ -201,6 +207,9 @@ func (m *Manager) Analyze(req AnalysisRequest) (*AnalysisResult, error) {
 		if !provider.IsAvailable() {
 			continue
 		}
+
+		// Record fallback event
+		metrics.RecordLLMFallback(primaryProviderName, provider.Name())
 
 		result, err := m.analyzeWithProvider(provider, req)
 		if err == nil {

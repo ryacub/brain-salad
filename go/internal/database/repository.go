@@ -44,11 +44,20 @@ func NewRepository(dbPath string) (*Repository, error) {
 		}
 	}
 
+	// Enable WAL mode and other optimizations via connection string
+	dsn := dbPath + "?_journal_mode=WAL&_synchronous=NORMAL&_busy_timeout=5000"
+
 	// Open database connection
-	db, err := sql.Open("sqlite3", dbPath)
+	db, err := sql.Open("sqlite3", dsn)
 	if err != nil {
 		return nil, fmt.Errorf("failed to open database: %w", err)
 	}
+
+	// Configure connection pooling
+	// For single-user local usage, conservative settings are appropriate
+	db.SetMaxOpenConns(5)                  // Max 5 concurrent connections
+	db.SetMaxIdleConns(2)                  // Keep 2 connections ready for reuse
+	db.SetConnMaxLifetime(5 * time.Minute) // Refresh connections every 5 minutes
 
 	// Test connection
 	if err := db.Ping(); err != nil {
@@ -56,10 +65,22 @@ func NewRepository(dbPath string) (*Repository, error) {
 		return nil, fmt.Errorf("failed to connect to database: %w", err)
 	}
 
-	// Enable foreign keys
-	if _, err := db.Exec("PRAGMA foreign_keys = ON"); err != nil {
-		_ = db.Close()
-		return nil, fmt.Errorf("failed to enable foreign keys: %w", err)
+	// Apply additional WAL optimizations
+	// These ensure WAL mode is active even if connection string params don't work
+	pragmas := []string{
+		"PRAGMA journal_mode = WAL",
+		"PRAGMA synchronous = NORMAL",
+		"PRAGMA busy_timeout = 5000",
+		"PRAGMA cache_size = -64000", // 64MB cache
+		"PRAGMA temp_store = MEMORY",  // Keep temp tables in memory
+		"PRAGMA foreign_keys = ON",    // Enable foreign keys
+	}
+
+	for _, pragma := range pragmas {
+		if _, err := db.Exec(pragma); err != nil {
+			_ = db.Close()
+			return nil, fmt.Errorf("failed to execute %s: %w", pragma, err)
+		}
 	}
 
 	repo := &Repository{db: db}

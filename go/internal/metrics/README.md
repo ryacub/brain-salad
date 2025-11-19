@@ -146,6 +146,180 @@ Response format:
 - Minimal memory overhead
 - Snapshot operation creates a copy (non-blocking)
 
+## LLM Telemetry
+
+Comprehensive telemetry for tracking LLM provider usage, performance, and costs.
+
+### What Metrics Are Collected
+
+**Per Provider (Ollama, Claude, OpenAI, Custom, Rule-based):**
+- Total requests (success/failure counts)
+- Request latency (average, P50, P95, P99)
+- Token usage (input/output tokens)
+- Estimated costs (for paid providers)
+- Error breakdown by type (timeout, rate_limit, auth_error, etc.)
+
+**Global Metrics:**
+- Cache hit/miss rates
+- Provider fallback events
+
+### Privacy Guarantees
+
+The metrics system only captures aggregated statistics. **No sensitive data is captured:**
+
+❌ Never captured:
+- Actual idea content
+- API keys or credentials
+- User-identifiable information
+- Error messages containing PII
+
+✅ Only captured:
+- Aggregated counts
+- Timing data
+- Token counts (numbers only)
+- Error types (categorized)
+
+### Usage
+
+#### Recording Metrics
+
+```go
+import "github.com/rayyacub/telos-idea-matrix/internal/metrics"
+
+// Record a successful LLM request
+start := time.Now()
+// ... call LLM provider ...
+duration := time.Since(start)
+metrics.RecordLLMRequest("claude", true, duration)
+
+// Record token usage (for cost estimation)
+metrics.RecordLLMTokens("claude", 1500, 800) // input: 1500, output: 800
+
+// Record errors
+metrics.RecordLLMError("openai", "timeout")
+metrics.RecordLLMError("claude", "rate_limit")
+
+// Record cache events
+metrics.RecordLLMCacheHit(true)  // cache hit
+metrics.RecordLLMCacheHit(false) // cache miss
+
+// Record fallback events
+metrics.RecordLLMFallback("ollama", "claude") // fell back from ollama to claude
+```
+
+#### Error Types
+
+Standard error classifications for consistent tracking:
+
+- `timeout` - Request exceeded deadline
+- `rate_limit` - Provider rate limit hit
+- `auth_error` - Authentication/API key issues
+- `network_error` - Connection failures
+- `invalid_response` - Provider returned malformed data
+- `provider_error` - Provider-side errors (5xx)
+- `unknown` - Unclassified errors
+
+#### Cost Estimation
+
+```go
+// Calculate cost for a single request
+cost := metrics.CalculateCost("claude", 1000, 500) // 1000 input, 500 output tokens
+fmt.Printf("Cost: %s\n", cost.FormatCost()) // e.g., "$0.0105"
+fmt.Printf("Details: %s\n", cost.FormatDetailed())
+
+// Estimate monthly cost based on daily usage
+monthlyCost := metrics.EstimateMonthlyCost(1_000_000, 500_000, "claude")
+fmt.Printf("Estimated monthly: $%.2f\n", monthlyCost)
+```
+
+#### Pricing (as of 2025)
+
+Provider | Input Cost (per 1M tokens) | Output Cost (per 1M tokens)
+---------|---------------------------|---------------------------
+Claude (Sonnet 3.5) | $3.00 | $15.00
+OpenAI (GPT-4) | $30.00 | $60.00
+Ollama | $0.00 (local) | $0.00 (local)
+Custom | Unknown | Unknown
+Rule-based | $0.00 (no LLM) | $0.00 (no LLM)
+
+### Viewing Metrics
+
+#### CLI Command
+
+```bash
+# View all LLM metrics
+tm analytics llm
+
+# Export as JSON
+tm analytics llm --json
+
+# View metrics from last 24 hours
+tm analytics llm --since 24h
+```
+
+#### Sample Output
+
+```
+LLM Provider Telemetry
+====================================================================================================
+
+Provider Summary:
+----------------------------------------------------------------------------------------------------
+Provider        Requests    Success    Failure   Success %   Avg Lat   Est. Cost
+----------------------------------------------------------------------------------------------------
+claude                42         40          2       95.2%      450ms      $0.105
+ollama                15         15          0      100.0%      200ms          -
+rule_based             8          8          0      100.0%       10ms          -
+
+Provider: claude
+----------------------------------------------------------------------------------------------------
+  Requests:      Total: 42 | Success: 40 | Failure: 2 | Success Rate: 95.2%
+  Latency (ms):  Avg: 450 | P50: 420 | P95: 580 | P99: 650
+  Tokens:        Input: 35000 | Output: 17500 | Total: 52500
+  Cost:          $0.105 USD
+  Errors:        timeout: 1 | network_error: 1
+
+Provider: ollama
+----------------------------------------------------------------------------------------------------
+  Requests:      Total: 15 | Success: 15 | Failure: 0 | Success Rate: 100.0%
+  Latency (ms):  Avg: 200 | P50: 195 | P95: 220 | P99: 230
+
+Cache Statistics:
+----------------------------------------------------------------------------------------------------
+  Hits:     12
+  Misses:   53
+  Hit Rate: 18.5%
+
+Fallback Statistics:
+----------------------------------------------------------------------------------------------------
+  ollama → claude: 3 times
+
+Cost Summary:
+----------------------------------------------------------------------------------------------------
+  Total Estimated Cost: $0.105 USD
+```
+
+### Implementation Details
+
+All LLM providers are automatically instrumented:
+- Ollama: Tracks requests and latency (no token counts available)
+- Claude: Tracks requests, latency, tokens, and costs
+- OpenAI: Tracks requests, latency, tokens, and costs
+- Custom: Tracks requests, latency, and errors
+- Rule-based: Tracks requests and latency (no costs)
+
+The LLM manager automatically records fallback events when a primary provider fails and a backup is used.
+
+### Testing
+
+```bash
+# Run all metrics tests including LLM tests
+go test github.com/rayyacub/telos-idea-matrix/internal/metrics -v -cover
+
+# Run only LLM metrics tests
+go test github.com/rayyacub/telos-idea-matrix/internal/metrics -run LLM -v
+```
+
 ## Testing
 
 ```bash

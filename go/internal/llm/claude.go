@@ -12,6 +12,7 @@ import (
 	"time"
 
 	"github.com/rayyacub/telos-idea-matrix/internal/llm/processing"
+	"github.com/rayyacub/telos-idea-matrix/internal/metrics"
 )
 
 // ============================================================================
@@ -113,12 +114,18 @@ func (cp *ClaudeProvider) Analyze(req AnalysisRequest) (*AnalysisResult, error) 
 	start := time.Now()
 
 	if !cp.IsAvailable() {
+		duration := time.Since(start)
+		metrics.RecordLLMRequest(cp.Name(), false, duration)
+		metrics.RecordLLMError(cp.Name(), "auth_error")
 		return nil, fmt.Errorf("Claude provider not available (check ANTHROPIC_API_KEY)")
 	}
 
 	// Build prompt
 	prompt, err := BuildAnalysisPrompt(req.IdeaContent, req.Telos)
 	if err != nil {
+		duration := time.Since(start)
+		metrics.RecordLLMRequest(cp.Name(), false, duration)
+		metrics.RecordLLMError(cp.Name(), "invalid_request")
 		return nil, fmt.Errorf("build prompt: %w", err)
 	}
 
@@ -161,12 +168,18 @@ func (cp *ClaudeProvider) Analyze(req AnalysisRequest) (*AnalysisResult, error) 
 		}
 	}
 
+	duration := time.Since(start)
+
 	if lastErr != nil {
+		metrics.RecordLLMRequest(cp.Name(), false, duration)
+		metrics.RecordLLMError(cp.Name(), classifyError(lastErr))
 		return nil, fmt.Errorf("Claude request failed after %d retries: %w", cp.maxRetries, lastErr)
 	}
 
 	// Extract text from response
 	if len(resp.Content) == 0 {
+		metrics.RecordLLMRequest(cp.Name(), false, duration)
+		metrics.RecordLLMError(cp.Name(), "invalid_response")
 		return nil, fmt.Errorf("no response content from Claude")
 	}
 
@@ -175,8 +188,16 @@ func (cp *ClaudeProvider) Analyze(req AnalysisRequest) (*AnalysisResult, error) 
 	// Process LLM response with fallback support
 	processed, err := cp.processor.Process(responseText, req.IdeaContent)
 	if err != nil {
+		metrics.RecordLLMRequest(cp.Name(), false, duration)
+		metrics.RecordLLMError(cp.Name(), "invalid_response")
 		return nil, fmt.Errorf("process response: %w", err)
 	}
+
+	// Record successful request
+	metrics.RecordLLMRequest(cp.Name(), true, duration)
+
+	// Record token usage
+	metrics.RecordLLMTokens(cp.Name(), resp.Usage.InputTokens, resp.Usage.OutputTokens)
 
 	// Convert to AnalysisResult
 	result := &AnalysisResult{

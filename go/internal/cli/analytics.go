@@ -39,6 +39,7 @@ Examples:
 	cmd.AddCommand(newAnalyticsPerformanceCommand())
 	cmd.AddCommand(newAnalyticsAnomalyCommand())
 	cmd.AddCommand(newAnalyticsMetricsCommand())
+	cmd.AddCommand(newAnalyticsLLMCommand())
 
 	return cmd
 }
