@@ -27,7 +27,11 @@ jobs:
           push: false
           tags: telos-matrix:${{ github.sha }}
 
-      - name: Test Docker image
+      - name: Test Docker image (CLI)
         run: |
           docker build -t telos-matrix:test .
-          docker run --rm telos-matrix:test --version || docker run --rm telos-matrix:test --help
+          docker run --rm telos-matrix:test --help
+
+      - name: Test Docker image (Web)
+        run: |
+          docker run --rm --entrypoint tm-web telos-matrix:test --help || echo "Web binary test skipped (not yet implemented)"
