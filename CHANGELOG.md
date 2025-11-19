@@ -5,6 +5,19 @@ All notable changes to this project will be documented in this file.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## [2.0.1] - 2025-11-19
+
+### Security
+- Fixed SQL injection vulnerabilities in database queries
+- Replaced insecure IP-based session tracking with SQLite-backed sessions
+- Fixed rate limiter to properly handle proxy headers (X-Forwarded-For, X-Real-IP)
+- Added proper session cookie security (Secure, HttpOnly, SameSite flags)
+
+### Fixed
+- Fixed unchecked errors in error handling paths
+- Reduced code duplication across the codebase
+- Fixed critical documentation mismatch in ARCHITECTURE.md
+
 ## [2.0.0] - 2024-11-19
 
 ### Changed
@@ -171,4 +184,6 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## Version History
 
+[2.0.1]: https://github.com/ryacub/brain-salad/releases/tag/v2.0.1
+[2.0.0]: https://github.com/ryacub/brain-salad/releases/tag/v2.0.0
 [0.1.0]: https://github.com/rayyacub/telos-idea-matrix/releases/tag/v0.1.0
