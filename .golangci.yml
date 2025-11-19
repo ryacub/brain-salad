@@ -16,7 +16,6 @@ linters:
     goconst:
       min-len: 3
       min-occurrences: 5
-      ignore-strings: '""'
     revive:
       rules:
         # Disable exported comment checks - too noisy for internal packages
