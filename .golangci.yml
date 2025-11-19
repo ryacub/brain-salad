@@ -1,21 +1,17 @@
+version: "2"
+
 run:
   timeout: 5m
   tests: true
   modules-download-mode: readonly
 
 linters:
+  default: standard
   enable:
-    - errcheck
-    - govet
-    - ineffassign
     - misspell
     - goconst
     - dupl
     - revive
-    - gosec
-    - unconvert
-    - unused
-    - staticcheck
 
 linters-settings:
   errcheck:
