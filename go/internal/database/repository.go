@@ -117,6 +117,12 @@ func (r *Repository) Create(idea *models.Idea) error {
 		return fmt.Errorf("failed to serialize patterns: %w", err)
 	}
 
+	// Serialize tags to JSON
+	tagsJSON, err := json.Marshal(idea.Tags)
+	if err != nil {
+		return fmt.Errorf("failed to serialize tags: %w", err)
+	}
+
 	// Format timestamps as RFC3339
 	createdAt := idea.CreatedAt.Format(time.RFC3339)
 	var reviewedAt *string
@@ -127,9 +133,9 @@ func (r *Repository) Create(idea *models.Idea) error {
 
 	query := `
 		INSERT INTO ideas (
-			id, content, raw_score, final_score, patterns,
+			id, content, raw_score, final_score, patterns, tags,
 			recommendation, analysis_details, created_at, reviewed_at, status
-		) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
+		) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
 	`
 
 	_, err = r.db.Exec(
@@ -139,6 +145,7 @@ func (r *Repository) Create(idea *models.Idea) error {
 		idea.RawScore,
 		idea.FinalScore,
 		string(patternsJSON),
+		string(tagsJSON),
 		idea.Recommendation,
 		idea.AnalysisDetails,
 		createdAt,
@@ -160,7 +167,7 @@ func (r *Repository) GetByID(id string) (*models.Idea, error) {
 	}
 
 	query := `
-		SELECT id, content, raw_score, final_score, patterns,
+		SELECT id, content, raw_score, final_score, patterns, tags,
 		       recommendation, analysis_details, created_at, reviewed_at, status
 		FROM ideas
 		WHERE id = ?
@@ -168,6 +175,7 @@ func (r *Repository) GetByID(id string) (*models.Idea, error) {
 
 	var idea models.Idea
 	var patternsJSON string
+	var tagsJSON string
 	var createdAt string
 	var reviewedAt sql.NullString
 
@@ -177,6 +185,7 @@ func (r *Repository) GetByID(id string) (*models.Idea, error) {
 		&idea.RawScore,
 		&idea.FinalScore,
 		&patternsJSON,
+		&tagsJSON,
 		&idea.Recommendation,
 		&idea.AnalysisDetails,
 		&createdAt,
@@ -195,6 +204,13 @@ func (r *Repository) GetByID(id string) (*models.Idea, error) {
 	if patternsJSON != "" && patternsJSON != "null" {
 		if err := json.Unmarshal([]byte(patternsJSON), &idea.Patterns); err != nil {
 			return nil, fmt.Errorf("failed to parse patterns: %w", err)
+		}
+	}
+
+	// Parse tags JSON
+	if tagsJSON != "" && tagsJSON != "null" {
+		if err := json.Unmarshal([]byte(tagsJSON), &idea.Tags); err != nil {
+			return nil, fmt.Errorf("failed to parse tags: %w", err)
 		}
 	}
 
@@ -229,6 +245,12 @@ func (r *Repository) Update(idea *models.Idea) error {
 		return fmt.Errorf("failed to serialize patterns: %w", err)
 	}
 
+	// Serialize tags to JSON
+	tagsJSON, err := json.Marshal(idea.Tags)
+	if err != nil {
+		return fmt.Errorf("failed to serialize tags: %w", err)
+	}
+
 	// Format timestamps
 	var reviewedAt *string
 	if idea.ReviewedAt != nil {
@@ -238,7 +260,7 @@ func (r *Repository) Update(idea *models.Idea) error {
 
 	query := `
 		UPDATE ideas
-		SET content = ?, raw_score = ?, final_score = ?, patterns = ?,
+		SET content = ?, raw_score = ?, final_score = ?, patterns = ?, tags = ?,
 		    recommendation = ?, analysis_details = ?, reviewed_at = ?, status = ?
 		WHERE id = ?
 	`
@@ -249,6 +271,7 @@ func (r *Repository) Update(idea *models.Idea) error {
 		idea.RawScore,
 		idea.FinalScore,
 		string(patternsJSON),
+		string(tagsJSON),
 		idea.Recommendation,
 		idea.AnalysisDetails,
 		reviewedAt,
@@ -302,7 +325,7 @@ func (r *Repository) Delete(id string) error {
 // List retrieves ideas based on the provided options.
 func (r *Repository) List(options ListOptions) ([]*models.Idea, error) {
 	query := `
-		SELECT id, content, raw_score, final_score, patterns,
+		SELECT id, content, raw_score, final_score, patterns, tags,
 		       recommendation, analysis_details, created_at, reviewed_at, status
 		FROM ideas
 		WHERE 1=1
@@ -354,6 +377,7 @@ func (r *Repository) List(options ListOptions) ([]*models.Idea, error) {
 	for rows.Next() {
 		var idea models.Idea
 		var patternsJSON string
+		var tagsJSON string
 		var createdAt string
 		var reviewedAt sql.NullString
 
@@ -363,6 +387,7 @@ func (r *Repository) List(options ListOptions) ([]*models.Idea, error) {
 			&idea.RawScore,
 			&idea.FinalScore,
 			&patternsJSON,
+			&tagsJSON,
 			&idea.Recommendation,
 			&idea.AnalysisDetails,
 			&createdAt,
@@ -378,6 +403,13 @@ func (r *Repository) List(options ListOptions) ([]*models.Idea, error) {
 		if patternsJSON != "" && patternsJSON != "null" {
 			if err := json.Unmarshal([]byte(patternsJSON), &idea.Patterns); err != nil {
 				return nil, fmt.Errorf("failed to parse patterns: %w", err)
+			}
+		}
+
+		// Parse tags JSON
+		if tagsJSON != "" && tagsJSON != "null" {
+			if err := json.Unmarshal([]byte(tagsJSON), &idea.Tags); err != nil {
+				return nil, fmt.Errorf("failed to parse tags: %w", err)
 			}
 		}
 
@@ -593,7 +625,7 @@ func (r *Repository) GetRelatedIdeas(ideaID string, relType *models.Relationship
 	}
 
 	baseQuery := `
-		SELECT DISTINCT i.id, i.content, i.raw_score, i.final_score, i.patterns,
+		SELECT DISTINCT i.id, i.content, i.raw_score, i.final_score, i.patterns, i.tags,
 		       i.recommendation, i.analysis_details, i.created_at, i.reviewed_at, i.status
 		FROM ideas i
 		INNER JOIN idea_relationships r ON (i.id = r.target_idea_id OR i.id = r.source_idea_id)
@@ -619,6 +651,7 @@ func (r *Repository) GetRelatedIdeas(ideaID string, relType *models.Relationship
 	for rows.Next() {
 		var idea models.Idea
 		var patternsJSON string
+		var tagsJSON string
 		var createdAt string
 		var reviewedAt sql.NullString
 
@@ -628,6 +661,7 @@ func (r *Repository) GetRelatedIdeas(ideaID string, relType *models.Relationship
 			&idea.RawScore,
 			&idea.FinalScore,
 			&patternsJSON,
+			&tagsJSON,
 			&idea.Recommendation,
 			&idea.AnalysisDetails,
 			&createdAt,
@@ -643,6 +677,13 @@ func (r *Repository) GetRelatedIdeas(ideaID string, relType *models.Relationship
 		if patternsJSON != "" && patternsJSON != "null" {
 			if err := json.Unmarshal([]byte(patternsJSON), &idea.Patterns); err != nil {
 				return nil, fmt.Errorf("failed to parse patterns: %w", err)
+			}
+		}
+
+		// Parse tags JSON
+		if tagsJSON != "" && tagsJSON != "null" {
+			if err := json.Unmarshal([]byte(tagsJSON), &idea.Tags); err != nil {
+				return nil, fmt.Errorf("failed to parse tags: %w", err)
 			}
 		}
 
