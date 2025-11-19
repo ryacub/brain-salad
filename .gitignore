@@ -9,8 +9,7 @@
 cli
 tm
 telos
-go/cli
-go/tm
+bin/
 
 # Go artifacts
 go.work
@@ -83,7 +82,10 @@ temp/
 *.tmp
 *.temp
 
-# Node modules (for web UI)
+# Web Frontend
+web/node_modules/
+web/.svelte-kit/
+web/build/
 node_modules/
 .npm/
 .pnpm-store/

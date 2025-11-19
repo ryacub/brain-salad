@@ -17,7 +17,7 @@ Telos Matrix helps combat decision paralysis and context-switching by providing 
 ```bash
 # Clone repository
 git clone https://github.com/ryacub/brain-salad.git
-cd brain-salad/go
+cd brain-salad
 
 # Build binary
 go build -o tm ./cmd/cli
@@ -33,10 +33,11 @@ go install ./cmd/cli
 
 ```bash
 # Using Docker Compose
+cd deployments/docker
 docker compose up
 
-# Or build manually
-docker build -t telos-matrix .
+# Or build manually from project root
+docker build -f deployments/docker/Dockerfile -t telos-matrix .
 docker run -v $(pwd)/telos.md:/app/telos.md telos-matrix
 ```
 
@@ -152,9 +153,12 @@ tm health                   # System health check
 **Testing:** Standard library + Testify
 
 ```
-go/
-├── cmd/cli/              # Main CLI binary
-├── internal/
+brain-salad/
+├── cmd/                  # Application entry points
+│   ├── cli/              # CLI binary
+│   ├── web/              # API server
+│   └── verify-wal/       # Database tools
+├── internal/             # Private application code
 │   ├── cli/              # Command implementations
 │   ├── database/         # SQLite repository
 │   ├── scoring/          # Scoring engine
@@ -162,9 +166,19 @@ go/
 │   ├── patterns/         # Pattern detection
 │   ├── llm/              # LLM provider abstraction
 │   ├── models/           # Domain models
+│   ├── api/              # HTTP handlers
 │   └── ...
+├── pkg/                  # Public libraries
+├── web/                  # SvelteKit frontend
 ├── test/                 # Integration tests
-└── docs/                 # Documentation
+├── docs/                 # Documentation
+├── examples/             # Example files
+├── scripts/              # Build and utility scripts
+├── configs/              # Configuration files
+└── deployments/          # Deployment configurations
+    ├── docker/           # Docker files
+    ├── nginx/            # Nginx configs
+    └── monitoring/       # Prometheus, Grafana
 ```
 
 See [Architecture Documentation](./docs/ARCHITECTURE.md) for details.
@@ -172,8 +186,6 @@ See [Architecture Documentation](./docs/ARCHITECTURE.md) for details.
 ## Testing
 
 ```bash
-cd go/
-
 # Run all tests
 go test ./...
 
@@ -185,6 +197,10 @@ go test ./internal/cli/...
 
 # Integration tests
 go test ./test/...
+
+# Using Makefile
+make test
+make test-coverage
 ```
 
 ## Configuration

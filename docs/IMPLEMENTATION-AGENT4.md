@@ -365,12 +365,12 @@ While the core functionality is complete, potential future enhancements include:
 ## Files Created/Modified
 
 ### Created Files
-1. `/home/user/brain-salad/go/internal/llm/manager.go` (520 lines)
-2. `/home/user/brain-salad/go/internal/llm/manager_test.go` (735 lines)
-3. `/home/user/brain-salad/go/docs/provider-manager.md` (550 lines)
-4. `/home/user/brain-salad/go/examples/provider-manager/main.go` (330 lines)
-5. `/home/user/brain-salad/go/configs/provider-config.example.yaml` (150 lines)
-6. `/home/user/brain-salad/go/docs/IMPLEMENTATION-AGENT4.md` (this file)
+1. `/home/user/brain-salad/internal/llm/manager.go` (520 lines)
+2. `/home/user/brain-salad/internal/llm/manager_test.go` (735 lines)
+3. `/home/user/brain-salad/docs/provider-manager.md` (550 lines)
+4. `/home/user/brain-salad/examples/provider-manager/main.go` (330 lines)
+5. `/home/user/brain-salad/configs/provider-config.example.yaml` (150 lines)
+6. `/home/user/brain-salad/docs/IMPLEMENTATION-AGENT4.md` (this file)
 
 ### Modified Files
 None - This implementation is additive and maintains full backward compatibility.

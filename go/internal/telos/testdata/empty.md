@@ -1,3 +1,0 @@
-# Empty Telos
-
-Nothing here.
