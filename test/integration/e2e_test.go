@@ -34,10 +34,10 @@ func TestEndToEndWorkflow(t *testing.T) {
 	telosPath := filepath.Join(tempDir, "telos.md")
 	telosContent := `# Telos: Technical Excellence
 
-## Core Goals
-- Build scalable systems
-- Write clean code
-- Deliver value
+## Goals
+- G1: Build scalable systems
+- G2: Write clean code
+- G3: Deliver value
 
 ## Strategies
 - Test-driven development
@@ -263,8 +263,8 @@ func TestConcurrentAccess(t *testing.T) {
 
 	telosPath := filepath.Join(tempDir, "telos.md")
 	telosContent := `# Telos
-## Core Goals
-- Goal 1
+## Goals
+- G1: Goal 1
 ## Strategies
 - Strategy 1
 `
@@ -548,8 +548,8 @@ func TestAPIErrorHandling(t *testing.T) {
 
 	telosPath := filepath.Join(tempDir, "telos.md")
 	telosContent := `# Telos
-## Core Goals
-- Goal 1
+## Goals
+- G1: Goal 1
 `
 	require.NoError(t, os.WriteFile(telosPath, []byte(telosContent), 0644))
 

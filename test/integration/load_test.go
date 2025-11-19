@@ -84,10 +84,10 @@ func TestLoadCreateIdeas(t *testing.T) {
 
 	telosPath := filepath.Join(tempDir, "telos.md")
 	telosContent := `# Telos: Load Test
-## Core Goals
-- Performance
-- Scalability
-- Reliability
+## Goals
+- G1: Performance
+- G2: Scalability
+- G3: Reliability
 ## Strategies
 - Efficient algorithms
 - Database optimization
@@ -190,9 +190,9 @@ func TestLoadMixedOperations(t *testing.T) {
 
 	telosPath := filepath.Join(tempDir, "telos.md")
 	telosContent := `# Telos
-## Core Goals
-- Goal 1
-- Goal 2
+## Goals
+- G1: Goal 1
+- G2: Goal 2
 `
 	require.NoError(t, os.WriteFile(telosPath, []byte(telosContent), 0644))
 
