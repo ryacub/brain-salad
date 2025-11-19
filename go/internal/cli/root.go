@@ -56,7 +56,9 @@ you focus on what truly matters.`,
 	rootCmd.PersistentFlags().StringVar(&telosPath, "telos", defaultTelosPath, "Path to telos.md file")
 
 	// Add subcommands
-	rootCmd.AddCommand(newDumpCommand())
+	dumpCmd := newDumpCommand()
+	dumpCmd.AddCommand(newBatchDumpCommand())
+	rootCmd.AddCommand(dumpCmd)
 	rootCmd.AddCommand(newScoreCommand())
 	rootCmd.AddCommand(newAnalyzeCommand())
 	rootCmd.AddCommand(newReviewCommand())
