@@ -2,6 +2,7 @@ package llm
 
 import (
 	"errors"
+	"sync"
 	"testing"
 	"time"
 
@@ -16,6 +17,7 @@ type mockProviderForManager struct {
 	err       error
 	result    *AnalysisResult
 	callCount int
+	mu        sync.Mutex
 }
 
 func (m *mockProviderForManager) Name() string {
@@ -27,7 +29,10 @@ func (m *mockProviderForManager) IsAvailable() bool {
 }
 
 func (m *mockProviderForManager) Analyze(req AnalysisRequest) (*AnalysisResult, error) {
+	m.mu.Lock()
 	m.callCount++
+	m.mu.Unlock()
+
 	if m.err != nil {
 		return nil, m.err
 	}
@@ -44,6 +49,12 @@ func (m *mockProviderForManager) Analyze(req AnalysisRequest) (*AnalysisResult, 
 		}, nil
 	}
 	return m.result, nil
+}
+
+func (m *mockProviderForManager) GetCallCount() int {
+	m.mu.Lock()
+	defer m.mu.Unlock()
+	return m.callCount
 }
 
 // createTestTelos creates a minimal valid telos for testing
@@ -167,13 +178,13 @@ func TestManager_FallbackChain(t *testing.T) {
 	}
 
 	// Verify primary was called
-	if primaryProvider.callCount != 1 {
-		t.Errorf("Expected primary provider to be called once, got %d", primaryProvider.callCount)
+	if primaryProvider.GetCallCount() != 1 {
+		t.Errorf("Expected primary provider to be called once, got %d", primaryProvider.GetCallCount())
 	}
 
 	// Verify fallback was called
-	if fallbackProvider.callCount != 1 {
-		t.Errorf("Expected fallback provider to be called once, got %d", fallbackProvider.callCount)
+	if fallbackProvider.GetCallCount() != 1 {
+		t.Errorf("Expected fallback provider to be called once, got %d", fallbackProvider.GetCallCount())
 	}
 }
 
@@ -696,23 +707,35 @@ func TestManager_ConcurrentAccess(t *testing.T) {
 	telos := createTestTelos()
 
 	// Run concurrent analyses
-	done := make(chan bool)
+	type result struct {
+		err error
+	}
+	results := make(chan result, 10)
+
 	for i := 0; i < 10; i++ {
 		go func() {
 			_, err := manager.Analyze(AnalysisRequest{
 				IdeaContent: "Test idea",
 				Telos:       telos,
 			})
-			if err != nil {
-				t.Errorf("Analysis failed: %v", err)
-			}
-			done <- true
+			results <- result{err: err}
 		}()
 	}
 
-	// Wait for all to complete
+	// Wait for all to complete and collect errors
+	var errors []error
 	for i := 0; i < 10; i++ {
-		<-done
+		res := <-results
+		if res.err != nil {
+			errors = append(errors, res.err)
+		}
+	}
+
+	// Report any errors after all goroutines complete
+	if len(errors) > 0 {
+		for _, err := range errors {
+			t.Errorf("Analysis failed: %v", err)
+		}
 	}
 
 	// Verify stats
