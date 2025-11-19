@@ -21,20 +21,21 @@ linters:
         - name: error-naming
         - name: if-return
         - name: var-naming
+  exclusions:
+    rules:
+      # Exclude goconst, dupl, and revive from test files
+      - path: _test\.go
+        linters:
+          - goconst
+          - dupl
+          - revive
+      # Exclude from test/ directory
+      - path: test/
+        linters:
+          - goconst
+          - dupl
+          - revive
 
 issues:
   max-issues-per-linter: 0
   max-same-issues: 0
-  exclude-rules:
-    # Exclude goconst, dupl, and revive from test files
-    - path: _test\.go
-      linters:
-        - goconst
-        - dupl
-        - revive
-    # Exclude goconst and dupl from test package
-    - path: test/
-      linters:
-        - goconst
-        - dupl
-        - revive
