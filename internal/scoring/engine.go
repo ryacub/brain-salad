@@ -527,8 +527,3 @@ func (e *Engine) calculateRevenueTesting(ideaLower string) float64 {
 
 	return 0.05 // Default low
 }
-
-// clamp ensures a value stays within min/max bounds.
-func clamp(value, minVal, maxVal float64) float64 {
-	return math.Max(minVal, math.Min(maxVal, value))
-}

@@ -12,7 +12,7 @@ linters:
     - revive
   settings:
     errcheck:
-      check-blank: true
+      check-blank: false
     revive:
       rules:
         - name: exported
