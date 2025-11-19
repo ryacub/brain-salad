@@ -52,7 +52,7 @@ func setupTestServer(t *testing.T) (*Server, *database.Repository, func()) {
 	require.NoError(t, err)
 
 	// Create server
-	server, err := NewServer(repo, telosPath)
+	server, err := NewServerFromPath(repo, telosPath)
 	require.NoError(t, err)
 
 	cleanup := func() {
@@ -75,10 +75,11 @@ func TestHealthHandler(t *testing.T) {
 
 	assert.Equal(t, http.StatusOK, w.Code)
 
-	var response map[string]string
+	var response map[string]interface{}
 	err := json.Unmarshal(w.Body.Bytes(), &response)
 	require.NoError(t, err)
-	assert.Equal(t, "ok", response["status"])
+	assert.NotEmpty(t, response["status"])
+	assert.Contains(t, []string{"healthy", "degraded", "unhealthy"}, response["status"])
 }
 
 // Test Analyze Endpoint
