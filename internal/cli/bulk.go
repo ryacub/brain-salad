@@ -665,6 +665,11 @@ func runBulkUpdate(opts bulkUpdateOptions) error {
 		}
 	}
 
+	// Safety check for tests
+	if ctx == nil || ctx.Repository == nil {
+		return fmt.Errorf("CLI context not initialized")
+	}
+
 	// Build filter
 	minScorePtr := &opts.scoreMin
 	maxScorePtr := &opts.scoreMax

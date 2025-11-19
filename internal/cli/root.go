@@ -146,6 +146,12 @@ func Execute() error {
 
 // GetRootCmd returns the root command for testing
 func GetRootCmd() *cobra.Command {
+	// Reset command state for testing
+	// This ensures flags are re-parsed fresh for each test
+	if rootCmd != nil {
+		rootCmd.SilenceUsage = false
+		rootCmd.SilenceErrors = false
+	}
 	return rootCmd
 }
 
@@ -157,4 +163,7 @@ func SetContext(c *CLIContext) {
 // ClearContext clears the global context (used for test cleanup)
 func ClearContext() {
 	ctx = nil
+	// Also reset the global flag variables
+	dbPath = ""
+	telosPath = ""
 }

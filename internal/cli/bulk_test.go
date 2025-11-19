@@ -1013,11 +1013,16 @@ func TestBulkUpdate_AddPatterns(t *testing.T) {
 	err := cliCtx.Repository.Create(idea)
 	require.NoError(t, err)
 
+	// Verify the idea exists with direct repository access
+	limit := 100
+	allIdeas, err := cliCtx.Repository.List(database.ListOptions{Limit: &limit})
+	require.NoError(t, err)
+	t.Logf("Repository has %d ideas before bulk update", len(allIdeas))
+
 	// Test bulk update to add pattern
+	// Don't pass --telos and --db since we've already set the context
 	cmd := GetRootCmd()
 	cmd.SetArgs([]string{
-		"--telos", cliCtx.TelosPath,
-		"--db", cliCtx.DBPath,
 		"bulk", "update",
 		"--score-min", "7.0",
 		"--add-patterns", "high-value,priority",
