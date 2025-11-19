@@ -1,0 +1,40 @@
+run:
+  timeout: 5m
+  tests: true
+
+linters:
+  enable:
+    - errcheck
+    - gosimple
+    - govet
+    - ineffassign
+    - staticcheck
+    - typecheck
+    - unused
+    - gofmt
+    - goimports
+    - misspell
+    - goconst
+    - dupl
+    - revive
+
+linters-settings:
+  errcheck:
+    check-blank: true
+  govet:
+    check-shadowing: true
+  gofmt:
+    simplify: true
+  revive:
+    rules:
+      - name: exported
+        severity: warning
+      - name: error-strings
+      - name: error-naming
+      - name: if-return
+      - name: var-naming
+
+issues:
+  exclude-use-default: false
+  max-issues-per-linter: 0
+  max-same-issues: 0
