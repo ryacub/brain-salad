@@ -25,3 +25,16 @@ linters:
 issues:
   max-issues-per-linter: 0
   max-same-issues: 0
+  exclude-rules:
+    # Exclude goconst, dupl, and revive from test files
+    - path: _test\.go
+      linters:
+        - goconst
+        - dupl
+        - revive
+    # Exclude goconst and dupl from test package
+    - path: test/
+      linters:
+        - goconst
+        - dupl
+        - revive
