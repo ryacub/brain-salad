@@ -30,7 +30,9 @@ func run() error {
 		homeDir = "/tmp"
 	}
 	logDir := filepath.Join(homeDir, ".telos-idea-matrix", "logs")
-	os.MkdirAll(logDir, 0755)
+	if err := os.MkdirAll(logDir, 0755); err != nil {
+		log.Warn().Err(err).Str("log_dir", logDir).Msg("failed to create log directory")
+	}
 
 	logCfg := logging.Config{
 		Level:      "info",
@@ -60,7 +62,11 @@ func run() error {
 	if err != nil {
 		return fmt.Errorf("failed to initialize database: %w", err)
 	}
-	defer repo.Close()
+	defer func() {
+		if err := repo.Close(); err != nil {
+			log.Error().Err(err).Msg("failed to close repository")
+		}
+	}()
 
 	log.Info().Str("database_path", cfg.Database.Path).Msg("Database initialized")
 
@@ -76,7 +82,11 @@ func run() error {
 	if err != nil {
 		return fmt.Errorf("failed to create server: %w", err)
 	}
-	defer server.Close()
+	defer func() {
+		if err := server.Close(); err != nil {
+			log.Error().Err(err).Msg("failed to close server")
+		}
+	}()
 
 	// Create task manager for background tasks
 	taskManager := tasks.NewTaskManager()

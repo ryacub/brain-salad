@@ -35,8 +35,8 @@ func TestCustomProvider_Name(t *testing.T) {
 		t.Run(tt.name, func(t *testing.T) {
 			// Set environment variable
 			if tt.envValue != "" {
-				os.Setenv("CUSTOM_LLM_NAME", tt.envValue)
-				defer os.Unsetenv("CUSTOM_LLM_NAME")
+				_ = os.Setenv("CUSTOM_LLM_NAME", tt.envValue)
+				defer func() { _ = os.Unsetenv("CUSTOM_LLM_NAME") }()
 			}
 
 			provider := NewCustomProvider()
@@ -69,8 +69,8 @@ func TestCustomProvider_IsAvailable(t *testing.T) {
 	for _, tt := range tests {
 		t.Run(tt.name, func(t *testing.T) {
 			if tt.endpoint != "" {
-				os.Setenv("CUSTOM_LLM_ENDPOINT", tt.endpoint)
-				defer os.Unsetenv("CUSTOM_LLM_ENDPOINT")
+				_ = os.Setenv("CUSTOM_LLM_ENDPOINT", tt.endpoint)
+				defer func() { _ = os.Unsetenv("CUSTOM_LLM_ENDPOINT") }()
 			}
 
 			provider := NewCustomProvider()
@@ -97,7 +97,7 @@ func TestCustomProvider_Analyze_Success(t *testing.T) {
 
 		// Return mock response
 		w.WriteHeader(http.StatusOK)
-		w.Write([]byte(`{
+		_, _ = w.Write([]byte(`{
 			"mission_alignment": 3.5,
 			"anti_challenge": 2.8,
 			"strategic_fit": 2.0,
@@ -109,8 +109,8 @@ func TestCustomProvider_Analyze_Success(t *testing.T) {
 	defer server.Close()
 
 	// Configure provider
-	os.Setenv("CUSTOM_LLM_ENDPOINT", server.URL)
-	defer os.Unsetenv("CUSTOM_LLM_ENDPOINT")
+	_ = os.Setenv("CUSTOM_LLM_ENDPOINT", server.URL)
+	defer func() { _ = os.Unsetenv("CUSTOM_LLM_ENDPOINT") }()
 
 	provider := NewCustomProvider()
 
@@ -185,7 +185,7 @@ func TestCustomProvider_Analyze_AlternativeFieldNames(t *testing.T) {
 	// Create mock server with alternative field names
 	server := httptest.NewServer(http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
 		w.WriteHeader(http.StatusOK)
-		w.Write([]byte(`{
+		_, _ = w.Write([]byte(`{
 			"missionAlignment": 3.0,
 			"antiChallenge": 2.5,
 			"strategicFit": 1.5,
@@ -195,8 +195,8 @@ func TestCustomProvider_Analyze_AlternativeFieldNames(t *testing.T) {
 	}))
 	defer server.Close()
 
-	os.Setenv("CUSTOM_LLM_ENDPOINT", server.URL)
-	defer os.Unsetenv("CUSTOM_LLM_ENDPOINT")
+	_ = os.Setenv("CUSTOM_LLM_ENDPOINT", server.URL)
+	defer func() { _ = os.Unsetenv("CUSTOM_LLM_ENDPOINT") }()
 
 	provider := NewCustomProvider()
 	req := AnalysisRequest{IdeaContent: "Test idea"}
@@ -222,12 +222,12 @@ func TestCustomProvider_Analyze_TextResponse(t *testing.T) {
 	// Create mock server returning plain text
 	server := httptest.NewServer(http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
 		w.WriteHeader(http.StatusOK)
-		w.Write([]byte("This idea shows promise but needs more validation."))
+		_, _ = w.Write([]byte("This idea shows promise but needs more validation."))
 	}))
 	defer server.Close()
 
-	os.Setenv("CUSTOM_LLM_ENDPOINT", server.URL)
-	defer os.Unsetenv("CUSTOM_LLM_ENDPOINT")
+	_ = os.Setenv("CUSTOM_LLM_ENDPOINT", server.URL)
+	defer func() { _ = os.Unsetenv("CUSTOM_LLM_ENDPOINT") }()
 
 	provider := NewCustomProvider()
 	req := AnalysisRequest{IdeaContent: "Test idea"}
@@ -287,12 +287,12 @@ func TestCustomProvider_Analyze_HTTPError(t *testing.T) {
 		t.Run(tt.name, func(t *testing.T) {
 			server := httptest.NewServer(http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
 				w.WriteHeader(tt.statusCode)
-				w.Write([]byte(tt.body))
+				_, _ = w.Write([]byte(tt.body))
 			}))
 			defer server.Close()
 
-			os.Setenv("CUSTOM_LLM_ENDPOINT", server.URL)
-			defer os.Unsetenv("CUSTOM_LLM_ENDPOINT")
+			_ = os.Setenv("CUSTOM_LLM_ENDPOINT", server.URL)
+			defer func() { _ = os.Unsetenv("CUSTOM_LLM_ENDPOINT") }()
 
 			provider := NewCustomProvider()
 			req := AnalysisRequest{IdeaContent: "Test idea"}
@@ -326,14 +326,14 @@ func TestCustomProvider_Analyze_WithHeaders(t *testing.T) {
 		receivedHeaders["X-Custom-Header"] = r.Header.Get("X-Custom-Header")
 
 		w.WriteHeader(http.StatusOK)
-		w.Write([]byte(`{"score": 7.0, "recommendation": "review"}`))
+		_, _ = w.Write([]byte(`{"score": 7.0, "recommendation": "review"}`))
 	}))
 	defer server.Close()
 
-	os.Setenv("CUSTOM_LLM_ENDPOINT", server.URL)
-	os.Setenv("CUSTOM_LLM_HEADERS", "Authorization:Bearer secret123,X-Custom-Header:custom-value")
-	defer os.Unsetenv("CUSTOM_LLM_ENDPOINT")
-	defer os.Unsetenv("CUSTOM_LLM_HEADERS")
+	_ = os.Setenv("CUSTOM_LLM_ENDPOINT", server.URL)
+	_ = os.Setenv("CUSTOM_LLM_HEADERS", "Authorization:Bearer secret123,X-Custom-Header:custom-value")
+	defer func() { _ = os.Unsetenv("CUSTOM_LLM_ENDPOINT") }()
+	defer func() { _ = os.Unsetenv("CUSTOM_LLM_HEADERS") }()
 
 	provider := NewCustomProvider()
 	req := AnalysisRequest{IdeaContent: "Test idea"}
@@ -357,17 +357,17 @@ func TestCustomProvider_Analyze_WithTemplate(t *testing.T) {
 
 	server := httptest.NewServer(http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
 		// Parse request body
-		json.NewDecoder(r.Body).Decode(&receivedBody)
+		_ = json.NewDecoder(r.Body).Decode(&receivedBody)
 
 		w.WriteHeader(http.StatusOK)
-		w.Write([]byte(`{"score": 7.0, "recommendation": "review"}`))
+		_, _ = w.Write([]byte(`{"score": 7.0, "recommendation": "review"}`))
 	}))
 	defer server.Close()
 
-	os.Setenv("CUSTOM_LLM_ENDPOINT", server.URL)
-	os.Setenv("CUSTOM_LLM_PROMPT_TEMPLATE", `{"text": "{{.IdeaContent}}", "max_tokens": 500}`)
-	defer os.Unsetenv("CUSTOM_LLM_ENDPOINT")
-	defer os.Unsetenv("CUSTOM_LLM_PROMPT_TEMPLATE")
+	_ = os.Setenv("CUSTOM_LLM_ENDPOINT", server.URL)
+	_ = os.Setenv("CUSTOM_LLM_PROMPT_TEMPLATE", `{"text": "{{.IdeaContent}}", "max_tokens": 500}`)
+	defer func() { _ = os.Unsetenv("CUSTOM_LLM_ENDPOINT") }()
+	defer func() { _ = os.Unsetenv("CUSTOM_LLM_PROMPT_TEMPLATE") }()
 
 	provider := NewCustomProvider()
 	req := AnalysisRequest{IdeaContent: "Build a task manager"}
@@ -391,14 +391,14 @@ func TestCustomProvider_Analyze_Timeout(t *testing.T) {
 	server := httptest.NewServer(http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
 		time.Sleep(2 * time.Second)
 		w.WriteHeader(http.StatusOK)
-		w.Write([]byte(`{"score": 7.0}`))
+		_, _ = w.Write([]byte(`{"score": 7.0}`))
 	}))
 	defer server.Close()
 
-	os.Setenv("CUSTOM_LLM_ENDPOINT", server.URL)
-	os.Setenv("CUSTOM_LLM_TIMEOUT", "1") // 1 second timeout
-	defer os.Unsetenv("CUSTOM_LLM_ENDPOINT")
-	defer os.Unsetenv("CUSTOM_LLM_TIMEOUT")
+	_ = os.Setenv("CUSTOM_LLM_ENDPOINT", server.URL)
+	_ = os.Setenv("CUSTOM_LLM_TIMEOUT", "1") // 1 second timeout
+	defer func() { _ = os.Unsetenv("CUSTOM_LLM_ENDPOINT") }()
+	defer func() { _ = os.Unsetenv("CUSTOM_LLM_TIMEOUT") }()
 
 	provider := NewCustomProvider()
 	req := AnalysisRequest{IdeaContent: "Test idea"}
@@ -447,12 +447,12 @@ func TestCustomProvider_ScoreValidation(t *testing.T) {
 		t.Run(tt.name, func(t *testing.T) {
 			server := httptest.NewServer(http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
 				w.WriteHeader(http.StatusOK)
-				w.Write([]byte(tt.response))
+				_, _ = w.Write([]byte(tt.response))
 			}))
 			defer server.Close()
 
-			os.Setenv("CUSTOM_LLM_ENDPOINT", server.URL)
-			defer os.Unsetenv("CUSTOM_LLM_ENDPOINT")
+			_ = os.Setenv("CUSTOM_LLM_ENDPOINT", server.URL)
+			defer func() { _ = os.Unsetenv("CUSTOM_LLM_ENDPOINT") }()
 
 			provider := NewCustomProvider()
 			req := AnalysisRequest{IdeaContent: "Test idea"}
@@ -561,7 +561,7 @@ func TestCustomProvider_CalculatedFinalScore(t *testing.T) {
 	server := httptest.NewServer(http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
 		w.WriteHeader(http.StatusOK)
 		// No final_score in response
-		w.Write([]byte(`{
+		_, _ = w.Write([]byte(`{
 			"mission_alignment": 3.0,
 			"anti_challenge": 2.5,
 			"strategic_fit": 1.5
@@ -569,8 +569,8 @@ func TestCustomProvider_CalculatedFinalScore(t *testing.T) {
 	}))
 	defer server.Close()
 
-	os.Setenv("CUSTOM_LLM_ENDPOINT", server.URL)
-	defer os.Unsetenv("CUSTOM_LLM_ENDPOINT")
+	_ = os.Setenv("CUSTOM_LLM_ENDPOINT", server.URL)
+	defer func() { _ = os.Unsetenv("CUSTOM_LLM_ENDPOINT") }()
 
 	provider := NewCustomProvider()
 	req := AnalysisRequest{IdeaContent: "Test idea"}
@@ -591,7 +591,7 @@ func TestCustomProvider_DefaultRecommendation(t *testing.T) {
 	server := httptest.NewServer(http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
 		w.WriteHeader(http.StatusOK)
 		// No recommendation in response
-		w.Write([]byte(`{
+		_, _ = w.Write([]byte(`{
 			"mission_alignment": 3.5,
 			"anti_challenge": 3.0,
 			"strategic_fit": 2.0
@@ -599,8 +599,8 @@ func TestCustomProvider_DefaultRecommendation(t *testing.T) {
 	}))
 	defer server.Close()
 
-	os.Setenv("CUSTOM_LLM_ENDPOINT", server.URL)
-	defer os.Unsetenv("CUSTOM_LLM_ENDPOINT")
+	_ = os.Setenv("CUSTOM_LLM_ENDPOINT", server.URL)
+	defer func() { _ = os.Unsetenv("CUSTOM_LLM_ENDPOINT") }()
 
 	provider := NewCustomProvider()
 	req := AnalysisRequest{IdeaContent: "Test idea"}

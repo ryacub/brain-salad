@@ -159,10 +159,10 @@ func TestCachedProvider_GetStats(t *testing.T) {
 	}
 
 	// First call - cache miss
-	cachedProvider.Analyze(req)
+	_, _ = cachedProvider.Analyze(req)
 
 	// Second call - cache hit
-	cachedProvider.Analyze(req)
+	_, _ = cachedProvider.Analyze(req)
 
 	// Get stats
 	stats := cachedProvider.GetCacheStats()
@@ -200,7 +200,7 @@ func TestCachedProvider_ClearCache(t *testing.T) {
 	}
 
 	// Store result
-	cachedProvider.Analyze(req)
+	_, _ = cachedProvider.Analyze(req)
 
 	stats := cachedProvider.GetCacheStats()
 	if stats.Size != 1 {

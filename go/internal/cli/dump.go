@@ -13,6 +13,7 @@ import (
 	"github.com/rayyacub/telos-idea-matrix/internal/models"
 	"github.com/rayyacub/telos-idea-matrix/internal/scoring"
 	"github.com/rayyacub/telos-idea-matrix/internal/utils"
+	"github.com/rs/zerolog/log"
 	"github.com/spf13/cobra"
 )
 
@@ -96,11 +97,15 @@ Examples:
 func runNormalDump(ideaText string, fromClipboard, toClipboard, useAI bool, provider, model string) error {
 	// Show clipboard info if applicable
 	if fromClipboard {
-		infoColor.Printf("📋 Read from clipboard: %s\n", truncateText(ideaText, 50))
+		if _, err := infoColor.Printf("📋 Read from clipboard: %s\n", truncateText(ideaText, 50)); err != nil {
+			log.Warn().Err(err).Msg("failed to print message")
+		}
 	}
 
 	// Show progress
-	infoColor.Println("📝 Capturing idea...")
+	if _, err := infoColor.Println("📝 Capturing idea..."); err != nil {
+		log.Warn().Err(err).Msg("failed to print message")
+	}
 	fmt.Println()
 
 	var analysis *models.Analysis
@@ -110,7 +115,9 @@ func runNormalDump(ideaText string, fromClipboard, toClipboard, useAI bool, prov
 		// Use LLM for analysis
 		analysis, err = runLLMAnalysis(ideaText, provider, model)
 		if err != nil {
-			warningColor.Printf("⚠️  LLM analysis failed, falling back to rule-based: %v\n", err)
+			if _, printErr := warningColor.Printf("⚠️  LLM analysis failed, falling back to rule-based: %v\n", err); printErr != nil {
+				log.Warn().Err(printErr).Msg("failed to print warning")
+			}
 			// Fall back to rule-based scoring
 			analysis, err = ctx.Engine.CalculateScore(ideaText)
 			if err != nil {
@@ -164,9 +171,13 @@ func runNormalDump(ideaText string, fromClipboard, toClipboard, useAI bool, prov
 			idea.Content)
 
 		if err := utils.CopyToClipboard(summary); err != nil {
-			warningColor.Printf("⚠️  Warning: failed to copy to clipboard: %v\n", err)
+			if _, printErr := warningColor.Printf("⚠️  Warning: failed to copy to clipboard: %v\n", err); printErr != nil {
+				log.Warn().Err(printErr).Msg("failed to print warning")
+			}
 		} else {
-			successColor.Println("✓ Result copied to clipboard")
+			if _, err := successColor.Println("✓ Result copied to clipboard"); err != nil {
+				log.Warn().Err(err).Msg("failed to print message")
+			}
 		}
 	}
 
@@ -175,59 +186,15 @@ func runNormalDump(ideaText string, fromClipboard, toClipboard, useAI bool, prov
 
 // runLLMAnalysis performs LLM-based analysis and converts result to models.Analysis
 func runLLMAnalysis(ideaText, provider, model string) (*models.Analysis, error) {
-	// Set provider if specified
-	if provider != "" {
-		if err := ctx.LLMManager.SetPrimaryProvider(provider); err != nil {
-			return nil, fmt.Errorf("failed to set provider: %w", err)
-		}
-	}
-
-	// TODO: Support model selection when LLM providers support it
-	_ = model
-
-	// Run LLM analysis
-	result, err := ctx.LLMManager.AnalyzeWithTelos(ideaText, ctx.Telos)
-	if err != nil {
-		return nil, err
-	}
-
-	// Convert LLM result to models.Analysis format
-	analysis := &models.Analysis{
-		RawScore:   result.FinalScore,
-		FinalScore: result.FinalScore,
-		Mission: models.MissionScores{
-			Total: result.Scores.MissionAlignment,
-			// LLM doesn't break down into sub-scores, so distribute proportionally
-			DomainExpertise:  result.Scores.MissionAlignment * 0.30,
-			AIAlignment:      result.Scores.MissionAlignment * 0.375,
-			ExecutionSupport: result.Scores.MissionAlignment * 0.20,
-			RevenuePotential: result.Scores.MissionAlignment * 0.125,
-		},
-		AntiChallenge: models.AntiChallengeScores{
-			Total: result.Scores.AntiChallenge,
-			// Distribute proportionally
-			ContextSwitching:  result.Scores.AntiChallenge * 0.343,
-			RapidPrototyping:  result.Scores.AntiChallenge * 0.286,
-			Accountability:    result.Scores.AntiChallenge * 0.229,
-			IncomeAnxiety:     result.Scores.AntiChallenge * 0.143,
-		},
-		Strategic: models.StrategicScores{
-			Total: result.Scores.StrategicFit,
-			// Distribute proportionally
-			StackCompatibility:     result.Scores.StrategicFit * 0.40,
-			ShippingHabit:          result.Scores.StrategicFit * 0.32,
-			PublicAccountability:   result.Scores.StrategicFit * 0.16,
-			RevenueTesting:         result.Scores.StrategicFit * 0.12,
-		},
-	}
-
-	return analysis, nil
+	return runLLMAnalysisWithProvider(ideaText, provider, model, ctx.LLMManager, ctx.Telos)
 }
 
 func displayIdeaAnalysis(idea *models.Idea, analysis *models.Analysis) {
 	// Header
 	fmt.Println(strings.Repeat("─", 80))
-	successColor.Printf("✨ Idea Analyzed (ID: %s)\n", idea.ID[:8])
+	if _, err := successColor.Printf("✨ Idea Analyzed (ID: %s)\n", idea.ID[:8]); err != nil {
+		log.Warn().Err(err).Msg("failed to print message")
+	}
 	fmt.Println(strings.Repeat("─", 80))
 	fmt.Println()
 
@@ -236,11 +203,15 @@ func displayIdeaAnalysis(idea *models.Idea, analysis *models.Analysis) {
 
 	// Score with color coding
 	scoreColor := getScoreColor(idea.FinalScore)
-	scoreColor.Printf("⭐ Score: %.1f/10.0\n", idea.FinalScore)
+	if _, err := scoreColor.Printf("⭐ Score: %.1f/10.0\n", idea.FinalScore); err != nil {
+		log.Warn().Err(err).Msg("failed to print score")
+	}
 
 	// Recommendation with emoji
 	recommendationColor := getRecommendationColor(idea.Recommendation)
-	recommendationColor.Printf("%s\n\n", idea.Recommendation)
+	if _, err := recommendationColor.Printf("%s\n\n", idea.Recommendation); err != nil {
+		log.Warn().Err(err).Msg("failed to print recommendation")
+	}
 
 	// Mission Alignment breakdown
 	fmt.Println("📊 Mission Alignment (40%):")
@@ -268,7 +239,9 @@ func displayIdeaAnalysis(idea *models.Idea, analysis *models.Analysis) {
 
 	// Patterns detected
 	if len(idea.Patterns) > 0 {
-		warningColor.Println("⚠️  Patterns Detected:")
+		if _, err := warningColor.Println("⚠️  Patterns Detected:"); err != nil {
+			log.Warn().Err(err).Msg("failed to print message")
+		}
 		for _, pattern := range idea.Patterns {
 			fmt.Printf("  • %s\n", pattern)
 		}
@@ -277,7 +250,9 @@ func displayIdeaAnalysis(idea *models.Idea, analysis *models.Analysis) {
 
 	// Footer
 	fmt.Println(strings.Repeat("─", 80))
-	successColor.Println("✅ Idea saved to database")
+	if _, err := successColor.Println("✅ Idea saved to database"); err != nil {
+		log.Warn().Err(err).Msg("failed to print message")
+	}
 	fmt.Println(strings.Repeat("─", 80))
 }
 
@@ -352,16 +327,22 @@ func runQuickDump(content string, toClipboard bool) error {
 
 	// Step 7: Display results
 	fmt.Println(strings.Repeat("─", 80))
-	successColor.Printf("✨ Quick Analysis Complete (ID: %s)\n", idea.ID[:8])
+	if _, err := successColor.Printf("✨ Quick Analysis Complete (ID: %s)\n", idea.ID[:8]); err != nil {
+		log.Warn().Err(err).Msg("failed to print message")
+	}
 	fmt.Println(strings.Repeat("─", 80))
 	fmt.Println()
 	fmt.Printf("💡 %s\n\n", idea.Content)
 
 	scoreColor := getScoreColor(idea.FinalScore)
-	scoreColor.Printf("⭐ Score: %.1f/10.0 (rule-based)\n", score)
+	if _, err := scoreColor.Printf("⭐ Score: %.1f/10.0 (rule-based)\n", score); err != nil {
+		log.Warn().Err(err).Msg("failed to print score")
+	}
 
 	recommendationColor := getRecommendationColor(recommendation)
-	recommendationColor.Printf("%s\n\n", recommendation)
+	if _, err := recommendationColor.Printf("%s\n\n", recommendation); err != nil {
+		log.Warn().Err(err).Msg("failed to print recommendation")
+	}
 
 	if len(patterns) > 0 {
 		fmt.Println("🏷️  Patterns:")
@@ -374,8 +355,12 @@ func runQuickDump(content string, toClipboard bool) error {
 	fmt.Printf("⚡ Completed in %v\n\n", elapsed)
 
 	fmt.Println(strings.Repeat("─", 80))
-	successColor.Println("✅ Idea saved to database")
-	infoColor.Println("💡 Tip: Use 'tm analyze " + idea.ID[:8] + "' to run full LLM analysis later")
+	if _, err := successColor.Println("✅ Idea saved to database"); err != nil {
+		log.Warn().Err(err).Msg("failed to print message")
+	}
+	if _, err := infoColor.Println("💡 Tip: Use 'tm analyze " + idea.ID[:8] + "' to run full LLM analysis later"); err != nil {
+		log.Warn().Err(err).Msg("failed to print message")
+	}
 	fmt.Println(strings.Repeat("─", 80))
 
 	// Copy result to clipboard if requested
@@ -386,9 +371,13 @@ func runQuickDump(content string, toClipboard bool) error {
 			idea.Content)
 
 		if err := utils.CopyToClipboard(summary); err != nil {
-			warningColor.Printf("⚠️  Warning: failed to copy to clipboard: %v\n", err)
+			if _, printErr := warningColor.Printf("⚠️  Warning: failed to copy to clipboard: %v\n", err); printErr != nil {
+				log.Warn().Err(printErr).Msg("failed to print warning")
+			}
 		} else {
-			successColor.Println("✓ Result copied to clipboard")
+			if _, err := successColor.Println("✓ Result copied to clipboard"); err != nil {
+				log.Warn().Err(err).Msg("failed to print message")
+			}
 		}
 	}
 
@@ -517,7 +506,9 @@ func runInteractiveDump(ideaText string, providerName string) error {
 	fmt.Println()
 
 	if !confirm("Continue to telos loading?") {
-		infoColor.Println("Analysis cancelled.")
+		if _, err := infoColor.Println("Analysis cancelled."); err != nil {
+			log.Warn().Err(err).Msg("failed to print message")
+		}
 		return nil
 	}
 
@@ -537,7 +528,9 @@ func runInteractiveDump(ideaText string, providerName string) error {
 	fmt.Println()
 
 	if !confirm("Continue with this telos?") {
-		infoColor.Println("Analysis cancelled.")
+		if _, err := infoColor.Println("Analysis cancelled."); err != nil {
+			log.Warn().Err(err).Msg("failed to print message")
+		}
 		return nil
 	}
 
@@ -566,7 +559,9 @@ func runInteractiveDump(ideaText string, providerName string) error {
 	fmt.Println()
 
 	if !confirm("Continue with this provider?") {
-		infoColor.Println("Analysis cancelled.")
+		if _, err := infoColor.Println("Analysis cancelled."); err != nil {
+			log.Warn().Err(err).Msg("failed to print message")
+		}
 		return nil
 	}
 
@@ -587,7 +582,9 @@ func runInteractiveDump(ideaText string, providerName string) error {
 		return fmt.Errorf("analysis failed: %w", err)
 	}
 
-	successColor.Printf("✓ Analysis complete (took %v)\n", duration)
+	if _, err := successColor.Printf("✓ Analysis complete (took %v)\n", duration); err != nil {
+		log.Warn().Err(err).Msg("failed to print message")
+	}
 	fmt.Println()
 
 	// Step 5: Display detailed results
@@ -598,7 +595,9 @@ func runInteractiveDump(ideaText string, providerName string) error {
 	displayInteractiveAnalysisResults(result)
 
 	if !confirm("Save this idea?") {
-		infoColor.Println("Idea not saved.")
+		if _, err := infoColor.Println("Idea not saved."); err != nil {
+			log.Warn().Err(err).Msg("failed to print message")
+		}
 		return nil
 	}
 
@@ -615,7 +614,9 @@ func runInteractiveDump(ideaText string, providerName string) error {
 	// Serialize analysis details
 	analysisJSON, err := json.Marshal(result)
 	if err != nil {
-		warningColor.Printf("⚠️  Warning: failed to serialize analysis: %v\n", err)
+		if _, printErr := warningColor.Printf("⚠️  Warning: failed to serialize analysis: %v\n", err); printErr != nil {
+			log.Warn().Err(printErr).Msg("failed to print warning")
+		}
 	} else {
 		idea.AnalysisDetails = string(analysisJSON)
 	}
@@ -624,7 +625,9 @@ func runInteractiveDump(ideaText string, providerName string) error {
 		return fmt.Errorf("failed to save idea: %w", err)
 	}
 
-	successColor.Printf("✓ Idea saved successfully\n")
+	if _, err := successColor.Printf("✓ Idea saved successfully\n"); err != nil {
+		log.Warn().Err(err).Msg("failed to print message")
+	}
 	fmt.Printf("  ID: %s\n", idea.ID[:8])
 	fmt.Printf("  Score: %.1f/10\n", idea.FinalScore)
 	fmt.Printf("  Recommendation: %s\n", idea.Recommendation)
@@ -643,12 +646,16 @@ func selectProviderInteractive(manager *llm.Manager) llm.Provider {
 	providers := manager.GetAvailableProviders()
 
 	if len(providers) == 0 {
-		errorColor.Println("No providers available!")
+		if _, err := errorColor.Println("No providers available!"); err != nil {
+			log.Warn().Err(err).Msg("failed to print error message")
+		}
 		return nil
 	}
 
 	if len(providers) == 1 {
-		infoColor.Printf("Using only available provider: %s\n", providers[0].Name())
+		if _, err := infoColor.Printf("Using only available provider: %s\n", providers[0].Name()); err != nil {
+			log.Warn().Err(err).Msg("failed to print message")
+		}
 		return providers[0]
 	}
 
@@ -666,7 +673,9 @@ func selectProviderInteractive(manager *llm.Manager) llm.Provider {
 	var choice int
 	_, err := fmt.Scanln(&choice)
 	if err != nil || choice < 1 || choice > len(providers) {
-		warningColor.Println("Invalid choice, using default provider")
+		if _, printErr := warningColor.Println("Invalid choice, using default provider"); printErr != nil {
+			log.Warn().Err(printErr).Msg("failed to print warning")
+		}
 		return providers[0]
 	}
 

@@ -9,7 +9,7 @@ import (
 )
 
 func main() {
-	fmt.Println("=== Provider Manager Example ===\n")
+	fmt.Println("=== Provider Manager Example ===")
 
 	// Example 1: Basic Usage with Default Configuration
 	basicExample()

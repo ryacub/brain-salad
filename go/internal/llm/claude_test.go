@@ -63,7 +63,7 @@ func TestClaudeProvider_IsAvailable_WithMockServer(t *testing.T) {
 	server := httptest.NewServer(http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
 		w.Header().Set("Content-Type", "application/json")
 		w.WriteHeader(http.StatusOK)
-		json.NewEncoder(w).Encode(map[string]interface{}{
+		_ = json.NewEncoder(w).Encode(map[string]interface{}{
 			"id":   "test",
 			"type": "message",
 			"role": "assistant",
@@ -106,7 +106,7 @@ func TestClaudeProvider_Headers(t *testing.T) {
 		// Return valid response
 		w.Header().Set("Content-Type", "application/json")
 		w.WriteHeader(http.StatusOK)
-		json.NewEncoder(w).Encode(map[string]interface{}{
+		_ = json.NewEncoder(w).Encode(map[string]interface{}{
 			"id":   "test",
 			"type": "message",
 			"role": "assistant",
@@ -162,7 +162,7 @@ func TestClaudeProvider_Analyze_Success(t *testing.T) {
 	server := httptest.NewServer(http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
 		w.Header().Set("Content-Type", "application/json")
 		w.WriteHeader(http.StatusOK)
-		json.NewEncoder(w).Encode(map[string]interface{}{
+		_ = json.NewEncoder(w).Encode(map[string]interface{}{
 			"id":   "msg_test",
 			"type": "message",
 			"role": "assistant",
@@ -242,7 +242,7 @@ func TestClaudeProvider_Analyze_APIError(t *testing.T) {
 	server := httptest.NewServer(http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
 		w.Header().Set("Content-Type", "application/json")
 		w.WriteHeader(http.StatusUnauthorized)
-		json.NewEncoder(w).Encode(map[string]interface{}{
+		_ = json.NewEncoder(w).Encode(map[string]interface{}{
 			"type": "error",
 			"error": map[string]string{
 				"type":    "authentication_error",
@@ -388,7 +388,7 @@ func TestClaudeProvider_RetryLogic(t *testing.T) {
 			isAvailableAttempts++
 			w.Header().Set("Content-Type", "application/json")
 			w.WriteHeader(http.StatusOK)
-			json.NewEncoder(w).Encode(map[string]interface{}{
+			_ = json.NewEncoder(w).Encode(map[string]interface{}{
 				"id":   "test",
 				"type": "message",
 				"role": "assistant",
@@ -412,7 +412,7 @@ func TestClaudeProvider_RetryLogic(t *testing.T) {
 		// Succeed on the third analysis attempt
 		w.Header().Set("Content-Type", "application/json")
 		w.WriteHeader(http.StatusOK)
-		json.NewEncoder(w).Encode(map[string]interface{}{
+		_ = json.NewEncoder(w).Encode(map[string]interface{}{
 			"id":   "msg_test",
 			"type": "message",
 			"role": "assistant",

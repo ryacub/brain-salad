@@ -6,6 +6,7 @@ import (
 	"os"
 
 	"github.com/rayyacub/telos-idea-matrix/internal/models"
+	"github.com/rs/zerolog/log"
 )
 
 // ExportJSON writes ideas to a JSON file.
@@ -14,7 +15,7 @@ func ExportJSON(ideas []*models.Idea, filename string, pretty bool) error {
 	if err != nil {
 		return fmt.Errorf("create file: %w", err)
 	}
-	defer file.Close()
+	defer func() { if err := file.Close(); err != nil { log.Warn().Err(err).Msg("failed to close file") } }()
 
 	encoder := json.NewEncoder(file)
 	if pretty {

@@ -5,6 +5,7 @@ import (
 	"strings"
 
 	"github.com/rayyacub/telos-idea-matrix/internal/llm"
+	"github.com/rs/zerolog/log"
 	"github.com/spf13/cobra"
 )
 
@@ -67,9 +68,13 @@ func runAnalyzeLLM(cmd *cobra.Command, args []string) error {
 	// Get current provider
 	currentProvider := manager.GetPrimaryProvider()
 	if llmVerbose {
-		infoColor.Printf("🔧 Using provider: %s\n", currentProvider.Name())
+		if _, err := infoColor.Printf("🔧 Using provider: %s\n", currentProvider.Name()); err != nil {
+			log.Warn().Err(err).Msg("failed to print provider info")
+		}
 		if !llmNoFallback {
-			infoColor.Println("🔄 Fallback enabled")
+			if _, err := infoColor.Println("🔄 Fallback enabled"); err != nil {
+				log.Warn().Err(err).Msg("failed to print fallback info")
+			}
 		}
 		fmt.Println()
 	}
@@ -90,7 +95,9 @@ func runAnalyzeLLM(cmd *cobra.Command, args []string) error {
 func displayLLMAnalysisResult(ideaText string, result *llm.AnalysisResult, verbose bool) {
 	// Header
 	fmt.Println(strings.Repeat("─", 80))
-	successColor.Printf("✨ LLM Analysis Complete\n")
+	if _, err := successColor.Printf("✨ LLM Analysis Complete\n"); err != nil {
+		log.Warn().Err(err).Msg("failed to print header")
+	}
 	fmt.Println(strings.Repeat("─", 80))
 	fmt.Println()
 
@@ -99,22 +106,32 @@ func displayLLMAnalysisResult(ideaText string, result *llm.AnalysisResult, verbo
 
 	// Provider info
 	if verbose {
-		infoColor.Printf("🤖 Provider: %s\n", result.Provider)
-		infoColor.Printf("⏱️  Duration: %v\n", result.Duration)
+		if _, err := infoColor.Printf("🤖 Provider: %s\n", result.Provider); err != nil {
+			log.Warn().Err(err).Msg("failed to print provider")
+		}
+		if _, err := infoColor.Printf("⏱️  Duration: %v\n", result.Duration); err != nil {
+			log.Warn().Err(err).Msg("failed to print duration")
+		}
 		if result.FromCache {
-			infoColor.Println("📦 Result from cache")
+			if _, err := infoColor.Println("📦 Result from cache"); err != nil {
+				log.Warn().Err(err).Msg("failed to print cache info")
+			}
 		}
 		fmt.Println()
 	}
 
 	// Score with color coding
 	scoreColor := getScoreColor(result.FinalScore)
-	scoreColor.Printf("⭐ Score: %.1f/10.0\n", result.FinalScore)
+	if _, err := scoreColor.Printf("⭐ Score: %.1f/10.0\n", result.FinalScore); err != nil {
+		log.Warn().Err(err).Msg("failed to print score")
+	}
 
 	// Recommendation with emoji
 	recommendationColor := getRecommendationColor(result.Recommendation)
 	recommendationEmoji := getRecommendationEmoji(result.Recommendation)
-	recommendationColor.Printf("%s %s\n\n", recommendationEmoji, result.Recommendation)
+	if _, err := recommendationColor.Printf("%s %s\n\n", recommendationEmoji, result.Recommendation); err != nil {
+		log.Warn().Err(err).Msg("failed to print recommendation")
+	}
 
 	// Score breakdown
 	fmt.Println("📊 Score Breakdown:")

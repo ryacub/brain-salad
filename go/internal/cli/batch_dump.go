@@ -6,6 +6,7 @@ import (
 	"strings"
 	"time"
 
+	"github.com/rs/zerolog/log"
 	"github.com/spf13/cobra"
 )
 
@@ -59,10 +60,14 @@ func runBatchDump(filename string) error {
 
 		err := runQuickDump(line, false)
 		if err != nil {
-			errorColor.Printf("  ✗ Error: %v\n", err)
+			if _, printErr := errorColor.Printf("  ✗ Error: %v\n", err); printErr != nil {
+				log.Warn().Err(printErr).Msg("failed to print error message")
+			}
 			errorCount++
 		} else {
-			successColor.Printf("  ✓ Saved\n")
+			if _, printErr := successColor.Printf("  ✓ Saved\n"); printErr != nil {
+				log.Warn().Err(printErr).Msg("failed to print success message")
+			}
 			successCount++
 		}
 		fmt.Println()
@@ -72,9 +77,13 @@ func runBatchDump(filename string) error {
 
 	fmt.Println(strings.Repeat("═", 80))
 	fmt.Println("Batch processing complete:")
-	successColor.Printf("  ✓ Success: %d ideas\n", successCount)
+	if _, err := successColor.Printf("  ✓ Success: %d ideas\n", successCount); err != nil {
+		log.Warn().Err(err).Msg("failed to print success message")
+	}
 	if errorCount > 0 {
-		errorColor.Printf("  ✗ Errors: %d\n", errorCount)
+		if _, err := errorColor.Printf("  ✗ Errors: %d\n", errorCount); err != nil {
+			log.Warn().Err(err).Msg("failed to print error count")
+		}
 	}
 	fmt.Printf("  ⚡ Time: %v (%.1f ideas/sec)\n", elapsed, float64(successCount)/elapsed.Seconds())
 	fmt.Println(strings.Repeat("═", 80))

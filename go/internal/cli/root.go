@@ -12,6 +12,7 @@ import (
 	"github.com/rayyacub/telos-idea-matrix/internal/patterns"
 	"github.com/rayyacub/telos-idea-matrix/internal/scoring"
 	"github.com/rayyacub/telos-idea-matrix/internal/telos"
+	"github.com/rs/zerolog/log"
 	"github.com/spf13/cobra"
 )
 
@@ -90,7 +91,9 @@ func initializeCLI(cmd *cobra.Command, args []string) error {
 
 	// Check if telos.md exists
 	if _, err := os.Stat(telosPath); os.IsNotExist(err) {
-		warningColor.Fprintf(os.Stderr, "�  Telos file not found at %s\n", telosPath)
+		if _, printErr := warningColor.Fprintf(os.Stderr, "�  Telos file not found at %s\n", telosPath); printErr != nil {
+			log.Warn().Err(printErr).Msg("failed to print warning")
+		}
 		fmt.Fprintf(os.Stderr, "Please create a telos.md file with your goals, strategies, and stack.\n")
 		fmt.Fprintf(os.Stderr, "Run 'tm init' to create a template or see documentation for format.\n\n")
 		return fmt.Errorf("telos file not found")

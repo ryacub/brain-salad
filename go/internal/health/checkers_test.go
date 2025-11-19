@@ -16,7 +16,7 @@ func TestDatabaseHealthChecker(t *testing.T) {
 	if err != nil {
 		t.Fatalf("Failed to open test database: %v", err)
 	}
-	defer db.Close()
+	defer func() { _ = db.Close() }()
 
 	checker := NewDatabaseHealthChecker(db)
 
@@ -56,7 +56,7 @@ func TestDatabaseHealthChecker_ClosedConnection(t *testing.T) {
 	}
 
 	// Close the database before checking
-	db.Close()
+	_ = db.Close()
 
 	checker := NewDatabaseHealthChecker(db)
 	ctx := context.Background()
@@ -77,7 +77,7 @@ func TestDatabaseHealthChecker_Timeout(t *testing.T) {
 	if err != nil {
 		t.Fatalf("Failed to open test database: %v", err)
 	}
-	defer db.Close()
+	defer func() { _ = db.Close() }()
 
 	checker := NewDatabaseHealthChecker(db)
 
@@ -247,7 +247,7 @@ func TestHealthChecker_Timeout(t *testing.T) {
 	if err != nil {
 		t.Fatalf("Failed to open test database: %v", err)
 	}
-	defer db.Close()
+	defer func() { _ = db.Close() }()
 
 	checker := NewDatabaseHealthChecker(db)
 
@@ -279,7 +279,7 @@ func TestHealthChecker_Error(t *testing.T) {
 	if err != nil {
 		t.Fatalf("Failed to open test database: %v", err)
 	}
-	db.Close()
+	_ = db.Close()
 
 	checker := NewDatabaseHealthChecker(db)
 
@@ -305,7 +305,7 @@ func TestHealthChecker_ConcurrentExecution(t *testing.T) {
 	if err != nil {
 		t.Fatalf("Failed to open test database: %v", err)
 	}
-	defer db.Close()
+	defer func() { _ = db.Close() }()
 
 	checker := NewDatabaseHealthChecker(db)
 	ctx := context.Background()

@@ -83,9 +83,7 @@ func respondJSON(w http.ResponseWriter, status int, data interface{}) {
 	w.WriteHeader(status)
 	if data != nil {
 		if err := json.NewEncoder(w).Encode(data); err != nil {
-			// Log the error but don't try to send another response since headers are already written
-			// In a production system, this should use a proper logger
-			fmt.Fprintf(w, `{"error":"Failed to encode JSON response"}`)
+			log.Warn().Err(err).Msg("failed to encode JSON response")
 		}
 	}
 }

@@ -6,6 +6,7 @@ import (
 	"time"
 
 	"github.com/rayyacub/telos-idea-matrix/internal/llm"
+	"github.com/rs/zerolog/log"
 	"github.com/spf13/cobra"
 )
 
@@ -60,7 +61,9 @@ func displayHealthStatus(health map[string]bool) {
 
 	// Display header
 	fmt.Println("═══════════════════════════════════════════════════════════════")
-	successColor.Println("🏥 Provider Health Status")
+	if _, err := successColor.Println("🏥 Provider Health Status"); err != nil {
+		log.Warn().Err(err).Msg("failed to print message")
+	}
 	fmt.Println("═══════════════════════════════════════════════════════════════")
 	fmt.Println()
 
@@ -119,11 +122,15 @@ func displayWatchHealth(manager *llm.Manager, intervalSec int) {
 
 	// Display header
 	fmt.Println("═══════════════════════════════════════════════════════════════")
-	successColor.Printf("🏥 Provider Health Status (refreshing every %ds)\n", intervalSec)
+	if _, err := successColor.Printf("🏥 Provider Health Status (refreshing every %ds)\n", intervalSec); err != nil {
+		log.Warn().Err(err).Msg("failed to print message")
+	}
 	fmt.Println("═══════════════════════════════════════════════════════════════")
 	fmt.Println()
 
-	infoColor.Printf("Last check: %s\n", time.Now().Format("15:04:05"))
+	if _, err := infoColor.Printf("Last check: %s\n", time.Now().Format("15:04:05")); err != nil {
+		log.Warn().Err(err).Msg("failed to print message")
+	}
 	fmt.Println()
 
 	// Display each provider
@@ -144,5 +151,7 @@ func displayWatchHealth(manager *llm.Manager, intervalSec int) {
 
 	fmt.Println()
 	fmt.Println("═══════════════════════════════════════════════════════════════")
-	warningColor.Println("\nPress Ctrl+C to exit")
+	if _, err := warningColor.Println("\nPress Ctrl+C to exit"); err != nil {
+		log.Warn().Err(err).Msg("failed to print message")
+	}
 }
