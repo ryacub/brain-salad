@@ -1,8 +1,3 @@
-# Build artifacts
-target/
-**/*.rs.bk
-*.pdb
-
 # Git and version control
 .git/
 .gitignore
@@ -15,6 +10,7 @@ target/
 docs/
 *.md
 !README.md
+!go/README.md
 
 # IDE and editor files
 .vscode/
@@ -28,6 +24,7 @@ docs/
 # Test files
 tests/
 benches/
+go/test/
 
 # Logs and temporary files
 *.log
@@ -55,10 +52,24 @@ docker-compose*.yml
 *.sh
 !setup-*.sh
 
-# Rust specific
+# Go specific
+go/bin/
+go/vendor/
+*.test
+*.out
+go/coverage.html
+go/coverage.out
+
+# Rust specific (legacy - project is migrating to Go)
+target/
+**/*.rs.bk
+*.pdb
 Cargo.lock
 rust-toolchain
 rust-toolchain.toml
+src/
+Cargo.toml
+migrations/
 
 # macOS
 .DS_Store
@@ -87,3 +98,11 @@ tm-alias.sh
 todo-list.md
 automate.config
 telos-matrix.rb
+migration-prompts/
+
+# Execution tracking and planning documents
+EXECUTION_TRACKER.md
+GO_MIGRATION_PLAN.md
+LANGUAGE_ANALYSIS.md
+MIGRATION_EXECUTION_PROMPT.md
+SUBAGENT_ORCHESTRATION.md
