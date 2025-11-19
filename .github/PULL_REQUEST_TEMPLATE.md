@@ -25,17 +25,32 @@ Please check the relevant option(s):
 
 Please confirm that you have completed the following:
 
+### Code Quality
 - [ ] `go test ./...` - All tests pass
 - [ ] `golangci-lint run` - No lint warnings (or `go vet ./...` for basic checks)
 - [ ] `go fmt ./...` - Code is properly formatted
 - [ ] `go build ./...` - Build succeeds
+
+### Test Coverage
 - [ ] Added new tests for new functionality (if applicable)
 - [ ] All existing tests still pass
 - [ ] Manual testing performed (describe below if applicable)
 
+### Manual Testing Checklist
+- [ ] CLI commands work as expected
+- [ ] Web server starts successfully (if applicable)
+- [ ] Database operations work correctly
+- [ ] LLM integration functions properly
+- [ ] Configuration changes applied successfully
+
 **Manual Testing Performed:**
 
-(Describe any manual testing you performed to validate your changes)
+*(Provide a summary of manual testing performed. Examples:)*
+- Tested `tm dump "test idea"` - ✅ Successfully captured and analyzed idea
+- Verified `tm review` functionality - ✅ Filtered and displayed ideas correctly
+- Confirmed LLM provider switching - ✅ Claude, OpenAI, and rule-based working
+- Tested web interface at `localhost:8080` - ✅ Dashboard loads properly
+- Validated configuration changes - ✅ Settings applied correctly
 
 ## Documentation
 
