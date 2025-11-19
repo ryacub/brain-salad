@@ -402,6 +402,11 @@ func (r *Repository) List(options ListOptions) ([]*models.Idea, error) {
 	return ideas, nil
 }
 
+// DB returns the underlying database connection for health checks and other purposes.
+func (r *Repository) DB() *sql.DB {
+	return r.db
+}
+
 // Close closes the database connection.
 func (r *Repository) Close() error {
 	if r.db != nil {

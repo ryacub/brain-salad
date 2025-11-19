@@ -10,6 +10,7 @@ import (
 	"github.com/go-chi/chi/v5/middleware"
 	"github.com/go-chi/cors"
 	"github.com/rayyacub/telos-idea-matrix/internal/database"
+	"github.com/rayyacub/telos-idea-matrix/internal/health"
 	"github.com/rayyacub/telos-idea-matrix/internal/logging"
 	"github.com/rayyacub/telos-idea-matrix/internal/models"
 	"github.com/rayyacub/telos-idea-matrix/internal/telos"
@@ -23,16 +24,31 @@ type Server struct {
 	cache          *Cache
 	rateLimiter    *RateLimiter
 	csrfProtection *CSRFProtection
+	healthMonitor  *health.HealthMonitor
 }
 
 // NewServer creates a new API server from a telos configuration object
 func NewServer(repo *database.Repository, telosConfig *models.Telos) *Server {
+	// Create health monitor and register checks
+	healthMonitor := health.NewHealthMonitor()
+	healthMonitor.SetVersion("1.0.0")
+
+	// Add database health checker
+	healthMonitor.AddCheck(health.NewDatabaseHealthChecker(repo.DB()))
+
+	// Add memory health checker (warn if using > 500MB)
+	healthMonitor.AddCheck(health.NewMemoryHealthChecker(500.0))
+
+	// Add disk space health checker (warn if < 1GB free)
+	healthMonitor.AddCheck(health.NewDiskSpaceHealthChecker("/tmp", 1024))
+
 	s := &Server{
 		repo:           repo,
 		telos:          telosConfig,
 		cache:          NewCache(5 * time.Minute),       // 5-minute cache TTL
 		rateLimiter:    NewRateLimiter(100, 10),         // 100 req/min, burst of 10
 		csrfProtection: NewCSRFProtection(1 * time.Hour), // 1-hour token TTL
+		healthMonitor:  healthMonitor,
 	}
 
 	s.setupRouter()
