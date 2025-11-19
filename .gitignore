@@ -6,9 +6,9 @@
 *.dylib
 *.test
 *.out
-cli
-tm
-telos
+/cli
+/tm
+/telos
 bin/
 
 # Go artifacts
