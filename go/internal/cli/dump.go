@@ -3,12 +3,15 @@ package cli
 import (
 	"encoding/json"
 	"fmt"
+	"os"
+	"path/filepath"
 	"strings"
 	"time"
 
 	"github.com/fatih/color"
 	"github.com/rayyacub/telos-idea-matrix/internal/llm"
 	"github.com/rayyacub/telos-idea-matrix/internal/models"
+	"github.com/rayyacub/telos-idea-matrix/internal/scoring"
 	"github.com/rayyacub/telos-idea-matrix/internal/utils"
 	"github.com/spf13/cobra"
 )
@@ -36,7 +39,8 @@ Examples:
   tm dump --interactive "Start a podcast"
   tm dump --quick "Write a blog post"
   tm dump --from-clipboard
-  tm dump "Quick idea" --to-clipboard`,
+  tm dump "Quick idea" --to-clipboard
+  tm dump --quick "Fast idea capture"`,
 		Args: func(cmd *cobra.Command, args []string) error {
 			fromClipboard, _ := cmd.Flags().GetBool("from-clipboard")
 			if !fromClipboard && len(args) < 1 {
@@ -66,7 +70,7 @@ Examples:
 			}
 
 			if quick {
-				return runQuickDump(ideaText)
+				return runQuickDump(ideaText, toClipboard)
 			}
 
 			// Normal dump
@@ -75,7 +79,7 @@ Examples:
 	}
 
 	cmd.Flags().BoolVarP(&interactive, "interactive", "i", false, "Interactive mode with step-through analysis")
-	cmd.Flags().BoolVarP(&quick, "quick", "q", false, "Quick mode without LLM analysis")
+	cmd.Flags().BoolVarP(&quick, "quick", "q", false, "Quick mode with rule-based analysis")
 	cmd.Flags().StringVarP(&provider, "provider", "p", "", "LLM provider to use (interactive mode only)")
 	cmd.Flags().BoolVar(&fromClipboard, "from-clipboard", false, "Read idea from clipboard")
 	cmd.Flags().BoolVar(&toClipboard, "to-clipboard", false, "Copy result to clipboard")
@@ -235,32 +239,195 @@ func truncateText(text string, maxLen int) string {
 	return text[:maxLen] + "..."
 }
 
-// runQuickDump performs a quick capture without detailed analysis
-func runQuickDump(ideaText string) error {
-	fmt.Println("╔═══════════════════════════════════════════════════════════╗")
-	fmt.Println("║       Quick Idea Capture                                  ║")
-	fmt.Println("╚═══════════════════════════════════════════════════════════╝")
-	fmt.Println()
+// runQuickDump performs fast rule-based analysis without LLM
+func runQuickDump(content string, toClipboard bool) error {
+	start := time.Now()
 
-	// Create idea without analysis
-	idea := models.NewIdea(ideaText)
-	idea.RawScore = 0.0
-	idea.FinalScore = 0.0
-	idea.Recommendation = "Not analyzed (quick mode)"
-	idea.Patterns = []string{}
+	// Step 1: Load telos (optional for rule-based scoring)
+	telosContent, err := loadTelosQuiet()
+	if err != nil {
+		// Continue without telos if not available
+		telosContent = ""
+	}
 
-	// Save to database
+	// Step 2: Rule-based scoring
+	scorer := scoring.NewRuleBasedScorer()
+	score := scorer.Score(content, telosContent)
+
+	// Step 3: Pattern detection
+	patterns := detectBasicPatterns(content, telosContent)
+
+	// Step 4: Generate recommendation
+	recommendation := generateRecommendation(score, patterns)
+
+	// Step 5: Create idea with quick analysis marker
+	reasoning := "Quick analysis (rule-based, no LLM)\nScore based on: keyword matching, length, telos alignment"
+
+	idea := models.NewIdea(content)
+	idea.FinalScore = score
+	idea.RawScore = score
+	idea.Patterns = patterns
+	idea.Recommendation = recommendation
+	idea.AnalysisDetails = reasoning
+
+	// Step 6: Save to database
 	if err := ctx.Repository.Create(idea); err != nil {
 		return fmt.Errorf("failed to save idea: %w", err)
 	}
 
-	// Display result
-	fmt.Printf("💡 %s\n\n", idea.Content)
-	successColor.Printf("✓ Idea saved (ID: %s)\n", idea.ID[:8])
-	infoColor.Println("ℹ️  Run 'tm analyze' to analyze this idea later")
+	elapsed := time.Since(start)
+
+	// Step 7: Display results
+	fmt.Println(strings.Repeat("─", 80))
+	successColor.Printf("✨ Quick Analysis Complete (ID: %s)\n", idea.ID[:8])
+	fmt.Println(strings.Repeat("─", 80))
 	fmt.Println()
+	fmt.Printf("💡 %s\n\n", idea.Content)
+
+	scoreColor := getScoreColor(idea.FinalScore)
+	scoreColor.Printf("⭐ Score: %.1f/10.0 (rule-based)\n", score)
+
+	recommendationColor := getRecommendationColor(recommendation)
+	recommendationColor.Printf("%s\n\n", recommendation)
+
+	if len(patterns) > 0 {
+		fmt.Println("🏷️  Patterns:")
+		for _, pattern := range patterns {
+			fmt.Printf("  • %s\n", pattern)
+		}
+		fmt.Println()
+	}
+
+	fmt.Printf("⚡ Completed in %v\n\n", elapsed)
+
+	fmt.Println(strings.Repeat("─", 80))
+	successColor.Println("✅ Idea saved to database")
+	infoColor.Println("💡 Tip: Use 'tm analyze " + idea.ID[:8] + "' to run full LLM analysis later")
+	fmt.Println(strings.Repeat("─", 80))
+
+	// Copy result to clipboard if requested
+	if toClipboard {
+		summary := fmt.Sprintf("Score: %.1f/10.0 (rule-based)\n%s\n\nIdea: %s",
+			idea.FinalScore,
+			idea.Recommendation,
+			idea.Content)
+
+		if err := utils.CopyToClipboard(summary); err != nil {
+			warningColor.Printf("⚠️  Warning: failed to copy to clipboard: %v\n", err)
+		} else {
+			successColor.Println("✓ Result copied to clipboard")
+		}
+	}
 
 	return nil
+}
+
+// loadTelosQuiet loads telos without errors
+func loadTelosQuiet() (string, error) {
+	telosPath := os.Getenv("TELOS_PATH")
+	if telosPath == "" {
+		homeDir, _ := os.UserHomeDir()
+		telosPath = filepath.Join(homeDir, ".telos", "telos.md")
+	}
+
+	data, err := os.ReadFile(telosPath)
+	if err != nil {
+		return "", err
+	}
+
+	return string(data), nil
+}
+
+// detectBasicPatterns performs simple pattern detection
+func detectBasicPatterns(content, telos string) []string {
+	patterns := []string{}
+	contentLower := strings.ToLower(content)
+
+	// Pattern keywords with their categories
+	patternKeywords := map[string]string{
+		"innovation":   "innovation",
+		"innovate":     "innovation",
+		"novel":        "innovation",
+		"new":          "innovation",
+		"sustain":      "sustainability",
+		"green":        "sustainability",
+		"environment":  "sustainability",
+		"eco":          "sustainability",
+		"impact":       "impact",
+		"improve":      "impact",
+		"benefit":      "impact",
+		"help":         "impact",
+		"scale":        "scalability",
+		"grow":         "scalability",
+		"expand":       "scalability",
+		"revenue":      "revenue",
+		"profit":       "revenue",
+		"monetize":     "revenue",
+		"income":       "revenue",
+		"cost":         "cost-reduction",
+		"save":         "cost-reduction",
+		"efficient":    "efficiency",
+		"optimize":     "efficiency",
+		"automate":     "automation",
+		"automatic":    "automation",
+		"ai":           "ai-ml",
+		"machine":      "ai-ml",
+		"learning":     "ai-ml",
+		"mobile":       "mobile",
+		"app":          "mobile",
+		"web":          "web",
+		"cloud":        "cloud",
+		"saas":         "saas",
+		"product":      "product",
+		"service":      "service",
+	}
+
+	// Track found patterns to avoid duplicates
+	found := make(map[string]bool)
+
+	for keyword, pattern := range patternKeywords {
+		if strings.Contains(contentLower, keyword) && !found[pattern] {
+			patterns = append(patterns, pattern)
+			found[pattern] = true
+		}
+	}
+
+	// If no patterns found, add a generic one
+	if len(patterns) == 0 {
+		patterns = append(patterns, "general")
+	}
+
+	// Limit to top 5 patterns
+	if len(patterns) > 5 {
+		patterns = patterns[:5]
+	}
+
+	return patterns
+}
+
+// generateRecommendation creates a recommendation based on score and patterns
+func generateRecommendation(score float64, patterns []string) string {
+	// High score -> pursue
+	if score >= 7.0 {
+		return "🔥 PURSUE - Strong potential"
+	}
+
+	// Low score -> defer
+	if score < 4.0 {
+		return "❌ DEFER - Low alignment"
+	}
+
+	// Medium score -> review (check patterns for tie-breaker)
+	strongPatterns := []string{"innovation", "impact", "scalability", "revenue"}
+	for _, pattern := range patterns {
+		for _, strong := range strongPatterns {
+			if pattern == strong {
+				return "✅ PURSUE - Good potential with strong patterns"
+			}
+		}
+	}
+
+	return "⚠️ REVIEW - Needs more evaluation"
 }
 
 // runInteractiveDump performs step-by-step interactive analysis using LLM
