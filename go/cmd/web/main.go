@@ -47,7 +47,7 @@ func run() error {
 	}
 
 	// Create API server
-	server, err := api.NewServer(repo, cfg.Telos.FilePath)
+	server, err := api.NewServerFromPath(repo, cfg.Telos.FilePath)
 	if err != nil {
 		return fmt.Errorf("failed to create server: %w", err)
 	}
