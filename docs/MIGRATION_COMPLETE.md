@@ -155,7 +155,7 @@ git checkout 31acbfe
 
 ### Process
 1. Incremental migration reduced risk
-2. Comprehensive RUST_REFERENCE.md document was invaluable
+2. Comprehensive RUST_SPECIFICATION.md document was invaluable
 3. Parallel development (Rust continuing while Go developed) worked well
 4. Test-driven development caught regressions early
 
@@ -189,7 +189,7 @@ All future development will be in Go with potential for:
 
 ## Acknowledgments
 
-The Rust implementation (22,934 lines) provided the solid foundation that made this migration possible. The careful design and comprehensive RUST_REFERENCE.md documentation ensured 100% fidelity during migration.
+The Rust implementation (22,934 lines) provided the solid foundation that made this migration possible. The careful design and comprehensive RUST_SPECIFICATION.md documentation (now archived at `docs/rust-reference/`) ensured 100% fidelity during migration.
 
 ---
 

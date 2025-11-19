@@ -407,6 +407,24 @@ The tool evaluates ideas across three dimensions:
 
 ---
 
+## Migration History
+
+**Note:** This project was originally implemented in Rust (22,934 lines) and successfully migrated to Go with 100% feature parity achieved on 2024-11-19.
+
+The Go implementation now exceeds the original with:
+- 5 LLM providers (vs Rust's 1)
+- Interactive and quick dump modes
+- Comprehensive test coverage (18 packages)
+- Faster compilation (5s vs 50s)
+
+**Rust Archive:** The complete Rust implementation is preserved in:
+- Branch: `archive/rust-implementation-2024` (commit `31acbfe`)
+- Docs: [`docs/rust-reference/`](./docs/rust-reference/)
+
+For migration details, see [MIGRATION_COMPLETE.md](./docs/MIGRATION_COMPLETE.md).
+
+---
+
 ## Architecture
 
 The Telos Idea Matrix is built with modern Rust practices and production-ready patterns:

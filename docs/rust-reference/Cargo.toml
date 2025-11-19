@@ -1,0 +1,104 @@
+[package]
+name = "telos-idea-matrix"
+version = "0.1.0"
+edition = "2021"
+authors = ["Ray Yacub <ray@example.com>"]
+description = "Idea capture + Telos-aligned analysis for decision paralysis"
+license = "MIT"
+repository = "https://github.com/rayyacub/telos-idea-matrix"
+homepage = "https://github.com/rayyacub/telos-idea-matrix"
+keywords = ["productivity", "ideas", "telos", "goals", "cli"]
+categories = ["command-line-utilities"]
+
+[[bin]]
+name = "tm"
+path = "src/main.rs"
+
+[dependencies]
+# CLI Framework
+clap = { version = "4.4", features = ["derive", "color"] }
+
+# Database
+sqlx = { version = "0.7", features = ["sqlite", "runtime-tokio-rustls", "chrono", "uuid", "macros", "migrate"] }
+
+# Logging
+log = "0.4"
+tracing = "0.1"
+tracing-subscriber = { version = "0.3", features = ["env-filter", "fmt", "json", "time"] }
+tracing-appender = "0.2"
+time = "0.3"
+
+# Serialization
+serde = { version = "1.0", features = ["derive"] }
+serde_json = "1.0"
+toml = "0.8"
+
+# Time handling
+chrono = { version = "0.4", features = ["serde"] }
+
+# Text processing
+regex = "1.10"
+
+# Terminal colors and formatting
+colored = "2.1"
+console = "0.15"
+
+# Async runtime
+tokio = { version = "1.35", features = [
+    "rt-multi-thread",
+    "macros",
+    "sync",
+    "time",
+    "signal",
+    "io-util",
+    "fs",
+    "process",
+] }
+tokio-util = { version = "0.7", features = ["time"] }
+futures = "0.3"
+
+# Async traits
+async-trait = "0.1"
+
+# Error handling
+anyhow = "1.0"
+thiserror = "1.0"
+
+# Circuit breaker and retry
+tower = { version = "0.4", features = ["full"] }
+tower-http = { version = "0.4", features = ["trace"] }
+backoff = { version = "0.4", features = ["tokio"] }
+rand = "0.8"
+
+# HTTP client
+reqwest = { version = "0.11", features = ["json"] }
+
+# UUID generation
+uuid = { version = "1.6", features = ["v4", "serde"] }
+
+# AI Integration (optional for MVP)
+ollama-rs = "0.1"
+
+# File I/O
+dirs = "5.0"
+
+# URL parsing
+url = "2.5"
+
+# Interactive input
+dialoguer = "0.11"
+
+# Terminal detection
+atty = "0.2"
+
+# Clipboard support
+arboard = "3.3"
+
+
+[dev-dependencies]
+tempfile = "3.8"
+
+# Test profile - optimize for faster test execution and immediate output
+[profile.test]
+opt-level = 1  # Minimal optimization for faster compilation, reasonable test speed
+incremental = true  # Faster recompilation during test development
