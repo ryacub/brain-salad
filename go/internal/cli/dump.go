@@ -21,7 +21,9 @@ func newDumpCommand() *cobra.Command {
 	var toClipboard bool
 	var interactive bool
 	var quick bool
+	var useAI bool
 	var provider string
+	var model string
 
 	cmd := &cobra.Command{
 		Use:   "dump <idea text>",
@@ -36,6 +38,8 @@ Modes:
 
 Examples:
   tm dump "Build a SaaS product for developers"
+  tm dump "Start a podcast" --use-ai
+  tm dump "Learn Rust" --use-ai --provider ollama
   tm dump --interactive "Start a podcast"
   tm dump --quick "Write a blog post"
   tm dump --from-clipboard
@@ -74,20 +78,22 @@ Examples:
 			}
 
 			// Normal dump
-			return runNormalDump(ideaText, fromClipboard, toClipboard)
+			return runNormalDump(ideaText, fromClipboard, toClipboard, useAI, provider, model)
 		},
 	}
 
 	cmd.Flags().BoolVarP(&interactive, "interactive", "i", false, "Interactive mode with step-through analysis")
 	cmd.Flags().BoolVarP(&quick, "quick", "q", false, "Quick mode with rule-based analysis")
-	cmd.Flags().StringVarP(&provider, "provider", "p", "", "LLM provider to use (interactive mode only)")
+	cmd.Flags().BoolVar(&useAI, "use-ai", false, "Use LLM analysis (requires Ollama or API keys)")
+	cmd.Flags().StringVarP(&provider, "provider", "p", "", "LLM provider to use (ollama|openai|claude|rule_based)")
+	cmd.Flags().StringVar(&model, "model", "", "LLM model to use")
 	cmd.Flags().BoolVar(&fromClipboard, "from-clipboard", false, "Read idea from clipboard")
 	cmd.Flags().BoolVar(&toClipboard, "to-clipboard", false, "Copy result to clipboard")
 
 	return cmd
 }
 
-func runNormalDump(ideaText string, fromClipboard, toClipboard bool) error {
+func runNormalDump(ideaText string, fromClipboard, toClipboard, useAI bool, provider, model string) error {
 	// Show clipboard info if applicable
 	if fromClipboard {
 		infoColor.Printf("📋 Read from clipboard: %s\n", truncateText(ideaText, 50))
@@ -97,10 +103,26 @@ func runNormalDump(ideaText string, fromClipboard, toClipboard bool) error {
 	infoColor.Println("📝 Capturing idea...")
 	fmt.Println()
 
-	// Calculate score
-	analysis, err := ctx.Engine.CalculateScore(ideaText)
-	if err != nil {
-		return fmt.Errorf("failed to score idea: %w", err)
+	var analysis *models.Analysis
+	var err error
+
+	if useAI {
+		// Use LLM for analysis
+		analysis, err = runLLMAnalysis(ideaText, provider, model)
+		if err != nil {
+			warningColor.Printf("⚠️  LLM analysis failed, falling back to rule-based: %v\n", err)
+			// Fall back to rule-based scoring
+			analysis, err = ctx.Engine.CalculateScore(ideaText)
+			if err != nil {
+				return fmt.Errorf("failed to score idea: %w", err)
+			}
+		}
+	} else {
+		// Use rule-based scoring (default)
+		analysis, err = ctx.Engine.CalculateScore(ideaText)
+		if err != nil {
+			return fmt.Errorf("failed to score idea: %w", err)
+		}
 	}
 
 	// Detect patterns
@@ -149,6 +171,57 @@ func runNormalDump(ideaText string, fromClipboard, toClipboard bool) error {
 	}
 
 	return nil
+}
+
+// runLLMAnalysis performs LLM-based analysis and converts result to models.Analysis
+func runLLMAnalysis(ideaText, provider, model string) (*models.Analysis, error) {
+	// Set provider if specified
+	if provider != "" {
+		if err := ctx.LLMManager.SetPrimaryProvider(provider); err != nil {
+			return nil, fmt.Errorf("failed to set provider: %w", err)
+		}
+	}
+
+	// TODO: Support model selection when LLM providers support it
+	_ = model
+
+	// Run LLM analysis
+	result, err := ctx.LLMManager.AnalyzeWithTelos(ideaText, ctx.Telos)
+	if err != nil {
+		return nil, err
+	}
+
+	// Convert LLM result to models.Analysis format
+	analysis := &models.Analysis{
+		RawScore:   result.FinalScore,
+		FinalScore: result.FinalScore,
+		Mission: models.MissionScores{
+			Total: result.Scores.MissionAlignment,
+			// LLM doesn't break down into sub-scores, so distribute proportionally
+			DomainExpertise:  result.Scores.MissionAlignment * 0.30,
+			AIAlignment:      result.Scores.MissionAlignment * 0.375,
+			ExecutionSupport: result.Scores.MissionAlignment * 0.20,
+			RevenuePotential: result.Scores.MissionAlignment * 0.125,
+		},
+		AntiChallenge: models.AntiChallengeScores{
+			Total: result.Scores.AntiChallenge,
+			// Distribute proportionally
+			ContextSwitching:  result.Scores.AntiChallenge * 0.343,
+			RapidPrototyping:  result.Scores.AntiChallenge * 0.286,
+			Accountability:    result.Scores.AntiChallenge * 0.229,
+			IncomeAnxiety:     result.Scores.AntiChallenge * 0.143,
+		},
+		Strategic: models.StrategicScores{
+			Total: result.Scores.StrategicFit,
+			// Distribute proportionally
+			StackCompatibility:     result.Scores.StrategicFit * 0.40,
+			ShippingHabit:          result.Scores.StrategicFit * 0.32,
+			PublicAccountability:   result.Scores.StrategicFit * 0.16,
+			RevenueTesting:         result.Scores.StrategicFit * 0.12,
+		},
+	}
+
+	return analysis, nil
 }
 
 func displayIdeaAnalysis(idea *models.Idea, analysis *models.Analysis) {
