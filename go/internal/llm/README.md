@@ -19,15 +19,16 @@ type Provider interface {
 ### Provider Implementations
 
 1. **OllamaProvider** - Uses local Ollama for LLM analysis
-2. **RuleBasedProvider** - Uses rule-based scoring engine (always available)
-3. **FallbackProvider** - Chains multiple providers with automatic fallback
+2. **OpenAIProvider** - Uses OpenAI GPT models (GPT-4, GPT-3.5-turbo)
+3. **RuleBasedProvider** - Uses rule-based scoring engine (always available)
+4. **FallbackProvider** - Chains multiple providers with automatic fallback
 
 ### Fallback Chain
 
 The default fallback chain is:
 
 ```
-Ollama → Claude API (Track 5B) → Rule-based
+Ollama → OpenAI → Claude API (Track 5B) → Rule-based
 ```
 
 If Ollama is unavailable or fails, it automatically falls back to the next provider.
@@ -80,14 +81,23 @@ if ollamaProvider.IsAvailable() {
     // ...
 }
 
+// Use only OpenAI
+// Set OPENAI_API_KEY and optionally OPENAI_MODEL environment variables
+openaiProvider := llm.NewOpenAIProvider()
+if openaiProvider.IsAvailable() {
+    result, err := openaiProvider.Analyze(req)
+    // ...
+}
+
 // Use only rule-based
 ruleProvider := llm.NewRuleBasedProvider()
 result, err := ruleProvider.Analyze(req)
 // ...
 
-// Custom fallback chain
+// Custom fallback chain with OpenAI
 customChain := llm.NewFallbackProvider(
     llm.NewOllamaProvider("http://localhost:11434", "mistral"),
+    llm.NewOpenAIProvider(),
     llm.NewRuleBasedProvider(),
 )
 result, err := customChain.Analyze(req)
@@ -105,6 +115,11 @@ config := llm.ProviderConfig{
     OllamaModel:   "llama2",
     OllamaTimeout: 30, // seconds
 
+    // OpenAI settings
+    OpenAIAPIKey:  os.Getenv("OPENAI_API_KEY"),
+    OpenAIModel:   "gpt-5.1", // or "gpt-5", "gpt-5-mini", "gpt-4o", etc.
+    OpenAITimeout: 30,
+
     // Claude API settings (Track 5B)
     ClaudeAPIKey:  os.Getenv("CLAUDE_API_KEY"),
     ClaudeModel:   "claude-3-5-sonnet-20241022",
@@ -114,6 +129,13 @@ config := llm.ProviderConfig{
     EnableCache: true,
     CacheTTL:    3600, // 1 hour
 }
+
+// Environment Variables for OpenAI:
+// OPENAI_API_KEY - Your OpenAI API key (required)
+// OPENAI_MODEL   - Model to use (optional, defaults to "gpt-5.1")
+//
+// Supported models: gpt-5.1, gpt-5.1-instant, gpt-5.1-thinking, gpt-5,
+//                   gpt-5-mini, gpt-5-nano, gpt-4.5, gpt-4o, gpt-4o-mini
 ```
 
 ## Testing
