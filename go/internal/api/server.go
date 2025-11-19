@@ -24,6 +24,7 @@ type Server struct {
 	cache          *Cache
 	rateLimiter    *RateLimiter
 	csrfProtection *CSRFProtection
+	sessionManager *SessionManager
 	healthMonitor  *health.HealthMonitor
 }
 
@@ -42,12 +43,19 @@ func NewServer(repo *database.Repository, telosConfig *models.Telos) *Server {
 	// Add disk space health checker (warn if < 1GB free)
 	healthMonitor.AddCheck(health.NewDiskSpaceHealthChecker("/tmp", 1024))
 
+	// Create session manager with secure configuration
+	sessionConfig := DefaultSessionConfig()
+	// For development, allow non-HTTPS. In production, this should be true.
+	sessionConfig.SecureCookie = false // TODO: Set to true in production with HTTPS
+	sessionManager := NewSessionManager(repo.DB(), sessionConfig)
+
 	s := &Server{
 		repo:           repo,
 		telos:          telosConfig,
 		cache:          NewCache(5 * time.Minute),       // 5-minute cache TTL
 		rateLimiter:    NewRateLimiter(100, 10),         // 100 req/min, burst of 10
 		csrfProtection: NewCSRFProtection(1 * time.Hour), // 1-hour token TTL
+		sessionManager: sessionManager,
 		healthMonitor:  healthMonitor,
 	}
 
@@ -88,6 +96,9 @@ func (s *Server) setupRouter() {
 	r.Use(logging.Middleware) // Structured logging middleware
 	r.Use(middleware.Recoverer)
 	r.Use(middleware.Timeout(60 * time.Second))
+
+	// Session middleware - must come early so session is available for other middleware
+	r.Use(SessionMiddleware(s.sessionManager))
 
 	// Security middleware
 	r.Use(SecurityHeadersMiddleware)
