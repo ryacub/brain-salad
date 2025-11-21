@@ -117,15 +117,15 @@ Before contributing, please:
 
 ### Development Dependencies
 
-The project uses these key dependencies:
+The project uses these key Go modules:
 
-- **clap** (4.4): CLI argument parsing
-- **sqlx** (0.7): Async database operations with SQLite
-- **tokio** (1.35): Async runtime
-- **serde** (1.0): Serialization/deserialization
-- **anyhow** & **thiserror**: Error handling
-- **reqwest**: HTTP client for AI integration
-- **ollama-rs**: LLM integration (optional)
+- **github.com/spf13/cobra**: CLI command framework and argument parsing
+- **modernc.org/sqlite**: Pure Go SQLite database driver
+- **github.com/jmoiron/sqlx**: Database query extensions and utilities
+- **github.com/olekukonko/tablewriter**: Terminal table formatting
+- **github.com/fatih/color**: Terminal color output
+- **github.com/sashabaranov/go-openai**: OpenAI API client
+- **golang.org/x/sync/errgroup**: Goroutine error handling
 
 See [go.mod](./go.mod) for the complete dependency list.
 
@@ -191,35 +191,42 @@ golint ./...
 
 ### Naming Conventions
 
-- **Modules**: snake_case (`telos_parser`, `scoring_engine`)
-- **Structs**: PascalCase (`TelosConfig`, `ScoringEngine`)
-- **Functions**: snake_case (`calculate_score`, `load_config`)
-- **Constants**: SCREAMING_SNAKE_CASE (`DEFAULT_TIMEOUT_MS`)
+- **Packages**: lowercase, single word preferred (`telos`, `scoring`, `analytics`)
+- **Exported Types**: PascalCase (`TelosConfig`, `ScoringEngine`, `IdeaRepository`)
+- **Unexported Types**: camelCase (`internalCache`, `scoreCalculator`)
+- **Exported Functions**: PascalCase (`CalculateScore`, `LoadConfig`, `NewService`)
+- **Unexported Functions**: camelCase (`calculateScore`, `loadConfig`, `parseInput`)
+- **Exported Constants**: PascalCase (`DefaultTimeout`, `MaxRetries`)
+- **Unexported Constants**: camelCase (`defaultBufferSize`, `maxConcurrency`)
 
 ### Import Organization
 
-Organize imports in this order:
-1. Standard library
-2. External crates
-3. Internal modules
+Organize imports in this order (goimports handles this automatically):
+1. Standard library packages
+2. External packages (third-party modules)
+3. Internal packages (project modules)
 
 ```go
-use std::path::PathBuf;
+import (
+    "context"
+    "fmt"
+    "path/filepath"
 
-use anyhow::Result;
-use serde::{Deserialize, Serialize};
+    "github.com/spf13/cobra"
+    "github.com/jmoiron/sqlx"
 
-use crate::config::ConfigPaths;
-use crate::scoring::ScoringEngine;
+    "github.com/rayyacub/telos-idea-matrix/internal/config"
+    "github.com/rayyacub/telos-idea-matrix/internal/scoring"
+)
 ```
 
 ### Architecture Guidelines
 
-- **Modular Design**: Keep modules focused on a single responsibility
-- **Trait Usage**: Use traits for abstractions and testability
+- **Modular Design**: Keep packages focused on a single responsibility
+- **Interface Usage**: Use interfaces for abstractions and testability
 - **Dependency Injection**: Pass dependencies explicitly rather than using globals
 - **Configuration**: Use the existing config system for new settings
-- **Logging**: Use `tracing` crate for structured logging
+- **Logging**: Use the standard `log` package with configurable levels
 
 ## Testing Requirements
 
@@ -231,17 +238,23 @@ All contributions must include appropriate tests and pass the existing test suit
 # Run all tests
 go test ./...
 
-# Run tests with output
-go test ./... -- --nocapture
+# Run tests with verbose output
+go test -v ./...
 
-# Run specific test
-go test ./... test_name
+# Run specific test by name
+go test -v ./... -run TestName
 
 # Run tests with logging
-RUST_LOG=debug go test ./...
+LOG_LEVEL=debug go test -v ./...
 
 # Run integration tests only
-go test ./... --test '*'
+go test -v -tags=integration ./...
+
+# Run tests with race detector
+go test -race ./...
+
+# Run tests with coverage
+go test -cover ./...
 ```
 
 ### Test Coverage
@@ -297,13 +310,16 @@ func TestIdeaScoringMissionAlignment(t *testing.T) {
    go fmt ./...
 
    # Run linter
-   golangci-lint run -- -D warnings
+   golangci-lint run
 
    # Run tests
    go test ./...
 
-   # Build the project
-   go build ./... --release
+   # Build CLI binary
+   go build ./cmd/cli
+
+   # Build web binary
+   go build ./cmd/web
    ```
 
 4. **Update Documentation**
@@ -362,10 +378,12 @@ func TestIdeaScoringMissionAlignment(t *testing.T) {
 ### CI/CD Pipeline Expectations
 
 Your PR must pass:
-- [ ] `go test ./...` - All tests pass
-- [ ] `golangci-lint run --all-targets --all-features -- -D warnings` - No clippy warnings
-- [ ] `go fmt ./... --check` - Code is properly formatted
-- [ ] `go build ./...` - Builds successfully
+- [ ] `go mod verify` - Dependency integrity check
+- [ ] `go test -race ./...` - All tests pass with race detection
+- [ ] `golangci-lint run` - No linting warnings
+- [ ] `go test -tags=integration ./...` - Integration tests pass
+- [ ] `go build ./cmd/cli` - CLI binary builds successfully
+- [ ] `go build ./cmd/web` - Web binary builds successfully
 - [ ] `docker build .` - Container builds successfully (if Dockerfile changed)
 
 ## Issue Reporting
@@ -567,10 +585,12 @@ cmd/cli/main.go         # CLI entry point & command routing
 
 ### Error Handling Philosophy
 
-- Use `anyhow::Result<T>` for application-level errors
-- Use `thiserror` for domain-specific error types
-- Provide context at the boundary of modules
-- Don't panic in library code; return Result instead
+- Return `error` as the last return value from functions
+- Use `fmt.Errorf` with `%w` to wrap errors with context
+- Create custom error types for domain-specific errors
+- Provide context at the boundary of packages
+- Don't panic in library code; return errors instead
+- Check errors immediately after function calls
 
 ## Getting Help
 

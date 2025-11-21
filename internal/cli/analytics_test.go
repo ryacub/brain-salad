@@ -5,6 +5,7 @@ import (
 	"testing"
 	"time"
 
+	"github.com/rayyacub/telos-idea-matrix/internal/analytics"
 	"github.com/rayyacub/telos-idea-matrix/internal/models"
 )
 
@@ -863,7 +864,8 @@ func parseDate(dateStr string) time.Time {
 func TestCalculateOverviewMetrics(t *testing.T) {
 	t.Run("empty ideas", func(_ *testing.T) {
 		ideas := []*models.Idea{}
-		metrics := calculateOverviewMetrics(ideas)
+		service := analytics.NewService(nil)
+		metrics := service.CalculateOverviewMetrics(ideas)
 
 		if metrics.TotalIdeas != 0 {
 			t.Errorf("Expected 0 ideas, got %d", metrics.TotalIdeas)
@@ -880,7 +882,8 @@ func TestCalculateOverviewMetrics(t *testing.T) {
 			{FinalScore: 3.0, Patterns: []string{"p3"}},
 		}
 
-		metrics := calculateOverviewMetrics(ideas)
+		service := analytics.NewService(nil)
+		metrics := service.CalculateOverviewMetrics(ideas)
 
 		if metrics.TotalIdeas != 3 {
 			t.Errorf("Expected 3 ideas, got %d", metrics.TotalIdeas)
@@ -904,12 +907,13 @@ func TestCalculateOverviewMetrics(t *testing.T) {
 	})
 
 	t.Run("duplicate patterns", func(_ *testing.T) {
+		service := analytics.NewService(nil)
 		ideas := []*models.Idea{
 			{FinalScore: 5.0, Patterns: []string{"p1", "p2"}},
 			{FinalScore: 7.0, Patterns: []string{"p1", "p2"}},
 		}
 
-		metrics := calculateOverviewMetrics(ideas)
+		metrics := service.CalculateOverviewMetrics(ideas)
 
 		if metrics.TotalPatterns != 2 {
 			t.Errorf("Expected 2 unique patterns, got %d", metrics.TotalPatterns)
@@ -932,7 +936,7 @@ func TestCalculateMedian(t *testing.T) {
 
 	for _, tt := range tests {
 		t.Run(tt.name, func(t *testing.T) {
-			result := calculateMedian(tt.scores)
+			result := analytics.CalculateMedian(tt.scores)
 			if result != tt.expected {
 				t.Errorf("Expected %.1f, got %.1f", tt.expected, result)
 			}
@@ -942,14 +946,14 @@ func TestCalculateMedian(t *testing.T) {
 
 func TestCalculateStdDev(t *testing.T) {
 	t.Run("empty scores", func(_ *testing.T) {
-		result := calculateStdDev([]float64{})
+		result := analytics.CalculateStdDev([]float64{})
 		if result != 0 {
 			t.Errorf("Expected 0, got %.2f", result)
 		}
 	})
 
 	t.Run("identical values", func(_ *testing.T) {
-		result := calculateStdDev([]float64{5, 5, 5, 5})
+		result := analytics.CalculateStdDev([]float64{5, 5, 5, 5})
 		if result != 0 {
 			t.Errorf("Expected 0 for identical values, got %.2f", result)
 		}
@@ -957,7 +961,7 @@ func TestCalculateStdDev(t *testing.T) {
 
 	t.Run("standard calculation", func(_ *testing.T) {
 		// Mean = 5, variance = 2, stddev = sqrt(2) ≈ 1.414
-		result := calculateStdDev([]float64{3, 4, 5, 6, 7})
+		result := analytics.CalculateStdDev([]float64{3, 4, 5, 6, 7})
 		expected := 1.414
 		if result < expected-0.01 || result > expected+0.01 {
 			t.Errorf("Expected ~%.3f, got %.3f", expected, result)
@@ -984,7 +988,7 @@ func TestCalculatePercentile(t *testing.T) {
 
 	for _, tt := range tests {
 		t.Run(string(rune(tt.percentile)), func(t *testing.T) {
-			result := calculatePercentile(scores, tt.percentile)
+			result := analytics.CalculatePercentile(scores, tt.percentile)
 			if result < tt.expected-tt.tolerance || result > tt.expected+tt.tolerance {
 				t.Errorf("P%d: expected %.2f (±%.2f), got %.2f", tt.percentile, tt.expected, tt.tolerance, result)
 			}
@@ -992,7 +996,7 @@ func TestCalculatePercentile(t *testing.T) {
 	}
 
 	t.Run("empty scores", func(_ *testing.T) {
-		result := calculatePercentile([]float64{}, 50)
+		result := analytics.CalculatePercentile([]float64{}, 50)
 		if result != 0 {
 			t.Errorf("Expected 0 for empty scores, got %.1f", result)
 		}
@@ -1009,7 +1013,8 @@ func TestCalculateScoreDistribution(t *testing.T) {
 		{FinalScore: 5.5}, // 4-6
 	}
 
-	metrics := calculateScoreDistribution(ideas)
+	service := analytics.NewService(nil)
+	metrics := service.CalculateScoreDistribution(ideas)
 
 	if metrics.Buckets["0-2"] != 1 {
 		t.Errorf("Expected 1 in 0-2 bucket, got %d", metrics.Buckets["0-2"])
@@ -1045,7 +1050,8 @@ func TestCalculatePatternStats(t *testing.T) {
 		{Patterns: []string{"pattern1", "pattern3"}},
 	}
 
-	stats := calculatePatternStats(ideas)
+	service := analytics.NewService(nil)
+	stats := service.CalculatePatternStats(ideas)
 
 	// pattern1 should appear 3 times (75%)
 	// pattern2 should appear 1 time (25%)
@@ -1087,7 +1093,8 @@ func TestCalculateTimeMetrics(t *testing.T) {
 		{CreatedAt: now.AddDate(0, 0, -2)}, // Within last 7 days
 	}
 
-	metrics := calculateTimeMetrics(ideas)
+	service := analytics.NewService(nil)
+	metrics := service.CalculateTimeMetrics(ideas)
 
 	if !metrics.OldestIdea.Equal(oldest) {
 		t.Errorf("Expected oldest %v, got %v", oldest, metrics.OldestIdea)
@@ -1118,7 +1125,8 @@ func TestCalculateTimeMetrics(t *testing.T) {
 }
 
 func TestCalculateTimeMetricsEmpty(t *testing.T) {
-	metrics := calculateTimeMetrics([]*models.Idea{})
+	service := analytics.NewService(nil)
+	metrics := service.CalculateTimeMetrics([]*models.Idea{})
 
 	if !metrics.OldestIdea.IsZero() {
 		t.Error("Expected zero time for oldest idea")
@@ -1138,7 +1146,8 @@ func TestCalculateTimeMetricsSingleDay(t *testing.T) {
 		{CreatedAt: now.Add(time.Hour)},
 	}
 
-	metrics := calculateTimeMetrics(ideas)
+	service := analytics.NewService(nil)
+	metrics := service.CalculateTimeMetrics(ideas)
 
 	// Should default to 1 day to avoid division by zero
 	if metrics.TotalDays != 1 {
@@ -1162,7 +1171,7 @@ func TestFormatBytes(t *testing.T) {
 
 	for _, tt := range tests {
 		t.Run(tt.expected, func(t *testing.T) {
-			result := formatBytes(tt.bytes)
+			result := analytics.FormatBytes(tt.bytes)
 			if result != tt.expected {
 				t.Errorf("Expected %s, got %s", tt.expected, result)
 			}
@@ -1192,7 +1201,8 @@ func TestCalculateSystemMetrics(t *testing.T) {
 		},
 	}
 
-	metrics := calculateSystemMetrics(ideas)
+	service := analytics.NewService(nil)
+	metrics := service.CalculateSystemMetrics(ideas)
 
 	// Overview
 	if metrics.Overview.TotalIdeas != 3 {
