@@ -169,21 +169,22 @@ func (m *Manager) Analyze(req AnalysisRequest) (*AnalysisResult, error) {
 	m.mu.RLock()
 	primary := m.primary
 	fallbackEnabled := m.fallbackEnabled
-	m.mu.RUnlock()
 
 	var primaryProviderName string
+	var result *AnalysisResult
+	var err error
+
 	if primary != nil {
 		primaryProviderName = primary.Name()
-	}
-
-	// Try primary provider
-	if primary != nil {
-		result, err := m.analyzeWithProvider(primary, req)
+		m.mu.RUnlock() // Unlock before potentially slow I/O
+		result, err = m.analyzeWithProvider(primary, req)
 		if err == nil {
 			return result, nil
 		}
 		// Log primary failure but continue to fallback
-		fmt.Printf("[Manager] Primary provider %s failed: %v\n", primary.Name(), err)
+		fmt.Printf("[Manager] Primary provider %s failed: %v\n", primaryProviderName, err)
+	} else {
+		m.mu.RUnlock()
 	}
 
 	// If fallback disabled, return error

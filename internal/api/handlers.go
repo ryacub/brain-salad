@@ -425,7 +425,8 @@ func (s *Server) DeleteIdeaHandler(w http.ResponseWriter, r *http.Request) {
 
 // AnalyticsStatsHandler handles requests for analytics statistics
 func (s *Server) AnalyticsStatsHandler(w http.ResponseWriter, _ *http.Request) {
-	// Get all ideas
+	// Note: For personal use with <10K ideas, loading all ideas is acceptable.
+	// For larger datasets, this should use SQL aggregation (COUNT, AVG, MIN, MAX).
 	allIdeas, err := s.repo.List(database.ListOptions{})
 	if err != nil {
 		// Log internal error details but don't expose to client
