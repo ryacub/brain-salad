@@ -137,6 +137,10 @@ func (s *Server) setupRouter() {
 	r.Get("/health", s.HealthHandler)
 	r.Get("/metrics", s.MetricsHandler)
 
+	// OpenAPI documentation
+	r.Get("/api/openapi.yaml", s.OpenAPIHandler)
+	r.Get("/api/docs", s.APIDocsHandler)
+
 	// API v1 routes
 	r.Route("/api/v1", func(r chi.Router) {
 		// CSRF token endpoint (for clients that need it)

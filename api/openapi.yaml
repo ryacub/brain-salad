@@ -1,0 +1,381 @@
+openapi: 3.0.3
+info:
+  title: Telos Idea Matrix API
+  description: AI-powered personal productivity system for decision-making and idea management
+  version: 2.0.1
+  contact:
+    name: API Support
+    url: https://github.com/ryacub/brain-salad
+
+servers:
+  - url: http://localhost:8080/api/v1
+    description: Local development server
+  - url: https://your-domain.com/api/v1
+    description: Production server
+
+security:
+  - BearerAuth: []
+
+paths:
+  /ideas:
+    get:
+      summary: List ideas
+      description: Retrieve a paginated list of ideas with optional filtering
+      operationId: listIdeas
+      tags:
+        - Ideas
+      parameters:
+        - name: status
+          in: query
+          schema:
+            type: string
+            enum: [active, archived, deleted]
+        - name: min_score
+          in: query
+          schema:
+            type: number
+            format: float
+            minimum: 0
+            maximum: 10
+        - name: limit
+          in: query
+          schema:
+            type: integer
+            default: 20
+            minimum: 1
+            maximum: 100
+        - name: offset
+          in: query
+          schema:
+            type: integer
+            default: 0
+            minimum: 0
+        - name: order_by
+          in: query
+          schema:
+            type: string
+            enum: [final_score DESC, created_at DESC, updated_at DESC]
+      responses:
+        '200':
+          description: List of ideas
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  ideas:
+                    type: array
+                    items:
+                      $ref: '#/components/schemas/Idea'
+                  total:
+                    type: integer
+                  limit:
+                    type: integer
+                  offset:
+                    type: integer
+
+    post:
+      summary: Create idea
+      description: Create a new idea with optional LLM analysis
+      operationId: createIdea
+      tags:
+        - Ideas
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              required:
+                - content
+              properties:
+                content:
+                  type: string
+                  minLength: 1
+                  example: "Build an AI tool that helps with decision making"
+                use_ai:
+                  type: boolean
+                  default: false
+                  description: Enable LLM analysis
+      responses:
+        '201':
+          description: Idea created successfully
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Idea'
+        '400':
+          $ref: '#/components/responses/BadRequest'
+        '401':
+          $ref: '#/components/responses/Unauthorized'
+
+  /ideas/{id}:
+    get:
+      summary: Get idea by ID
+      operationId: getIdea
+      tags:
+        - Ideas
+      parameters:
+        - name: id
+          in: path
+          required: true
+          schema:
+            type: string
+      responses:
+        '200':
+          description: Idea details
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Idea'
+        '404':
+          $ref: '#/components/responses/NotFound'
+
+    put:
+      summary: Update idea
+      operationId: updateIdea
+      tags:
+        - Ideas
+      parameters:
+        - name: id
+          in: path
+          required: true
+          schema:
+            type: string
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              properties:
+                content:
+                  type: string
+                status:
+                  type: string
+                  enum: [active, archived, deleted]
+      responses:
+        '200':
+          description: Idea updated
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Idea'
+        '404':
+          $ref: '#/components/responses/NotFound'
+
+    delete:
+      summary: Delete idea
+      operationId: deleteIdea
+      tags:
+        - Ideas
+      parameters:
+        - name: id
+          in: path
+          required: true
+          schema:
+            type: string
+      responses:
+        '204':
+          description: Idea deleted
+        '404':
+          $ref: '#/components/responses/NotFound'
+
+  /analyze:
+    post:
+      summary: Analyze idea
+      description: Analyze an idea without saving it
+      operationId: analyzeIdea
+      tags:
+        - Analysis
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              required:
+                - content
+              properties:
+                content:
+                  type: string
+                  example: "Launch a podcast about AI"
+      responses:
+        '200':
+          description: Analysis result
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/AnalysisResult'
+
+  /analytics/stats:
+    get:
+      summary: Get analytics statistics
+      operationId: getAnalyticsStats
+      tags:
+        - Analytics
+      responses:
+        '200':
+          description: Analytics statistics
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Stats'
+
+  /csrf-token:
+    get:
+      summary: Get CSRF token
+      operationId: getCsrfToken
+      tags:
+        - System
+      responses:
+        '200':
+          description: CSRF token
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  token:
+                    type: string
+
+  /health:
+    get:
+      summary: Health check
+      operationId: healthCheck
+      tags:
+        - System
+      security: []
+      responses:
+        '200':
+          description: Service is healthy
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  status:
+                    type: string
+                    example: "ok"
+                  timestamp:
+                    type: string
+                    format: date-time
+
+components:
+  securitySchemes:
+    BearerAuth:
+      type: http
+      scheme: bearer
+      description: API key authentication
+
+  schemas:
+    Idea:
+      type: object
+      properties:
+        id:
+          type: string
+          example: "01H2XZKQR8Y7F3M9D6VW5NKPQT"
+        content:
+          type: string
+          example: "Build an AI-powered productivity tool"
+        raw_score:
+          type: number
+          format: float
+          minimum: 0
+          maximum: 10
+          example: 8.2
+        final_score:
+          type: number
+          format: float
+          minimum: 0
+          maximum: 10
+          example: 8.5
+        patterns:
+          type: array
+          items:
+            type: string
+          example: ["focus", "ai_expertise"]
+        recommendation:
+          type: string
+          example: "Proceed with caution"
+        analysis:
+          $ref: '#/components/schemas/Analysis'
+        created_at:
+          type: string
+          format: date-time
+        reviewed_at:
+          type: string
+          format: date-time
+          nullable: true
+        status:
+          type: string
+          enum: [active, archived, deleted]
+          example: "active"
+
+    Analysis:
+      type: object
+      properties:
+        mission_alignment:
+          type: number
+          format: float
+        anti_challenge:
+          type: number
+          format: float
+        strategic_fit:
+          type: number
+          format: float
+        total_score:
+          type: number
+          format: float
+
+    AnalysisResult:
+      type: object
+      properties:
+        analysis:
+          $ref: '#/components/schemas/Analysis'
+
+    Stats:
+      type: object
+      properties:
+        total_ideas:
+          type: integer
+        active_ideas:
+          type: integer
+        average_score:
+          type: number
+          format: float
+        high_score:
+          type: number
+          format: float
+        low_score:
+          type: number
+          format: float
+
+    Error:
+      type: object
+      properties:
+        error:
+          type: string
+          example: "Content cannot be empty"
+
+  responses:
+    BadRequest:
+      description: Invalid request
+      content:
+        application/json:
+          schema:
+            $ref: '#/components/schemas/Error'
+
+    Unauthorized:
+      description: Authentication required
+      content:
+        application/json:
+          schema:
+            $ref: '#/components/schemas/Error'
+
+    NotFound:
+      description: Resource not found
+      content:
+        application/json:
+          schema:
+            $ref: '#/components/schemas/Error'
