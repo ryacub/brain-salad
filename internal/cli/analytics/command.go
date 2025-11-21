@@ -4,6 +4,7 @@ import (
 	"fmt"
 
 	"github.com/rayyacub/telos-idea-matrix/internal/analytics"
+	"github.com/rayyacub/telos-idea-matrix/internal/cliutil"
 	"github.com/rayyacub/telos-idea-matrix/internal/database"
 	"github.com/rs/zerolog/log"
 	"github.com/spf13/cobra"
@@ -59,7 +60,7 @@ func runAnalytics(getContext func() *CLIContext) error {
 	}
 
 	if len(ideas) == 0 {
-		warningColor := getScoreColor(5.0)
+		warningColor := cliutil.GetScoreColor(5.0)
 		if _, err := warningColor.Println("No ideas found. Use 'tm dump' to capture your first idea!"); err != nil {
 			log.Warn().Err(err).Msg("failed to print warning message")
 		}
@@ -76,7 +77,7 @@ func runAnalytics(getContext func() *CLIContext) error {
 	fmt.Println("═════════════════════════════════════════════")
 	fmt.Println()
 
-	successColor := getScoreColor(10.0)
+	successColor := cliutil.GetScoreColor(10.0)
 	if _, err := successColor.Printf("Total Ideas: %d\n", stats.TotalIdeas); err != nil {
 		log.Warn().Err(err).Msg("failed to print total ideas")
 	}
@@ -95,13 +96,13 @@ func runAnalytics(getContext func() *CLIContext) error {
 		log.Warn().Err(err).Msg("failed to print high count")
 	}
 
-	warningColor := getScoreColor(5.0)
+	warningColor := cliutil.GetScoreColor(5.0)
 	if _, err := warningColor.Printf("  ⚠️  Medium (5-7):   %d ideas (%.0f%%)\n",
 		stats.MediumCount, mediumPct); err != nil {
 		log.Warn().Err(err).Msg("failed to print medium count")
 	}
 
-	errorColor := getScoreColor(0.0)
+	errorColor := cliutil.GetScoreColor(0.0)
 	if _, err := errorColor.Printf("  🚫 Low (< 5.0):     %d ideas (%.0f%%)\n",
 		stats.LowCount, lowPct); err != nil {
 		log.Warn().Err(err).Msg("failed to print low count")

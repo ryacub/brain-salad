@@ -6,6 +6,7 @@ import (
 
 	"github.com/fatih/color"
 	"github.com/rayyacub/telos-idea-matrix/internal/bulk"
+	"github.com/rayyacub/telos-idea-matrix/internal/cliutil"
 	"github.com/rayyacub/telos-idea-matrix/internal/database"
 	"github.com/rs/zerolog/log"
 	"github.com/spf13/cobra"
@@ -65,7 +66,7 @@ Use --min-score, --search, and --limit to control which ideas are tagged.`,
 			for i, idea := range ideas {
 				if i < 5 { // Show first 5
 					fmt.Printf("  - %s (score: %.1f)\n",
-						truncate(idea.Content, 60),
+						cliutil.TruncateText(idea.Content, 60),
 						idea.FinalScore)
 				}
 			}
@@ -74,7 +75,7 @@ Use --min-score, --search, and --limit to control which ideas are tagged.`,
 			}
 
 			// Confirm
-			if !yes && !confirm("Proceed with tagging?") {
+			if !yes && !cliutil.Confirm("Proceed with tagging?") {
 				fmt.Println("❌ Cancelled")
 				return nil
 			}
@@ -88,7 +89,7 @@ Use --min-score, --search, and --limit to control which ideas are tagged.`,
 				if !strings.Contains(idea.AnalysisDetails, tagName) {
 					idea.AnalysisDetails = fmt.Sprintf("%s [tag:%s]", idea.AnalysisDetails, tagName)
 					if err := ctx.Repository.Update(idea); err != nil {
-						if _, printErr := warningColor.Printf("⚠  Failed to tag idea %s: %v\n", idea.ID, err); printErr != nil {
+						if _, printErr := cliutil.WarningColor.Printf("⚠  Failed to tag idea %s: %v\n", idea.ID, err); printErr != nil {
 							log.Warn().Err(printErr).Msg("failed to print error message")
 						}
 						errorCount++
@@ -104,12 +105,12 @@ Use --min-score, --search, and --limit to control which ideas are tagged.`,
 			}
 
 			if errorCount > 0 {
-				if _, err := warningColor.Printf("⚠  %d ideas failed to tag\n", errorCount); err != nil {
+				if _, err := cliutil.WarningColor.Printf("⚠  %d ideas failed to tag\n", errorCount); err != nil {
 					log.Warn().Err(err).Msg("failed to print warning message")
 				}
 			}
 
-			if _, err := successColor.Printf("✅ Tagged %d ideas with '%s'\n", successCount, tagName); err != nil {
+			if _, err := cliutil.SuccessColor.Printf("✅ Tagged %d ideas with '%s'\n", successCount, tagName); err != nil {
 				log.Warn().Err(err).Msg("failed to print success message")
 			}
 			return nil

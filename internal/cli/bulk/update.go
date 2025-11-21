@@ -6,6 +6,7 @@ import (
 
 	"github.com/fatih/color"
 	"github.com/rayyacub/telos-idea-matrix/internal/bulk"
+	"github.com/rayyacub/telos-idea-matrix/internal/cliutil"
 	"github.com/rayyacub/telos-idea-matrix/internal/database"
 	"github.com/rs/zerolog/log"
 	"github.com/spf13/cobra"
@@ -174,7 +175,7 @@ func runBulkUpdate(getContext func() *CLIContext, opts bulkUpdateOptions) error 
 	fmt.Println()
 
 	if opts.dryRun {
-		if _, err := infoColor.Println("🔍 DRY RUN - Showing affected ideas and changes:"); err != nil {
+		if _, err := cliutil.InfoColor.Println("🔍 DRY RUN - Showing affected ideas and changes:"); err != nil {
 			log.Warn().Err(err).Msg("failed to print message")
 		}
 		for i, idea := range ideas {
@@ -182,7 +183,7 @@ func runBulkUpdate(getContext func() *CLIContext, opts bulkUpdateOptions) error 
 				fmt.Printf("\n... and %d more ideas\n", len(ideas)-10)
 				break
 			}
-			fmt.Printf("\n%d. [%s] %s\n", i+1, idea.ID[:8], truncate(idea.Content, 60))
+			fmt.Printf("\n%d. [%s] %s\n", i+1, idea.ID[:8], cliutil.TruncateText(idea.Content, 60))
 			fmt.Printf("   Current - Score: %.1f, Status: %s\n", idea.FinalScore, idea.Status)
 
 			if opts.setStatus != "" && idea.Status != opts.setStatus {
@@ -222,7 +223,7 @@ func runBulkUpdate(getContext func() *CLIContext, opts bulkUpdateOptions) error 
 	}
 
 	// Confirm
-	if !opts.yes && !confirm(fmt.Sprintf("Update %d ideas?", len(ideas))) {
+	if !opts.yes && !cliutil.Confirm(fmt.Sprintf("Update %d ideas?", len(ideas))) {
 		fmt.Println("❌ Cancelled")
 		return nil
 	}
@@ -264,13 +265,13 @@ func runBulkUpdate(getContext func() *CLIContext, opts bulkUpdateOptions) error 
 		}
 	}
 
-	fmt.Printf("\n%s Update complete:\n", successColor.Sprint("✅"))
+	fmt.Printf("\n%s Update complete:\n", cliutil.SuccessColor.Sprint("✅"))
 	fmt.Printf("  ✓ Updated: %s\n", color.GreenString("%d", updated))
 	if unchanged > 0 {
 		fmt.Printf("  - Unchanged: %s (no modifications needed)\n", color.CyanString("%d", unchanged))
 	}
 	if failed > 0 {
-		fmt.Printf("  ✗ Failed: %s\n", errorColor.Sprint(failed))
+		fmt.Printf("  ✗ Failed: %s\n", cliutil.ErrorColor.Sprint(failed))
 		if len(errors) > 0 && len(errors) <= 10 {
 			fmt.Println("\nErrors:")
 			for _, errMsg := range errors {

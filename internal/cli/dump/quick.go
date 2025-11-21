@@ -7,6 +7,7 @@ import (
 	"strings"
 	"time"
 
+	"github.com/rayyacub/telos-idea-matrix/internal/cliutil"
 	"github.com/rayyacub/telos-idea-matrix/internal/models"
 	"github.com/rayyacub/telos-idea-matrix/internal/scoring"
 	"github.com/rayyacub/telos-idea-matrix/internal/utils"
@@ -58,7 +59,7 @@ func runQuickDump(content string, toClipboard bool, repo interface{ Create(*mode
 
 	// Step 7: Display results
 	fmt.Println(strings.Repeat("─", 80))
-	successColor := getScoreColor(10.0) // Green color for success
+	successColor := cliutil.GetScoreColor(10.0) // Green color for success
 	if _, err := successColor.Printf("✨ Quick Analysis Complete (ID: %s)\n", idea.ID[:8]); err != nil {
 		log.Warn().Err(err).Msg("failed to print message")
 	}
@@ -66,12 +67,12 @@ func runQuickDump(content string, toClipboard bool, repo interface{ Create(*mode
 	fmt.Println()
 	fmt.Printf("💡 %s\n\n", idea.Content)
 
-	scoreColor := getScoreColor(idea.FinalScore)
+	scoreColor := cliutil.GetScoreColor(idea.FinalScore)
 	if _, err := scoreColor.Printf("⭐ Score: %.1f/10.0 (rule-based)\n", score); err != nil {
 		log.Warn().Err(err).Msg("failed to print score")
 	}
 
-	recommendationColor := getRecommendationColor(recommendation)
+	recommendationColor := cliutil.GetRecommendationColor(recommendation)
 	if _, err := recommendationColor.Printf("%s\n\n", recommendation); err != nil {
 		log.Warn().Err(err).Msg("failed to print recommendation")
 	}
@@ -90,7 +91,7 @@ func runQuickDump(content string, toClipboard bool, repo interface{ Create(*mode
 	if _, err := successColor.Println("✅ Idea saved to database"); err != nil {
 		log.Warn().Err(err).Msg("failed to print message")
 	}
-	infoColor := getScoreColor(7.0) // Cyan-like color for info
+	infoColor := cliutil.GetScoreColor(7.0) // Cyan-like color for info
 	if _, err := infoColor.Println("💡 Tip: Use 'tm analyze " + idea.ID[:8] + "' to run full LLM analysis later"); err != nil {
 		log.Warn().Err(err).Msg("failed to print message")
 	}
@@ -104,7 +105,7 @@ func runQuickDump(content string, toClipboard bool, repo interface{ Create(*mode
 			idea.Content)
 
 		if err := utils.CopyToClipboard(summary); err != nil {
-			warningColor := getScoreColor(5.0) // Yellow color for warnings
+			warningColor := cliutil.GetScoreColor(5.0) // Yellow color for warnings
 			if _, printErr := warningColor.Printf("⚠️  Warning: failed to copy to clipboard: %v\n", err); printErr != nil {
 				log.Warn().Err(printErr).Msg("failed to print warning")
 			}

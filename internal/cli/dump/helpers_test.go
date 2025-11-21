@@ -4,6 +4,7 @@ import (
 	"strings"
 	"testing"
 
+	"github.com/rayyacub/telos-idea-matrix/internal/cliutil"
 	"github.com/rayyacub/telos-idea-matrix/internal/llm"
 )
 
@@ -181,9 +182,9 @@ func TestTruncateText(t *testing.T) {
 	}
 
 	for _, tt := range tests {
-		result := truncateText(tt.text, tt.maxLen)
+		result := cliutil.TruncateText(tt.text, tt.maxLen)
 		if result != tt.expected {
-			t.Errorf("truncateText(%q, %d) = %q, want %q",
+			t.Errorf("cliutil.TruncateText(%q, %d) = %q, want %q",
 				tt.text, tt.maxLen, result, tt.expected)
 		}
 	}

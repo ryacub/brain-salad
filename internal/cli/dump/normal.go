@@ -5,6 +5,7 @@ import (
 	"fmt"
 	"strings"
 
+	"github.com/rayyacub/telos-idea-matrix/internal/cliutil"
 	"github.com/rayyacub/telos-idea-matrix/internal/models"
 	"github.com/rayyacub/telos-idea-matrix/internal/patterns"
 	"github.com/rayyacub/telos-idea-matrix/internal/scoring"
@@ -13,7 +14,7 @@ import (
 )
 
 var (
-	warningColor = getScoreColor(5.0) // Yellow color for warnings
+	warningColor = cliutil.GetScoreColor(5.0) // Yellow color for warnings
 )
 
 // DumpContext holds dependencies for dump operations
@@ -29,13 +30,13 @@ func runNormalDump(ideaText string, fromClipboard, toClipboard, useAI bool, prov
 
 	// Show clipboard info if applicable
 	if fromClipboard {
-		if _, err := infoColor.Printf("📋 Read from clipboard: %s\n", truncateText(ideaText, 50)); err != nil {
+		if _, err := cliutil.InfoColor.Printf("📋 Read from clipboard: %s\n", cliutil.TruncateText(ideaText, 50)); err != nil {
 			log.Warn().Err(err).Msg("failed to print message")
 		}
 	}
 
 	// Show progress
-	if _, err := infoColor.Println("📝 Capturing idea..."); err != nil {
+	if _, err := cliutil.InfoColor.Println("📝 Capturing idea..."); err != nil {
 		log.Warn().Err(err).Msg("failed to print message")
 	}
 	fmt.Println()
@@ -107,7 +108,7 @@ func runNormalDump(ideaText string, fromClipboard, toClipboard, useAI bool, prov
 				log.Warn().Err(printErr).Msg("failed to print warning")
 			}
 		} else {
-			if _, err := successColor.Println("✓ Result copied to clipboard"); err != nil {
+			if _, err := cliutil.SuccessColor.Println("✓ Result copied to clipboard"); err != nil {
 				log.Warn().Err(err).Msg("failed to print message")
 			}
 		}
@@ -120,7 +121,7 @@ func runNormalDump(ideaText string, fromClipboard, toClipboard, useAI bool, prov
 func displayIdeaAnalysis(idea *models.Idea, analysis *models.Analysis) {
 	// Header
 	fmt.Println(strings.Repeat("─", 80))
-	if _, err := successColor.Printf("✨ Idea Analyzed (ID: %s)\n", idea.ID[:8]); err != nil {
+	if _, err := cliutil.SuccessColor.Printf("✨ Idea Analyzed (ID: %s)\n", idea.ID[:8]); err != nil {
 		log.Warn().Err(err).Msg("failed to print message")
 	}
 	fmt.Println(strings.Repeat("─", 80))
@@ -130,13 +131,13 @@ func displayIdeaAnalysis(idea *models.Idea, analysis *models.Analysis) {
 	fmt.Printf("💡 %s\n\n", idea.Content)
 
 	// Score with color coding
-	scoreColor := getScoreColor(idea.FinalScore)
+	scoreColor := cliutil.GetScoreColor(idea.FinalScore)
 	if _, err := scoreColor.Printf("⭐ Score: %.1f/10.0\n", idea.FinalScore); err != nil {
 		log.Warn().Err(err).Msg("failed to print score")
 	}
 
 	// Recommendation with emoji
-	recommendationColor := getRecommendationColor(idea.Recommendation)
+	recommendationColor := cliutil.GetRecommendationColor(idea.Recommendation)
 	if _, err := recommendationColor.Printf("%s\n\n", idea.Recommendation); err != nil {
 		log.Warn().Err(err).Msg("failed to print recommendation")
 	}
@@ -178,7 +179,7 @@ func displayIdeaAnalysis(idea *models.Idea, analysis *models.Analysis) {
 
 	// Footer
 	fmt.Println(strings.Repeat("─", 80))
-	if _, err := successColor.Println("✅ Idea saved to database"); err != nil {
+	if _, err := cliutil.SuccessColor.Println("✅ Idea saved to database"); err != nil {
 		log.Warn().Err(err).Msg("failed to print message")
 	}
 	fmt.Println(strings.Repeat("─", 80))

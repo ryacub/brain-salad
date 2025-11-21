@@ -4,6 +4,7 @@ import (
 	"fmt"
 
 	"github.com/rayyacub/telos-idea-matrix/internal/analytics"
+	"github.com/rayyacub/telos-idea-matrix/internal/cliutil"
 	"github.com/rayyacub/telos-idea-matrix/internal/database"
 	"github.com/rs/zerolog/log"
 	"github.com/spf13/cobra"
@@ -42,7 +43,7 @@ Examples:
 			}
 
 			if len(ideas) == 0 {
-				warningColor := getScoreColor(5.0)
+				warningColor := cliutil.GetScoreColor(5.0)
 				if _, err := warningColor.Println("No ideas found. Use 'tm dump' to capture your first idea!"); err != nil {
 					log.Warn().Err(err).Msg("failed to print warning message")
 				}
@@ -74,9 +75,9 @@ Examples:
 
 			fmt.Printf("Trend: %s\n\n", sparkline)
 
-			successColor := getScoreColor(10.0)
-			warningColor := getScoreColor(5.0)
-			errorColor := getScoreColor(0.0)
+			successColor := cliutil.GetScoreColor(10.0)
+			warningColor := cliutil.GetScoreColor(5.0)
+			errorColor := cliutil.GetScoreColor(0.0)
 
 			for _, trend := range trends {
 				// Color code based on score

@@ -7,6 +7,7 @@ import (
 	"time"
 
 	"github.com/rayyacub/telos-idea-matrix/internal/cli/dump"
+	"github.com/rayyacub/telos-idea-matrix/internal/cliutil"
 	"github.com/rs/zerolog/log"
 	"github.com/spf13/cobra"
 )
@@ -61,12 +62,12 @@ func runBatchDump(filename string) error {
 
 		err := dump.RunQuickDump(line, false, ctx.Repository)
 		if err != nil {
-			if _, printErr := errorColor.Printf("  ✗ Error: %v\n", err); printErr != nil {
+			if _, printErr := cliutil.ErrorColor.Printf("  ✗ Error: %v\n", err); printErr != nil {
 				log.Warn().Err(printErr).Msg("failed to print error message")
 			}
 			errorCount++
 		} else {
-			if _, printErr := successColor.Printf("  ✓ Saved\n"); printErr != nil {
+			if _, printErr := cliutil.SuccessColor.Printf("  ✓ Saved\n"); printErr != nil {
 				log.Warn().Err(printErr).Msg("failed to print success message")
 			}
 			successCount++
@@ -78,11 +79,11 @@ func runBatchDump(filename string) error {
 
 	fmt.Println(strings.Repeat("═", 80))
 	fmt.Println("Batch processing complete:")
-	if _, err := successColor.Printf("  ✓ Success: %d ideas\n", successCount); err != nil {
+	if _, err := cliutil.SuccessColor.Printf("  ✓ Success: %d ideas\n", successCount); err != nil {
 		log.Warn().Err(err).Msg("failed to print success message")
 	}
 	if errorCount > 0 {
-		if _, err := errorColor.Printf("  ✗ Errors: %d\n", errorCount); err != nil {
+		if _, err := cliutil.ErrorColor.Printf("  ✗ Errors: %d\n", errorCount); err != nil {
 			log.Warn().Err(err).Msg("failed to print error count")
 		}
 	}

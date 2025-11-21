@@ -7,6 +7,7 @@ import (
 
 	"github.com/fatih/color"
 	"github.com/rayyacub/telos-idea-matrix/internal/bulk"
+	"github.com/rayyacub/telos-idea-matrix/internal/cliutil"
 	"github.com/rayyacub/telos-idea-matrix/internal/database"
 	"github.com/rayyacub/telos-idea-matrix/internal/patterns"
 	"github.com/rs/zerolog/log"
@@ -142,7 +143,7 @@ func runBulkAnalyze(getContext func() *CLIContext, opts bulkAnalyzeOptions) erro
 	fmt.Println()
 
 	if opts.dryRun {
-		if _, err := infoColor.Println("🔍 DRY RUN - No changes will be made"); err != nil {
+		if _, err := cliutil.InfoColor.Println("🔍 DRY RUN - No changes will be made"); err != nil {
 			log.Warn().Err(err).Msg("failed to print message")
 		}
 		fmt.Println()
@@ -150,7 +151,7 @@ func runBulkAnalyze(getContext func() *CLIContext, opts bulkAnalyzeOptions) erro
 			if i < 10 { // Show first 10
 				age := time.Since(idea.CreatedAt).Hours() / 24
 				fmt.Printf("%d. [%s] %s (score: %.1f, age: %.0fd)\n",
-					i+1, idea.ID[:8], truncate(idea.Content, 60), idea.FinalScore, age)
+					i+1, idea.ID[:8], cliutil.TruncateText(idea.Content, 60), idea.FinalScore, age)
 			}
 		}
 		if len(ideas) > 10 {
@@ -160,7 +161,7 @@ func runBulkAnalyze(getContext func() *CLIContext, opts bulkAnalyzeOptions) erro
 	}
 
 	// Confirm with user
-	if !opts.yes && !confirm(fmt.Sprintf("Re-analyze %d ideas?", len(ideas))) {
+	if !opts.yes && !cliutil.Confirm(fmt.Sprintf("Re-analyze %d ideas?", len(ideas))) {
 		fmt.Println("❌ Cancelled")
 		return nil
 	}
@@ -176,13 +177,13 @@ func runBulkAnalyze(getContext func() *CLIContext, opts bulkAnalyzeOptions) erro
 		if err := llmManager.SetPrimaryProvider(opts.provider); err != nil {
 			return fmt.Errorf("failed to set provider: %w", err)
 		}
-		if _, err := infoColor.Printf("🤖 Using provider: %s\n", opts.provider); err != nil {
+		if _, err := cliutil.InfoColor.Printf("🤖 Using provider: %s\n", opts.provider); err != nil {
 			log.Warn().Err(err).Msg("failed to print message")
 		}
 	} else {
 		primaryProvider := llmManager.GetPrimaryProvider()
 		if primaryProvider != nil {
-			if _, err := infoColor.Printf("🤖 Using provider: %s\n", primaryProvider.Name()); err != nil {
+			if _, err := cliutil.InfoColor.Printf("🤖 Using provider: %s\n", primaryProvider.Name()); err != nil {
 				log.Warn().Err(err).Msg("failed to print message")
 			}
 		}
@@ -255,12 +256,12 @@ func runBulkAnalyze(getContext func() *CLIContext, opts bulkAnalyzeOptions) erro
 	fmt.Println()
 
 	// Show summary
-	if _, err := successColor.Printf("✅ Re-analysis complete:\n"); err != nil {
+	if _, err := cliutil.SuccessColor.Printf("✅ Re-analysis complete:\n"); err != nil {
 		log.Warn().Err(err).Msg("failed to print success message")
 	}
 	fmt.Printf("  ✓ Successful: %d\n", successful)
 	if failed > 0 {
-		if _, err := warningColor.Printf("  ✗ Failed: %d\n", failed); err != nil {
+		if _, err := cliutil.WarningColor.Printf("  ✗ Failed: %d\n", failed); err != nil {
 			log.Warn().Err(err).Msg("failed to print failed count")
 		}
 		if len(errors) > 0 && len(errors) <= 10 {

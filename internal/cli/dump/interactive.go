@@ -7,14 +7,15 @@ import (
 	"time"
 
 	"github.com/fatih/color"
+	"github.com/rayyacub/telos-idea-matrix/internal/cliutil"
 	"github.com/rayyacub/telos-idea-matrix/internal/llm"
 	"github.com/rayyacub/telos-idea-matrix/internal/models"
 	"github.com/rs/zerolog/log"
 )
 
 var (
-	successColor = color.New(color.FgGreen, color.Bold)
-	infoColor    = color.New(color.FgCyan)
+	successColor = cliutil.SuccessColor
+	infoColor    = cliutil.InfoColor
 )
 
 // runInteractiveDump performs step-by-step interactive analysis using LLM
@@ -30,7 +31,7 @@ func runInteractiveDump(ideaText string, providerName string, telos *models.Telo
 	fmt.Println(ideaText)
 	fmt.Println()
 
-	if !confirm("Continue to telos loading?") {
+	if !cliutil.Confirm("Continue to telos loading?") {
 		if _, err := infoColor.Println("Analysis cancelled."); err != nil {
 			log.Warn().Err(err).Msg("failed to print message")
 		}
@@ -52,7 +53,7 @@ func runInteractiveDump(ideaText string, providerName string, telos *models.Telo
 	fmt.Printf("Stack Items: %d\n", stackCount)
 	fmt.Println()
 
-	if !confirm("Continue with this telos?") {
+	if !cliutil.Confirm("Continue with this telos?") {
 		if _, err := infoColor.Println("Analysis cancelled."); err != nil {
 			log.Warn().Err(err).Msg("failed to print message")
 		}
@@ -83,7 +84,7 @@ func runInteractiveDump(ideaText string, providerName string, telos *models.Telo
 	fmt.Printf("Status: %s\n", getProviderStatus(provider))
 	fmt.Println()
 
-	if !confirm("Continue with this provider?") {
+	if !cliutil.Confirm("Continue with this provider?") {
 		if _, err := infoColor.Println("Analysis cancelled."); err != nil {
 			log.Warn().Err(err).Msg("failed to print message")
 		}
@@ -119,7 +120,7 @@ func runInteractiveDump(ideaText string, providerName string, telos *models.Telo
 
 	displayInteractiveAnalysisResults(result)
 
-	if !confirm("Save this idea?") {
+	if !cliutil.Confirm("Save this idea?") {
 		if _, err := infoColor.Println("Idea not saved."); err != nil {
 			log.Warn().Err(err).Msg("failed to print message")
 		}
@@ -139,7 +140,7 @@ func runInteractiveDump(ideaText string, providerName string, telos *models.Telo
 	// Serialize analysis details
 	analysisJSON, err := json.Marshal(result)
 	if err != nil {
-		warningColor := getScoreColor(5.0)
+		warningColor := cliutil.GetScoreColor(5.0)
 		if _, printErr := warningColor.Printf("⚠️  Warning: failed to serialize analysis: %v\n", err); printErr != nil {
 			log.Warn().Err(printErr).Msg("failed to print warning")
 		}

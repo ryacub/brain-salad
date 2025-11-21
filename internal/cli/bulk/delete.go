@@ -5,6 +5,7 @@ import (
 	"time"
 
 	"github.com/rayyacub/telos-idea-matrix/internal/bulk"
+	"github.com/rayyacub/telos-idea-matrix/internal/cliutil"
 	"github.com/rayyacub/telos-idea-matrix/internal/database"
 	"github.com/rs/zerolog/log"
 	"github.com/spf13/cobra"
@@ -67,13 +68,13 @@ Always requires confirmation for safety.`,
 			}
 
 			// Show preview
-			if _, err := errorColor.Printf("⚠️  WARNING: About to PERMANENTLY DELETE %d ideas:\n", len(ideas)); err != nil {
+			if _, err := cliutil.ErrorColor.Printf("⚠️  WARNING: About to PERMANENTLY DELETE %d ideas:\n", len(ideas)); err != nil {
 				log.Warn().Err(err).Msg("failed to print warning message")
 			}
 			for i, idea := range ideas {
 				if i < 5 {
 					fmt.Printf("  - %s (score: %.1f)\n",
-						truncate(idea.Content, 50),
+						cliutil.TruncateText(idea.Content, 50),
 						idea.FinalScore)
 				}
 			}
@@ -84,7 +85,7 @@ Always requires confirmation for safety.`,
 			// Always require confirmation for delete
 			if !yes {
 				fmt.Println()
-				if !confirm("⚠️  PERMANENTLY DELETE these ideas? This CANNOT be undone!") {
+				if !cliutil.Confirm("⚠️  PERMANENTLY DELETE these ideas? This CANNOT be undone!") {
 					fmt.Println("❌ Cancelled")
 					return nil
 				}
@@ -95,7 +96,7 @@ Always requires confirmation for safety.`,
 			errorCount := 0
 			for i, idea := range ideas {
 				if err := ctx.Repository.Delete(idea.ID); err != nil {
-					if _, printErr := warningColor.Printf("⚠  Failed to delete idea %s: %v\n", idea.ID, err); printErr != nil {
+					if _, printErr := cliutil.WarningColor.Printf("⚠  Failed to delete idea %s: %v\n", idea.ID, err); printErr != nil {
 						log.Warn().Err(printErr).Msg("failed to print error message")
 					}
 					errorCount++
@@ -110,12 +111,12 @@ Always requires confirmation for safety.`,
 			}
 
 			if errorCount > 0 {
-				if _, err := warningColor.Printf("⚠  %d ideas failed to delete\n", errorCount); err != nil {
+				if _, err := cliutil.WarningColor.Printf("⚠  %d ideas failed to delete\n", errorCount); err != nil {
 					log.Warn().Err(err).Msg("failed to print warning message")
 				}
 			}
 
-			if _, err := errorColor.Printf("🗑️  Permanently deleted %d ideas\n", successCount); err != nil {
+			if _, err := cliutil.ErrorColor.Printf("🗑️  Permanently deleted %d ideas\n", successCount); err != nil {
 				log.Warn().Err(err).Msg("failed to print message")
 			}
 			return nil

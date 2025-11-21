@@ -2,40 +2,10 @@ package bulk
 
 import (
 	"fmt"
-	"strings"
 	"time"
 
-	"github.com/fatih/color"
 	"github.com/rayyacub/telos-idea-matrix/internal/llm"
-	"github.com/rs/zerolog/log"
 )
-
-var (
-	// Color definitions for bulk commands
-	successColor = color.New(color.FgGreen, color.Bold)
-	errorColor   = color.New(color.FgRed, color.Bold)
-	infoColor    = color.New(color.FgCyan)
-	warningColor = color.New(color.FgYellow)
-)
-
-// truncate truncates a string to the specified maximum length
-func truncate(s string, maxLen int) string {
-	if len(s) <= maxLen {
-		return s
-	}
-	return s[:maxLen-3] + "..."
-}
-
-// confirm prompts the user for yes/no confirmation
-func confirm(prompt string) bool {
-	fmt.Printf("%s [y/N]: ", prompt)
-	var response string
-	if _, err := fmt.Scanln(&response); err != nil {
-		log.Warn().Err(err).Msg("failed to read user input")
-	}
-	response = strings.ToLower(strings.TrimSpace(response))
-	return response == "y" || response == "yes"
-}
 
 // parseDuration parses duration strings like "7d", "30d", "24h"
 func parseDuration(s string) (time.Duration, error) {

@@ -6,6 +6,7 @@ import (
 
 	"github.com/fatih/color"
 	"github.com/rayyacub/telos-idea-matrix/internal/bulk"
+	"github.com/rayyacub/telos-idea-matrix/internal/cliutil"
 	"github.com/rayyacub/telos-idea-matrix/internal/database"
 	"github.com/rs/zerolog/log"
 	"github.com/spf13/cobra"
@@ -80,7 +81,7 @@ Use --max-score to archive ideas below a score threshold.`,
 				if i < 5 {
 					age := time.Since(idea.CreatedAt).Hours() / 24
 					fmt.Printf("  - %s (score: %.1f, age: %.0f days)\n",
-						truncate(idea.Content, 50),
+						cliutil.TruncateText(idea.Content, 50),
 						idea.FinalScore,
 						age)
 				}
@@ -90,14 +91,14 @@ Use --max-score to archive ideas below a score threshold.`,
 			}
 
 			if dryRun {
-				if _, err := infoColor.Println("\n🔍 DRY RUN - No changes will be made"); err != nil {
+				if _, err := cliutil.InfoColor.Println("\n🔍 DRY RUN - No changes will be made"); err != nil {
 					log.Warn().Err(err).Msg("failed to print message")
 				}
 				return nil
 			}
 
 			// Confirm
-			if !yes && !confirm("Proceed with archiving?") {
+			if !yes && !cliutil.Confirm("Proceed with archiving?") {
 				fmt.Println("❌ Cancelled")
 				return nil
 			}
@@ -108,7 +109,7 @@ Use --max-score to archive ideas below a score threshold.`,
 			for i, idea := range ideas {
 				idea.Status = "archived"
 				if err := ctx.Repository.Update(idea); err != nil {
-					if _, printErr := warningColor.Printf("⚠  Failed to archive idea %s: %v\n", idea.ID, err); printErr != nil {
+					if _, printErr := cliutil.WarningColor.Printf("⚠  Failed to archive idea %s: %v\n", idea.ID, err); printErr != nil {
 						log.Warn().Err(printErr).Msg("failed to print error message")
 					}
 					errorCount++
@@ -123,12 +124,12 @@ Use --max-score to archive ideas below a score threshold.`,
 			}
 
 			if errorCount > 0 {
-				if _, err := warningColor.Printf("⚠  %d ideas failed to archive\n", errorCount); err != nil {
+				if _, err := cliutil.WarningColor.Printf("⚠  %d ideas failed to archive\n", errorCount); err != nil {
 					log.Warn().Err(err).Msg("failed to print warning message")
 				}
 			}
 
-			if _, err := successColor.Printf("✅ Archived %d ideas\n", successCount); err != nil {
+			if _, err := cliutil.SuccessColor.Printf("✅ Archived %d ideas\n", successCount); err != nil {
 				log.Warn().Err(err).Msg("failed to print success message")
 			}
 			return nil

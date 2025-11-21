@@ -5,6 +5,7 @@ import (
 	"os"
 
 	"github.com/rayyacub/telos-idea-matrix/internal/analytics"
+	"github.com/rayyacub/telos-idea-matrix/internal/cliutil"
 	"github.com/rayyacub/telos-idea-matrix/internal/database"
 	"github.com/rs/zerolog/log"
 	"github.com/spf13/cobra"
@@ -66,7 +67,7 @@ Examples:
 				if err != nil {
 					return fmt.Errorf("failed to write report: %w", err)
 				}
-				successColor := getScoreColor(10.0)
+				successColor := cliutil.GetScoreColor(10.0)
 				if _, err := successColor.Printf("✅ Report saved to: %s\n", outputFile); err != nil {
 					log.Warn().Err(err).Msg("failed to print success message")
 				}

@@ -6,6 +6,7 @@ import (
 	"strings"
 
 	"github.com/rayyacub/telos-idea-matrix/internal/bulk"
+	"github.com/rayyacub/telos-idea-matrix/internal/cliutil"
 	"github.com/rayyacub/telos-idea-matrix/internal/database"
 	"github.com/rayyacub/telos-idea-matrix/internal/export"
 	"github.com/rs/zerolog/log"
@@ -85,7 +86,7 @@ Use filters to control which ideas are exported.`,
 				return fmt.Errorf("failed to export: %w", err)
 			}
 
-			if _, err := successColor.Printf("✅ Exported %d ideas to '%s' (%s format)\n",
+			if _, err := cliutil.SuccessColor.Printf("✅ Exported %d ideas to '%s' (%s format)\n",
 				len(ideas), filename, format); err != nil {
 				log.Warn().Err(err).Msg("failed to print success message")
 			}

@@ -4,6 +4,7 @@ import (
 	"fmt"
 	"time"
 
+	"github.com/rayyacub/telos-idea-matrix/internal/cliutil"
 	"github.com/rayyacub/telos-idea-matrix/internal/database"
 	"github.com/rayyacub/telos-idea-matrix/internal/models"
 	"github.com/rs/zerolog/log"
@@ -69,7 +70,7 @@ func runPrune(cmd *cobra.Command, args []string) error {
 	}
 
 	if len(toPrune) == 0 {
-		if _, err := successColor.Println("✅ No ideas to prune!"); err != nil {
+		if _, err := cliutil.SuccessColor.Println("✅ No ideas to prune!"); err != nil {
 			log.Warn().Err(err).Msg("failed to print message")
 		}
 		return nil
@@ -78,13 +79,13 @@ func runPrune(cmd *cobra.Command, args []string) error {
 	// Display what would be pruned
 	fmt.Printf("Found %d ideas to prune:\n\n", len(toPrune))
 	for i, idea := range toPrune {
-		fmt.Printf("%d. [%.1f] %s\n", i+1, idea.FinalScore, truncateString(idea.Content, 60))
+		fmt.Printf("%d. [%.1f] %s\n", i+1, idea.FinalScore, cliutil.TruncateText(idea.Content, 60))
 		fmt.Printf("   Created: %s\n", idea.CreatedAt.Format("2006-01-02"))
 	}
 	fmt.Println()
 
 	if pruneDryRun {
-		if _, err := infoColor.Println("🔍 Dry run - nothing was changed"); err != nil {
+		if _, err := cliutil.InfoColor.Println("🔍 Dry run - nothing was changed"); err != nil {
 			log.Warn().Err(err).Msg("failed to print message")
 		}
 		return nil
@@ -95,7 +96,7 @@ func runPrune(cmd *cobra.Command, args []string) error {
 	for _, idea := range toPrune {
 		idea.Status = "archived"
 		if err := ctx.Repository.Update(idea); err != nil {
-			if _, printErr := warningColor.Printf("Failed to archive idea %s: %v\n", idea.ID[:8], err); printErr != nil {
+			if _, printErr := cliutil.WarningColor.Printf("Failed to archive idea %s: %v\n", idea.ID[:8], err); printErr != nil {
 				log.Warn().Err(printErr).Msg("failed to print message")
 			}
 			continue
@@ -103,7 +104,7 @@ func runPrune(cmd *cobra.Command, args []string) error {
 		archived++
 	}
 
-	if _, err := successColor.Printf("✅ Archived %d ideas\n", archived); err != nil {
+	if _, err := cliutil.SuccessColor.Printf("✅ Archived %d ideas\n", archived); err != nil {
 		log.Warn().Err(err).Msg("failed to print message")
 	}
 	return nil

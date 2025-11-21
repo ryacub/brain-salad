@@ -4,6 +4,7 @@ import (
 	"fmt"
 
 	"github.com/fatih/color"
+	"github.com/rayyacub/telos-idea-matrix/internal/cliutil"
 	"github.com/rayyacub/telos-idea-matrix/internal/export"
 	"github.com/rs/zerolog/log"
 	"github.com/spf13/cobra"
@@ -45,7 +46,7 @@ ID,Content,RawScore,FinalScore,Patterns,Recommendation,AnalysisDetails,CreatedAt
 				filename)
 			for i, idea := range ideas {
 				if i < 5 {
-					fmt.Printf("  - %s\n", truncate(idea.Content, 60))
+					fmt.Printf("  - %s\n", cliutil.TruncateText(idea.Content, 60))
 				}
 			}
 			if len(ideas) > 5 {
@@ -53,7 +54,7 @@ ID,Content,RawScore,FinalScore,Patterns,Recommendation,AnalysisDetails,CreatedAt
 			}
 
 			// Confirm
-			if !yes && !confirm("Proceed with import?") {
+			if !yes && !cliutil.Confirm("Proceed with import?") {
 				fmt.Println("❌ Cancelled")
 				return nil
 			}
@@ -64,7 +65,7 @@ ID,Content,RawScore,FinalScore,Patterns,Recommendation,AnalysisDetails,CreatedAt
 			for i, idea := range ideas {
 				// Validate idea before import
 				if err := idea.Validate(); err != nil {
-					if _, printErr := warningColor.Printf("⚠  Skipping invalid idea: %v\n", err); printErr != nil {
+					if _, printErr := cliutil.WarningColor.Printf("⚠  Skipping invalid idea: %v\n", err); printErr != nil {
 						log.Warn().Err(printErr).Msg("failed to print warning")
 					}
 					errorCount++
@@ -72,7 +73,7 @@ ID,Content,RawScore,FinalScore,Patterns,Recommendation,AnalysisDetails,CreatedAt
 				}
 
 				if err := ctx.Repository.Create(idea); err != nil {
-					if _, printErr := warningColor.Printf("⚠  Failed to import idea: %v\n", err); printErr != nil {
+					if _, printErr := cliutil.WarningColor.Printf("⚠  Failed to import idea: %v\n", err); printErr != nil {
 						log.Warn().Err(printErr).Msg("failed to print error message")
 					}
 					errorCount++
@@ -87,12 +88,12 @@ ID,Content,RawScore,FinalScore,Patterns,Recommendation,AnalysisDetails,CreatedAt
 			}
 
 			if errorCount > 0 {
-				if _, err := warningColor.Printf("⚠  %d ideas failed to import\n", errorCount); err != nil {
+				if _, err := cliutil.WarningColor.Printf("⚠  %d ideas failed to import\n", errorCount); err != nil {
 					log.Warn().Err(err).Msg("failed to print warning message")
 				}
 			}
 
-			if _, err := successColor.Printf("✅ Imported %d ideas from '%s'\n", successCount, filename); err != nil {
+			if _, err := cliutil.SuccessColor.Printf("✅ Imported %d ideas from '%s'\n", successCount, filename); err != nil {
 				log.Warn().Err(err).Msg("failed to print success message")
 			}
 			return nil

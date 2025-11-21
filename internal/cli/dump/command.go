@@ -4,6 +4,7 @@ import (
 	"fmt"
 	"strings"
 
+	"github.com/rayyacub/telos-idea-matrix/internal/cliutil"
 	"github.com/rayyacub/telos-idea-matrix/internal/llm"
 	"github.com/rayyacub/telos-idea-matrix/internal/models"
 	"github.com/rayyacub/telos-idea-matrix/internal/patterns"
@@ -121,5 +122,5 @@ func RunQuickDump(content string, toClipboard bool, repo interface{ Create(*mode
 
 // TruncateText is exported for use by other commands
 func TruncateText(text string, maxLen int) string {
-	return truncateText(text, maxLen)
+	return cliutil.TruncateText(text, maxLen)
 }

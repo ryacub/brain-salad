@@ -4,6 +4,7 @@ import (
 	"fmt"
 	"strings"
 
+	"github.com/rayyacub/telos-idea-matrix/internal/cliutil"
 	"github.com/rayyacub/telos-idea-matrix/internal/llm"
 	"github.com/spf13/cobra"
 )
@@ -196,7 +197,7 @@ func runLLMTestSubcmd(manager *llm.Manager, providerName string) error {
 	fmt.Printf("  Recommendation: %s\n", result.Recommendation)
 
 	if len(result.Explanations) > 0 {
-		fmt.Printf("  Reasoning: %s\n", truncateString(getFirstExplanation(result.Explanations), 100))
+		fmt.Printf("  Reasoning: %s\n", cliutil.TruncateText(getFirstExplanation(result.Explanations), 100))
 	}
 
 	fmt.Println("\n✓ Provider is working correctly!")
