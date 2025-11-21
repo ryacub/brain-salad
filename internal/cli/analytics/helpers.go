@@ -1,8 +1,6 @@
 package analytics
 
 import (
-	"strings"
-
 	"github.com/fatih/color"
 )
 
@@ -18,16 +16,4 @@ func getScoreColor(score float64) *color.Color {
 	default:
 		return color.New(color.FgRed)
 	}
-}
-
-// getRecommendationColor returns a color based on the recommendation text
-func getRecommendationColor(recommendation string) *color.Color {
-	if strings.Contains(recommendation, "🔥") {
-		return color.New(color.FgGreen, color.Bold)
-	} else if strings.Contains(recommendation, "✅") {
-		return color.New(color.FgGreen)
-	} else if strings.Contains(recommendation, "⚠️") {
-		return color.New(color.FgYellow)
-	}
-	return color.New(color.FgRed)
 }
