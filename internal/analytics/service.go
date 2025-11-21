@@ -14,17 +14,17 @@ import (
 
 // Service handles analytics operations
 type Service struct {
-	repo   database.Repository
+	repo   *database.Repository
 	dbPath string
 }
 
 // NewService creates a new analytics service
-func NewService(repo database.Repository) *Service {
+func NewService(repo *database.Repository) *Service {
 	return &Service{repo: repo}
 }
 
 // NewServiceWithDB creates a new analytics service with database path
-func NewServiceWithDB(repo database.Repository, dbPath string) *Service {
+func NewServiceWithDB(repo *database.Repository, dbPath string) *Service {
 	return &Service{
 		repo:   repo,
 		dbPath: dbPath,

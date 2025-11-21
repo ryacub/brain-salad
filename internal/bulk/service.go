@@ -11,11 +11,11 @@ import (
 
 // Service handles bulk operations on ideas
 type Service struct {
-	repo database.Repository
+	repo *database.Repository
 }
 
 // NewService creates a new bulk operations service
-func NewService(repo database.Repository) *Service {
+func NewService(repo *database.Repository) *Service {
 	return &Service{repo: repo}
 }
 

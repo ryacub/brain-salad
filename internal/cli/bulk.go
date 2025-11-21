@@ -954,7 +954,8 @@ func runBulkAnalyze(opts bulkAnalyzeOptions) error {
 
 	// Filter by age if specified
 	if !cutoffTime.IsZero() {
-		ideas = filterByAge(ideas, cutoffTime)
+		service := bulk.NewService(ctx.Repository)
+		ideas = service.FilterByAge(ideas, cutoffTime)
 	}
 
 	if len(ideas) == 0 {
