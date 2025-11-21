@@ -62,6 +62,9 @@ Use --min-score, --search, and --limit to control which ideas are tagged.`,
 		RunE: func(cmd *cobra.Command, args []string) error {
 			tagName := args[0]
 
+			// Create service once
+			service := bulk.NewService(ctx.Repository)
+
 			// Find matching ideas
 			minScorePtr := &minScore
 			limitPtr := &limit
@@ -77,7 +80,6 @@ Use --min-score, --search, and --limit to control which ideas are tagged.`,
 
 			// Filter by search if provided
 			if search != "" {
-				service := bulk.NewService(ctx.Repository)
 				ideas = service.FilterBySearch(ideas, search)
 			}
 
@@ -168,6 +170,9 @@ func newBulkArchiveCommand() *cobra.Command {
 Use --older-than to archive ideas older than N days.
 Use --max-score to archive ideas below a score threshold.`,
 		RunE: func(cmd *cobra.Command, args []string) error {
+			// Create service once
+			service := bulk.NewService(ctx.Repository)
+
 			// Build filter options
 			maxScorePtr := &maxScore
 			if maxScore == 0 {
@@ -193,13 +198,11 @@ Use --max-score to archive ideas below a score threshold.`,
 			// Filter by age if specified
 			if olderThan > 0 {
 				cutoffDate := time.Now().UTC().Add(-time.Duration(olderThan) * 24 * time.Hour)
-				service := bulk.NewService(ctx.Repository)
 				ideas = service.FilterByAge(ideas, cutoffDate)
 			}
 
 			// Filter by search if provided
 			if search != "" {
-				service := bulk.NewService(ctx.Repository)
 				ideas = service.FilterBySearch(ideas, search)
 			}
 
@@ -294,6 +297,9 @@ func newBulkDeleteCommand() *cobra.Command {
 ⚠️  WARNING: This operation cannot be undone!
 Always requires confirmation for safety.`,
 		RunE: func(cmd *cobra.Command, args []string) error {
+			// Create service once
+			service := bulk.NewService(ctx.Repository)
+
 			// Build filter options
 			maxScorePtr := &maxScore
 			if maxScore == 0 {
@@ -314,13 +320,11 @@ Always requires confirmation for safety.`,
 			// Filter by age if specified
 			if olderThan > 0 {
 				cutoffDate := time.Now().UTC().Add(-time.Duration(olderThan) * 24 * time.Hour)
-				service := bulk.NewService(ctx.Repository)
 				ideas = service.FilterByAge(ideas, cutoffDate)
 			}
 
 			// Filter by search if provided
 			if search != "" {
-				service := bulk.NewService(ctx.Repository)
 				ideas = service.FilterBySearch(ideas, search)
 			}
 
@@ -500,6 +504,9 @@ Use filters to control which ideas are exported.`,
 		RunE: func(cmd *cobra.Command, args []string) error {
 			filename := args[0]
 
+			// Create service once
+			service := bulk.NewService(ctx.Repository)
+
 			// Auto-detect format from extension if not specified
 			if format == "" {
 				ext := strings.ToLower(filepath.Ext(filename))
@@ -525,7 +532,6 @@ Use filters to control which ideas are exported.`,
 
 			// Filter by search if provided
 			if search != "" {
-				service := bulk.NewService(ctx.Repository)
 				ideas = service.FilterBySearch(ideas, search)
 			}
 
@@ -925,6 +931,9 @@ type bulkAnalyzeOptions struct {
 
 // runBulkAnalyze performs bulk re-analysis of ideas
 func runBulkAnalyze(opts bulkAnalyzeOptions) error {
+	// Create service once
+	service := bulk.NewService(ctx.Repository)
+
 	// Parse olderThan duration if specified
 	var cutoffTime time.Time
 	if opts.olderThan != "" {
@@ -953,7 +962,6 @@ func runBulkAnalyze(opts bulkAnalyzeOptions) error {
 
 	// Filter by age if specified
 	if !cutoffTime.IsZero() {
-		service := bulk.NewService(ctx.Repository)
 		ideas = service.FilterByAge(ideas, cutoffTime)
 	}
 
