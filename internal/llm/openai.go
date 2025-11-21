@@ -29,7 +29,7 @@ func NewOpenAIProvider() *OpenAIProvider {
 	apiKey := os.Getenv("OPENAI_API_KEY")
 	model := os.Getenv("OPENAI_MODEL")
 	if model == "" {
-		model = "gpt-5.1" // Default to GPT-5.1 (latest flagship model)
+		model = "gpt-4o" // Default to GPT-4o (current flagship model)
 	}
 
 	return &OpenAIProvider{

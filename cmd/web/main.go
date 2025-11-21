@@ -137,29 +137,34 @@ func run() error {
 
 // setupBackgroundTasks initializes and spawns background tasks
 func setupBackgroundTasks(tm *tasks.TaskManager, repo *database.Repository) {
-	// Database cleanup task - runs every hour
+	// Database cleanup task - runs once per day
 	cleanupTask := tasks.NewScheduledTask(
 		"database-cleanup",
-		1*time.Hour,
+		24*time.Hour,
 		func(_ context.Context) error {
-			log.Info().Msg("Running database cleanup task")
-			// Placeholder for actual cleanup logic
-			// Could vacuum, remove old records, optimize indexes, etc.
+			log.Info().Msg("Running database vacuum")
+			if _, err := repo.DB().Exec("VACUUM"); err != nil {
+				log.Warn().Err(err).Msg("Database vacuum failed")
+				return err
+			}
+			log.Info().Msg("Database vacuum completed")
 			return nil
 		},
 	).WithTimeout(10 * time.Minute)
 
 	tm.Spawn(cleanupTask)
-	log.Info().Msg("Spawned database cleanup task (runs every 1 hour)")
+	log.Info().Msg("Spawned database cleanup task (runs every 24 hours)")
 
 	// Metrics collection task - runs every 5 minutes
 	metricsTask := tasks.NewScheduledTask(
 		"metrics-collection",
 		5*time.Minute,
 		func(_ context.Context) error {
-			log.Debug().Msg("Collecting metrics")
-			// Placeholder for metrics collection
-			// Could collect database stats, memory usage, etc.
+			stats := repo.DB().Stats()
+			log.Debug().
+				Int("open_connections", stats.OpenConnections).
+				Int("in_use", stats.InUse).
+				Msg("Database connection stats")
 			return nil
 		},
 	).WithTimeout(1 * time.Minute)
