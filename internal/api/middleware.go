@@ -6,6 +6,7 @@ import (
 	"encoding/hex"
 	"net"
 	"net/http"
+	"strconv"
 	"strings"
 	"sync"
 	"time"
@@ -330,7 +331,7 @@ func RateLimitMiddleware(limiter *RateLimiter) func(http.Handler) http.Handler {
 			ip := getClientIP(r)
 
 			if !limiter.Allow(ip) {
-				w.Header().Set("X-RateLimit-Limit", string(rune(limiter.rate)))
+				w.Header().Set("X-RateLimit-Limit", strconv.Itoa(limiter.rate))
 				w.Header().Set("Retry-After", "60")
 				respondError(w, http.StatusTooManyRequests, "Rate limit exceeded. Please try again later.")
 				return
