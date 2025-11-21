@@ -30,10 +30,11 @@ func (c *CacheEntry) IsExpired() bool {
 
 // Cache is a simple in-memory cache for HTTP responses
 type Cache struct {
-	entries map[string]*CacheEntry
-	mu      sync.RWMutex
-	ttl     time.Duration
-	stopCh  chan struct{}
+	entries  map[string]*CacheEntry
+	mu       sync.RWMutex
+	ttl      time.Duration
+	stopCh   chan struct{}
+	stopOnce sync.Once
 }
 
 // NewCache creates a new cache with the specified TTL
@@ -44,8 +45,18 @@ func NewCache(ttl time.Duration) *Cache {
 		stopCh:  make(chan struct{}),
 	}
 
-	// Start cleanup goroutine
-	go c.cleanupExpired()
+	// Start cleanup goroutine with panic recovery
+	go func() {
+		defer func() {
+			if r := recover(); r != nil {
+				log.Error().
+					Interface("panic", r).
+					Str("goroutine", "cache-cleanup").
+					Msg("background goroutine panicked")
+			}
+		}()
+		c.cleanupExpired()
+	}()
 
 	return c
 }
@@ -72,8 +83,11 @@ func (c *Cache) cleanupExpired() {
 }
 
 // Stop gracefully stops the cache cleanup goroutine
+// Use sync.Once to prevent double-close panic
 func (c *Cache) Stop() {
-	close(c.stopCh)
+	c.stopOnce.Do(func() {
+		close(c.stopCh)
+	})
 }
 
 // Get retrieves a cache entry by key
@@ -89,10 +103,29 @@ func (c *Cache) Get(key string) (*CacheEntry, bool) {
 	return entry, true
 }
 
+const maxCacheEntries = 1000 // Reasonable for personal use
+
 // Set stores a cache entry
 func (c *Cache) Set(key string, entry *CacheEntry) {
 	c.mu.Lock()
 	defer c.mu.Unlock()
+
+	// Simple eviction: if cache full, clear oldest entries
+	if len(c.entries) >= maxCacheEntries {
+		// Clear 10% of cache (simple approach)
+		count := 0
+		for k := range c.entries {
+			if count >= maxCacheEntries/10 {
+				break
+			}
+			delete(c.entries, k)
+			count++
+		}
+		log.Warn().
+			Int("cache_size", len(c.entries)).
+			Int("max_entries", maxCacheEntries).
+			Msg("cache size limit reached, cleared oldest entries")
+	}
 
 	c.entries[key] = entry
 }
@@ -204,6 +237,7 @@ type RateLimiter struct {
 	rate     int // requests per minute
 	burst    int // max burst size
 	stopCh   chan struct{}
+	stopOnce sync.Once
 }
 
 type visitor struct {
@@ -220,8 +254,18 @@ func NewRateLimiter(rate, burst int) *RateLimiter {
 		stopCh:   make(chan struct{}),
 	}
 
-	// Cleanup old visitors every 5 minutes
-	go rl.cleanupVisitors()
+	// Cleanup old visitors every 5 minutes with panic recovery
+	go func() {
+		defer func() {
+			if r := recover(); r != nil {
+				log.Error().
+					Interface("panic", r).
+					Str("goroutine", "rate-limiter-cleanup").
+					Msg("background goroutine panicked")
+			}
+		}()
+		rl.cleanupVisitors()
+	}()
 
 	return rl
 }
@@ -248,9 +292,14 @@ func (rl *RateLimiter) cleanupVisitors() {
 }
 
 // Stop gracefully stops the rate limiter cleanup goroutine
+// Use sync.Once to prevent double-close panic
 func (rl *RateLimiter) Stop() {
-	close(rl.stopCh)
+	rl.stopOnce.Do(func() {
+		close(rl.stopCh)
+	})
 }
+
+const maxVisitors = 10000 // Reasonable for personal use
 
 // Allow checks if a request from the given IP should be allowed
 func (rl *RateLimiter) Allow(ip string) bool {
@@ -261,6 +310,19 @@ func (rl *RateLimiter) Allow(ip string) bool {
 	v, exists := rl.visitors[ip]
 
 	if !exists {
+		// Check if we have too many visitors
+		if len(rl.visitors) >= maxVisitors {
+			// This shouldn't happen in personal use, but be defensive
+			log.Warn().
+				Int("visitor_count", len(rl.visitors)).
+				Msg("rate limiter visitor map full, clearing old entries")
+			for ip, v := range rl.visitors {
+				if now.Sub(v.lastSeen) > 10*time.Minute {
+					delete(rl.visitors, ip)
+				}
+			}
+		}
+
 		rl.visitors[ip] = &visitor{
 			lastSeen: now,
 			tokens:   float64(rl.burst - 1),
