@@ -154,7 +154,7 @@ func (s *Service) CalculateSystemMetrics(ideas []*models.Idea) SystemMetrics {
 	}
 
 	// Overview metrics
-	metrics.Overview = s.calculateOverviewMetrics(ideas)
+	metrics.Overview = s.CalculateOverviewMetrics(ideas)
 
 	// Status breakdown
 	for _, idea := range ideas {
@@ -162,13 +162,13 @@ func (s *Service) CalculateSystemMetrics(ideas []*models.Idea) SystemMetrics {
 	}
 
 	// Score distribution
-	metrics.ScoreDistribution = s.calculateScoreDistribution(ideas)
+	metrics.ScoreDistribution = s.CalculateScoreDistribution(ideas)
 
 	// Pattern statistics
-	metrics.PatternStats = s.calculatePatternStats(ideas)
+	metrics.PatternStats = s.CalculatePatternStats(ideas)
 
 	// Time metrics
-	metrics.TimeMetrics = s.calculateTimeMetrics(ideas)
+	metrics.TimeMetrics = s.CalculateTimeMetrics(ideas)
 
 	// Database statistics
 	metrics.DatabaseStats = s.calculateDatabaseStats()
@@ -176,7 +176,8 @@ func (s *Service) CalculateSystemMetrics(ideas []*models.Idea) SystemMetrics {
 	return metrics
 }
 
-func (s *Service) calculateOverviewMetrics(ideas []*models.Idea) OverviewMetrics {
+// CalculateOverviewMetrics calculates overview statistics from ideas
+func (s *Service) CalculateOverviewMetrics(ideas []*models.Idea) OverviewMetrics {
 	if len(ideas) == 0 {
 		return OverviewMetrics{}
 	}
@@ -214,7 +215,8 @@ func (s *Service) calculateOverviewMetrics(ideas []*models.Idea) OverviewMetrics
 	}
 }
 
-func (s *Service) calculateScoreDistribution(ideas []*models.Idea) ScoreDistributionMetrics {
+// CalculateScoreDistribution calculates score distribution metrics from ideas
+func (s *Service) CalculateScoreDistribution(ideas []*models.Idea) ScoreDistributionMetrics {
 	buckets := map[string]int{
 		"0-2":  0,
 		"2-4":  0,
@@ -255,7 +257,8 @@ func (s *Service) calculateScoreDistribution(ideas []*models.Idea) ScoreDistribu
 	}
 }
 
-func (s *Service) calculatePatternStats(ideas []*models.Idea) []PatternStat {
+// CalculatePatternStats calculates pattern statistics from ideas
+func (s *Service) CalculatePatternStats(ideas []*models.Idea) []PatternStat {
 	patternCounts := make(map[string]int)
 
 	for _, idea := range ideas {
@@ -283,7 +286,8 @@ func (s *Service) calculatePatternStats(ideas []*models.Idea) []PatternStat {
 	return stats
 }
 
-func (s *Service) calculateTimeMetrics(ideas []*models.Idea) TimeMetrics {
+// CalculateTimeMetrics calculates time-based metrics from ideas
+func (s *Service) CalculateTimeMetrics(ideas []*models.Idea) TimeMetrics {
 	if len(ideas) == 0 {
 		return TimeMetrics{}
 	}
