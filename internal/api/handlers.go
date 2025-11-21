@@ -237,7 +237,12 @@ func (s *Server) GetIdeaHandler(w http.ResponseWriter, r *http.Request) {
 
 	idea, err := s.repo.GetByID(idStr)
 	if err != nil {
-		respondError(w, http.StatusNotFound, "Idea not found")
+		if database.IsNotFound(err) {
+			respondError(w, http.StatusNotFound, "Idea not found")
+			return
+		}
+		log.Error().Err(err).Str("idea_id", idStr).Msg("Failed to get idea")
+		respondError(w, http.StatusInternalServerError, "Failed to get idea")
 		return
 	}
 
@@ -326,7 +331,12 @@ func (s *Server) UpdateIdeaHandler(w http.ResponseWriter, r *http.Request) {
 	// Get existing idea
 	idea, err := s.repo.GetByID(idStr)
 	if err != nil {
-		respondError(w, http.StatusNotFound, "Idea not found")
+		if database.IsNotFound(err) {
+			respondError(w, http.StatusNotFound, "Idea not found")
+			return
+		}
+		log.Error().Err(err).Str("idea_id", idStr).Msg("Failed to get idea")
+		respondError(w, http.StatusInternalServerError, "Failed to get idea")
 		return
 	}
 
@@ -390,7 +400,12 @@ func (s *Server) DeleteIdeaHandler(w http.ResponseWriter, r *http.Request) {
 	// Check if idea exists
 	_, err := s.repo.GetByID(idStr)
 	if err != nil {
-		respondError(w, http.StatusNotFound, "Idea not found")
+		if database.IsNotFound(err) {
+			respondError(w, http.StatusNotFound, "Idea not found")
+			return
+		}
+		log.Error().Err(err).Str("idea_id", idStr).Msg("Failed to get idea")
+		respondError(w, http.StatusInternalServerError, "Failed to get idea")
 		return
 	}
 

@@ -11,6 +11,7 @@ import (
 	"github.com/go-chi/chi/v5"
 	"github.com/go-chi/chi/v5/middleware"
 	"github.com/go-chi/cors"
+	"github.com/rayyacub/telos-idea-matrix/internal/config"
 	"github.com/rayyacub/telos-idea-matrix/internal/database"
 	"github.com/rayyacub/telos-idea-matrix/internal/health"
 	"github.com/rayyacub/telos-idea-matrix/internal/logging"
@@ -28,10 +29,11 @@ type Server struct {
 	csrfProtection *CSRFProtection
 	sessionManager *SessionManager
 	healthMonitor  *health.HealthMonitor
+	authConfig     config.AuthConfig
 }
 
 // NewServer creates a new API server from a telos configuration object
-func NewServer(repo *database.Repository, telosConfig *models.Telos) *Server {
+func NewServer(repo *database.Repository, telosConfig *models.Telos, authConfig config.AuthConfig) *Server {
 	// Create health monitor and register checks
 	healthMonitor := health.NewHealthMonitor()
 	healthMonitor.SetVersion("1.0.0")
@@ -62,6 +64,7 @@ func NewServer(repo *database.Repository, telosConfig *models.Telos) *Server {
 		csrfProtection: NewCSRFProtection(1 * time.Hour), // 1-hour token TTL
 		sessionManager: sessionManager,
 		healthMonitor:  healthMonitor,
+		authConfig:     authConfig,
 	}
 
 	s.setupRouter()
@@ -70,14 +73,14 @@ func NewServer(repo *database.Repository, telosConfig *models.Telos) *Server {
 }
 
 // NewServerFromPath creates a new API server from a telos file path
-func NewServerFromPath(repo *database.Repository, telosPath string) (*Server, error) {
+func NewServerFromPath(repo *database.Repository, telosPath string, authConfig config.AuthConfig) (*Server, error) {
 	// Load telos configuration
 	telosData, err := loadTelos(telosPath)
 	if err != nil {
 		return nil, fmt.Errorf("failed to load telos: %w", err)
 	}
 
-	return NewServer(repo, telosData), nil
+	return NewServer(repo, telosData, authConfig), nil
 }
 
 // loadTelos loads and parses the telos configuration file
@@ -107,6 +110,9 @@ func (s *Server) setupRouter() {
 
 	// Security middleware
 	r.Use(SecurityHeadersMiddleware)
+
+	// Authentication middleware (optional, after security headers)
+	r.Use(AuthMiddleware(s.authConfig))
 
 	// Rate limiting - skip in test environment to avoid flaky tests
 	// Tests often run many requests quickly from the same IP (localhost)

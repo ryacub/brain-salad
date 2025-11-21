@@ -12,6 +12,7 @@ type Config struct {
 	Server   ServerConfig
 	Database DatabaseConfig
 	Telos    TelosConfig
+	Auth     AuthConfig
 }
 
 // ServerConfig holds server-specific configuration
@@ -45,6 +46,7 @@ func Load() (*Config, error) {
 		Telos: TelosConfig{
 			FilePath: getEnv("TELOS_PATH", "telos.md"),
 		},
+		Auth: LoadAuthConfig(),
 	}
 
 	// Validate configuration

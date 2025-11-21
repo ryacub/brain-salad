@@ -10,6 +10,7 @@ import (
 	"testing"
 
 	"github.com/google/uuid"
+	"github.com/rayyacub/telos-idea-matrix/internal/config"
 	"github.com/rayyacub/telos-idea-matrix/internal/database"
 	"github.com/rayyacub/telos-idea-matrix/internal/models"
 	"github.com/stretchr/testify/assert"
@@ -51,8 +52,9 @@ func setupTestServer(t *testing.T) (*Server, *database.Repository, func()) {
 	err = os.WriteFile(telosPath, []byte(telosContent), 0644)
 	require.NoError(t, err)
 
-	// Create server
-	server, err := NewServerFromPath(repo, telosPath)
+	// Create server with auth disabled for tests
+	authCfg := config.DefaultAuthConfig()
+	server, err := NewServerFromPath(repo, telosPath, authCfg)
 	require.NoError(t, err)
 
 	cleanup := func() {

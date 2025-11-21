@@ -145,7 +145,7 @@ func TestRepository_GetByID_NonexistentID_ReturnsError(t *testing.T) {
 
 	_, err := repo.GetByID(uuid.New().String())
 	assert.Error(t, err)
-	assert.Contains(t, err.Error(), "not found")
+	assert.True(t, database.IsNotFound(err))
 }
 
 // TestRepository_Update_ExistingIdea_UpdatesSuccessfully tests updating an idea
@@ -207,7 +207,7 @@ func TestRepository_Delete_ExistingIdea_DeletesSuccessfully(t *testing.T) {
 	// Verify deletion
 	_, err = repo.GetByID(idea.ID)
 	assert.Error(t, err)
-	assert.Contains(t, err.Error(), "not found")
+	assert.True(t, database.IsNotFound(err))
 }
 
 // TestRepository_Delete_NonexistentID_ReturnsError tests delete error handling
