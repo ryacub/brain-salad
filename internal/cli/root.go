@@ -80,6 +80,10 @@ you focus on what truly matters.`,
 	rootCmd.AddCommand(newLLMListCommand())
 	rootCmd.AddCommand(newLLMConfigCommand())
 	rootCmd.AddCommand(newLLMHealthCommand())
+
+	// Utility commands
+	rootCmd.AddCommand(newInitCommand())
+	rootCmd.AddCommand(newCompletionCommand())
 }
 
 // initializeCLI sets up the shared context for all commands
