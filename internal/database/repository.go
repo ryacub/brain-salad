@@ -275,14 +275,20 @@ func (r *Repository) GetByID(id string) (*models.Idea, error) {
 	}
 
 	// Parse timestamps
-	if parsedTime, err := time.Parse(time.RFC3339, createdAt); err == nil {
+	if createdAt != "" {
+		parsedTime, err := time.Parse(time.RFC3339, createdAt)
+		if err != nil {
+			return nil, fmt.Errorf("corrupted created_at timestamp in database: %w", err)
+		}
 		idea.CreatedAt = parsedTime
 	}
 
 	if reviewedAt.Valid {
-		if parsedTime, err := time.Parse(time.RFC3339, reviewedAt.String); err == nil {
-			idea.ReviewedAt = &parsedTime
+		parsedTime, err := time.Parse(time.RFC3339, reviewedAt.String)
+		if err != nil {
+			return nil, fmt.Errorf("corrupted reviewed_at timestamp in database: %w", err)
 		}
+		idea.ReviewedAt = &parsedTime
 	}
 
 	return &idea, nil
@@ -422,14 +428,20 @@ func scanIdeaRow(rows *sql.Rows) (*models.Idea, error) {
 	}
 
 	// Parse timestamps
-	if parsedTime, err := time.Parse(time.RFC3339, createdAt); err == nil {
+	if createdAt != "" {
+		parsedTime, err := time.Parse(time.RFC3339, createdAt)
+		if err != nil {
+			return nil, fmt.Errorf("corrupted created_at timestamp in database: %w", err)
+		}
 		idea.CreatedAt = parsedTime
 	}
 
 	if reviewedAt.Valid {
-		if parsedTime, err := time.Parse(time.RFC3339, reviewedAt.String); err == nil {
-			idea.ReviewedAt = &parsedTime
+		parsedTime, err := time.Parse(time.RFC3339, reviewedAt.String)
+		if err != nil {
+			return nil, fmt.Errorf("corrupted reviewed_at timestamp in database: %w", err)
 		}
+		idea.ReviewedAt = &parsedTime
 	}
 
 	return &idea, nil
@@ -627,7 +639,11 @@ func (r *Repository) GetRelationship(id string) (*models.IdeaRelationship, error
 	rel.RelationshipType = relType
 
 	// Parse timestamp
-	if parsedTime, err := time.Parse(time.RFC3339, createdAt); err == nil {
+	if createdAt != "" {
+		parsedTime, err := time.Parse(time.RFC3339, createdAt)
+		if err != nil {
+			return nil, fmt.Errorf("corrupted created_at timestamp in database: %w", err)
+		}
 		rel.CreatedAt = parsedTime
 	}
 
@@ -684,7 +700,11 @@ func (r *Repository) GetRelationshipsForIdea(ideaID string) ([]*models.IdeaRelat
 		rel.RelationshipType = relType
 
 		// Parse timestamp
-		if parsedTime, err := time.Parse(time.RFC3339, createdAt); err == nil {
+		if createdAt != "" {
+			parsedTime, err := time.Parse(time.RFC3339, createdAt)
+			if err != nil {
+				return nil, fmt.Errorf("corrupted created_at timestamp in database: %w", err)
+			}
 			rel.CreatedAt = parsedTime
 		}
 
