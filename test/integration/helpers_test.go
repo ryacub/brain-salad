@@ -10,6 +10,7 @@ import (
 	"testing"
 
 	"github.com/rayyacub/telos-idea-matrix/internal/api"
+	configPkg "github.com/rayyacub/telos-idea-matrix/internal/config"
 	"github.com/rayyacub/telos-idea-matrix/internal/database"
 	"github.com/rayyacub/telos-idea-matrix/internal/telos"
 	"github.com/stretchr/testify/require"
@@ -50,7 +51,9 @@ func setupTestServer(t *testing.T, config *testServerConfig) (*httptest.Server, 
 	require.NoError(t, err)
 	t.Cleanup(func() { repo.Close() })
 
-	server := api.NewServer(repo, telosConfig)
+	// Create server with auth disabled for integration tests
+	authCfg := configPkg.DefaultAuthConfig()
+	server := api.NewServer(repo, telosConfig, authCfg)
 	ts := httptest.NewServer(server.Router())
 	t.Cleanup(func() { ts.Close() })
 

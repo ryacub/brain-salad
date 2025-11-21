@@ -254,7 +254,7 @@ func (r *Repository) GetByID(id string) (*models.Idea, error) {
 	)
 
 	if err == sql.ErrNoRows {
-		return nil, fmt.Errorf("idea not found: %s", id)
+		return nil, fmt.Errorf("%w: %s", ErrNotFound, id)
 	}
 	if err != nil {
 		return nil, fmt.Errorf("failed to query idea: %w", err)
@@ -350,7 +350,7 @@ func (r *Repository) Update(idea *models.Idea) error {
 	}
 
 	if rowsAffected == 0 {
-		return fmt.Errorf("idea not found: %s", idea.ID)
+		return fmt.Errorf("%w: %s", ErrNotFound, idea.ID)
 	}
 
 	return nil
@@ -376,7 +376,7 @@ func (r *Repository) Delete(id string) error {
 	}
 
 	if rowsAffected == 0 {
-		return fmt.Errorf("idea not found: %s", id)
+		return fmt.Errorf("%w: %s", ErrNotFound, id)
 	}
 
 	return nil
@@ -563,7 +563,7 @@ func (r *Repository) CreateRelationship(relationship *models.IdeaRelationship) e
 		return fmt.Errorf("failed to check for duplicate relationship: %w", err)
 	}
 	if count > 0 {
-		return fmt.Errorf("relationship already exists between %s and %s with type %s", relationship.SourceIdeaID, relationship.TargetIdeaID, relationship.RelationshipType)
+		return fmt.Errorf("%w: relationship already exists between %s and %s with type %s", ErrAlreadyExists, relationship.SourceIdeaID, relationship.TargetIdeaID, relationship.RelationshipType)
 	}
 
 	// Insert the relationship
@@ -613,7 +613,7 @@ func (r *Repository) GetRelationship(id string) (*models.IdeaRelationship, error
 	)
 
 	if err == sql.ErrNoRows {
-		return nil, fmt.Errorf("relationship not found: %s", id)
+		return nil, fmt.Errorf("%w: %s", ErrNotFound, id)
 	}
 	if err != nil {
 		return nil, fmt.Errorf("failed to query relationship: %w", err)
@@ -767,7 +767,7 @@ func (r *Repository) DeleteRelationship(id string) error {
 	}
 
 	if rowsAffected == 0 {
-		return fmt.Errorf("relationship not found: %s", id)
+		return fmt.Errorf("%w: %s", ErrNotFound, id)
 	}
 
 	return nil

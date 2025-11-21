@@ -78,8 +78,16 @@ func run() error {
 		log.Warn().Msg("Create a telos.md file with your goals, strategies, and failure patterns")
 	}
 
+	// Log authentication status
+	if cfg.Auth.Enabled {
+		log.Info().Str("mode", cfg.Auth.Mode).Msg("Authentication enabled")
+		log.Info().Int("api_keys", len(cfg.Auth.APIKeys)).Msg("API keys configured")
+	} else {
+		log.Info().Msg("Authentication disabled (local development mode)")
+	}
+
 	// Create API server
-	server, err := api.NewServerFromPath(repo, cfg.Telos.FilePath)
+	server, err := api.NewServerFromPath(repo, cfg.Telos.FilePath, cfg.Auth)
 	if err != nil {
 		return fmt.Errorf("failed to create server: %w", err)
 	}

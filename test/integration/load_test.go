@@ -17,6 +17,7 @@ import (
 	"time"
 
 	"github.com/rayyacub/telos-idea-matrix/internal/api"
+	"github.com/rayyacub/telos-idea-matrix/internal/config"
 	"github.com/rayyacub/telos-idea-matrix/internal/database"
 	"github.com/rayyacub/telos-idea-matrix/internal/models"
 	"github.com/rayyacub/telos-idea-matrix/internal/telos"
@@ -109,7 +110,9 @@ func TestLoadCreateIdeas(t *testing.T) {
 	require.NoError(t, err)
 	defer repo.Close()
 
-	server := api.NewServer(repo, telosConfig)
+	// Create server with auth disabled for load tests
+	authCfg := config.DefaultAuthConfig()
+	server := api.NewServer(repo, telosConfig, authCfg)
 	ts := httptest.NewServer(server.Router())
 	defer ts.Close()
 
@@ -209,7 +212,9 @@ func TestLoadMixedOperations(t *testing.T) {
 	require.NoError(t, err)
 	defer repo.Close()
 
-	server := api.NewServer(repo, telosConfig)
+	// Create server with auth disabled for load tests
+	authCfg := config.DefaultAuthConfig()
+	server := api.NewServer(repo, telosConfig, authCfg)
 	ts := httptest.NewServer(server.Router())
 	defer ts.Close()
 
