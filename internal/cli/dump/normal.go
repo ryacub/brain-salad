@@ -14,7 +14,6 @@ import (
 
 var (
 	warningColor = getScoreColor(5.0) // Yellow color for warnings
-	errorColor   = getScoreColor(0.0) // Red color for errors
 )
 
 // DumpContext holds dependencies for dump operations
