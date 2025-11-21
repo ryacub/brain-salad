@@ -44,6 +44,20 @@ jobs:
           files: ./coverage.txt
           flags: unittests
 
+      # NEW: Print coverage summary
+      - name: Coverage summary
+        run: |
+          go tool cover -func=coverage.txt | tail -1
+          COVERAGE=$(go tool cover -func=coverage.txt | grep total | awk '{print $3}' | sed 's/%//')
+          echo "Total coverage: ${COVERAGE}%"
+
+          # Fail if coverage drops below threshold (optional)
+          # Uncomment to enforce minimum coverage
+          # if (( $(echo "$COVERAGE < 60" | bc -l) )); then
+          #   echo "Coverage below 60% threshold"
+          #   exit 1
+          # fi
+
   # Linting
   lint:
     name: Lint
