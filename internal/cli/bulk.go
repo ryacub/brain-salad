@@ -12,7 +12,6 @@ import (
 	"github.com/rayyacub/telos-idea-matrix/internal/database"
 	"github.com/rayyacub/telos-idea-matrix/internal/export"
 	"github.com/rayyacub/telos-idea-matrix/internal/llm"
-	"github.com/rayyacub/telos-idea-matrix/internal/models"
 	"github.com/rs/zerolog/log"
 	"github.com/spf13/cobra"
 )
