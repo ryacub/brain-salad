@@ -6,6 +6,7 @@ import (
 	"path/filepath"
 
 	"github.com/fatih/color"
+	"github.com/rayyacub/telos-idea-matrix/internal/cli/dump"
 	"github.com/rayyacub/telos-idea-matrix/internal/database"
 	"github.com/rayyacub/telos-idea-matrix/internal/llm"
 	"github.com/rayyacub/telos-idea-matrix/internal/models"
@@ -60,7 +61,7 @@ you focus on what truly matters.`,
 	rootCmd.PersistentFlags().StringVar(&telosPath, "telos", defaultTelosPath, "Path to telos.md file")
 
 	// Add subcommands
-	dumpCmd := newDumpCommand()
+	dumpCmd := dump.NewDumpCommand(getDumpContext)
 	dumpCmd.AddCommand(newBatchDumpCommand())
 	rootCmd.AddCommand(dumpCmd)
 	rootCmd.AddCommand(newScoreCommand())
@@ -190,4 +191,18 @@ func ClearContext() {
 	// Also reset the global flag variables
 	dbPath = ""
 	telosPath = ""
+}
+
+// getDumpContext converts CLIContext to dump.CLIContext
+func getDumpContext() *dump.CLIContext {
+	if ctx == nil {
+		return nil
+	}
+	return &dump.CLIContext{
+		Repository: ctx.Repository,
+		Engine:     ctx.Engine,
+		Detector:   ctx.Detector,
+		Telos:      ctx.Telos,
+		LLMManager: ctx.LLMManager,
+	}
 }

@@ -6,6 +6,7 @@ import (
 	"strings"
 	"time"
 
+	"github.com/rayyacub/telos-idea-matrix/internal/cli/dump"
 	"github.com/rs/zerolog/log"
 	"github.com/spf13/cobra"
 )
@@ -56,9 +57,9 @@ func runBatchDump(filename string) error {
 			continue // Skip empty lines and comments
 		}
 
-		fmt.Printf("[%d/%d] Processing: %s\n", i+1, len(lines), truncateText(line, 60))
+		fmt.Printf("[%d/%d] Processing: %s\n", i+1, len(lines), dump.TruncateText(line, 60))
 
-		err := runQuickDump(line, false)
+		err := dump.RunQuickDump(line, false, ctx.Repository)
 		if err != nil {
 			if _, printErr := errorColor.Printf("  ✗ Error: %v\n", err); printErr != nil {
 				log.Warn().Err(printErr).Msg("failed to print error message")
