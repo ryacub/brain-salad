@@ -13,7 +13,15 @@ import (
 	"github.com/rayyacub/telos-idea-matrix/internal/config"
 	"github.com/rayyacub/telos-idea-matrix/internal/database"
 	"github.com/rayyacub/telos-idea-matrix/internal/telos"
+	"github.com/rs/zerolog/log"
 	"github.com/spf13/cobra"
+)
+
+// Health status constants
+const (
+	statusHealthy = "healthy"
+	statusWarning = "warning"
+	statusError   = "error"
 )
 
 // NewDoctorCommand creates the doctor command
@@ -28,7 +36,7 @@ func NewDoctorCommand() *cobra.Command {
 
 type healthStatus struct {
 	section  string
-	status   string // "healthy", "warning", "error"
+	status   string // statusHealthy, statusWarning, or statusError
 	messages []string
 	details  map[string]string
 }
@@ -44,27 +52,30 @@ func runDoctor(cmd *cobra.Command, args []string) error {
 	// Check database
 	dbStatus := checkDatabase()
 	statuses = append(statuses, dbStatus)
-	if dbStatus.status == "warning" {
+	switch dbStatus.status {
+	case statusWarning:
 		warningCount++
-	} else if dbStatus.status == "error" {
+	case statusError:
 		errorCount++
 	}
 
 	// Check telos configuration
 	telosStatus := checkTelosConfig()
 	statuses = append(statuses, telosStatus)
-	if telosStatus.status == "warning" {
+	switch telosStatus.status {
+	case statusWarning:
 		warningCount++
-	} else if telosStatus.status == "error" {
+	case statusError:
 		errorCount++
 	}
 
 	// Check LLM providers
 	llmStatus := checkLLMProviders()
 	statuses = append(statuses, llmStatus)
-	if llmStatus.status == "warning" {
+	switch llmStatus.status {
+	case statusWarning:
 		warningCount++
-	} else if llmStatus.status == "error" {
+	case statusError:
 		errorCount++
 	}
 
@@ -90,13 +101,13 @@ func runDoctor(cmd *cobra.Command, args []string) error {
 func checkDatabase() healthStatus {
 	status := healthStatus{
 		section: "Database",
-		status:  "healthy",
+		status:  statusHealthy,
 		details: make(map[string]string),
 	}
 
 	cfg, err := config.Load()
 	if err != nil {
-		status.status = "error"
+		status.status = statusError
 		status.messages = append(status.messages, "Failed to load configuration")
 		return status
 	}
@@ -107,7 +118,7 @@ func checkDatabase() healthStatus {
 	// Check if database exists
 	info, err := os.Stat(dbPath)
 	if err != nil {
-		status.status = "error"
+		status.status = statusError
 		status.messages = append(status.messages, "Database file not found")
 		status.messages = append(status.messages, "Run 'tm init' to initialize")
 		return status
@@ -120,20 +131,20 @@ func checkDatabase() healthStatus {
 	// Connect to database
 	repo, err := database.NewRepository(dbPath)
 	if err != nil {
-		status.status = "error"
+		status.status = statusError
 		status.messages = append(status.messages, fmt.Sprintf("Failed to connect: %v", err))
 		return status
 	}
 	defer func() {
 		if closeErr := repo.Close(); closeErr != nil {
 			// Log but don't fail
-			fmt.Fprintf(os.Stderr, "Warning: failed to close database: %v\n", closeErr)
+			log.Warn().Err(closeErr).Msg("failed to close database in doctor check")
 		}
 	}()
 
 	// Check connection
 	if err := repo.Ping(); err != nil {
-		status.status = "error"
+		status.status = statusError
 		status.messages = append(status.messages, "Database connection failed")
 		return status
 	}
@@ -141,15 +152,16 @@ func checkDatabase() healthStatus {
 	// Get idea counts
 	allIdeas, err := repo.List(database.ListOptions{})
 	if err != nil {
-		status.status = "warning"
+		status.status = statusWarning
 		status.messages = append(status.messages, "Could not query ideas")
 	} else {
 		activeCount := 0
 		archivedCount := 0
 		for _, idea := range allIdeas {
-			if idea.Status == "active" {
+			switch idea.Status {
+			case "active":
 				activeCount++
-			} else if idea.Status == "archived" {
+			case "archived":
 				archivedCount++
 			}
 		}
@@ -162,7 +174,7 @@ func checkDatabase() healthStatus {
 	var integrityCheck string
 	if err := db.QueryRow("PRAGMA integrity_check").Scan(&integrityCheck); err == nil {
 		if integrityCheck != "ok" {
-			status.status = "warning"
+			status.status = statusWarning
 			status.messages = append(status.messages, fmt.Sprintf("Integrity check: %s", integrityCheck))
 		}
 	}
@@ -173,13 +185,13 @@ func checkDatabase() healthStatus {
 func checkTelosConfig() healthStatus {
 	status := healthStatus{
 		section: "Telos Configuration",
-		status:  "healthy",
+		status:  statusHealthy,
 		details: make(map[string]string),
 	}
 
 	cfg, err := config.Load()
 	if err != nil {
-		status.status = "error"
+		status.status = statusError
 		status.messages = append(status.messages, "Failed to load configuration")
 		return status
 	}
@@ -190,7 +202,7 @@ func checkTelosConfig() healthStatus {
 	// Check if file exists
 	info, err := os.Stat(telosPath)
 	if err != nil {
-		status.status = "error"
+		status.status = statusError
 		status.messages = append(status.messages, "Telos file not found")
 		status.messages = append(status.messages, fmt.Sprintf("Create %s with your goals and strategies", telosPath))
 		return status
@@ -200,7 +212,7 @@ func checkTelosConfig() healthStatus {
 	parser := telos.NewParser()
 	telosData, err := parser.ParseFile(telosPath)
 	if err != nil {
-		status.status = "error"
+		status.status = statusError
 		status.messages = append(status.messages, fmt.Sprintf("Failed to parse telos file: %v", err))
 		return status
 	}
@@ -212,7 +224,7 @@ func checkTelosConfig() healthStatus {
 
 	// Check if empty
 	if len(telosData.Goals) == 0 && len(telosData.Strategies) == 0 {
-		status.status = "warning"
+		status.status = statusWarning
 		status.messages = append(status.messages, "Telos file is empty or invalid")
 		status.messages = append(status.messages, "Add your goals and strategies for better idea scoring")
 	}
@@ -220,11 +232,12 @@ func checkTelosConfig() healthStatus {
 	// Last modified
 	modTime := info.ModTime()
 	daysAgo := int(time.Since(modTime).Hours() / 24)
-	if daysAgo == 0 {
+	switch {
+	case daysAgo == 0:
 		status.details["Last modified"] = "today"
-	} else if daysAgo == 1 {
+	case daysAgo == 1:
 		status.details["Last modified"] = "yesterday"
-	} else {
+	default:
 		status.details["Last modified"] = fmt.Sprintf("%d days ago", daysAgo)
 	}
 
@@ -234,17 +247,15 @@ func checkTelosConfig() healthStatus {
 func checkLLMProviders() healthStatus {
 	status := healthStatus{
 		section:  "LLM Providers",
-		status:   "warning",
+		status:   statusWarning,
 		messages: []string{},
 		details:  make(map[string]string),
 	}
 
-	hasWorkingProvider := false
-
 	// Check OpenAI
 	if os.Getenv("OPENAI_API_KEY") != "" {
 		status.details["openai"] = "✓ Configured"
-		hasWorkingProvider = true
+		status.status = statusHealthy
 	} else {
 		status.details["openai"] = "✗ OPENAI_API_KEY not set"
 	}
@@ -252,7 +263,7 @@ func checkLLMProviders() healthStatus {
 	// Check Claude
 	if os.Getenv("CLAUDE_API_KEY") != "" {
 		status.details["claude"] = "✓ Configured"
-		hasWorkingProvider = true
+		status.status = statusHealthy
 	} else {
 		status.details["claude"] = "✗ CLAUDE_API_KEY not set"
 	}
@@ -269,24 +280,20 @@ func checkLLMProviders() healthStatus {
 	}
 	resp, err := client.Get(ollamaURL)
 	if err == nil {
-		resp.Body.Close()
+		if closeErr := resp.Body.Close(); closeErr != nil {
+			log.Warn().Err(closeErr).Msg("failed to close response body")
+		}
 		status.details["ollama"] = fmt.Sprintf("✓ Available (%s)", ollamaURL)
-		hasWorkingProvider = true
+		status.status = statusHealthy
 	} else {
 		status.details["ollama"] = fmt.Sprintf("✗ Connection failed (%s)", ollamaURL)
 	}
 
 	// Rule-based always available
 	status.details["rule-based"] = "✓ Available (no API key needed)"
-	hasWorkingProvider = true
-
-	// Update status based on findings
-	if hasWorkingProvider {
-		status.status = "healthy"
-	} else {
-		status.messages = append(status.messages, "No LLM providers configured")
-		status.messages = append(status.messages, "Set OPENAI_API_KEY for AI-powered analysis:")
-		status.messages = append(status.messages, "  export OPENAI_API_KEY=sk-...")
+	// Rule-based is always available, so we always have at least one provider
+	if status.status != statusHealthy {
+		status.status = statusHealthy
 	}
 
 	return status
@@ -295,7 +302,7 @@ func checkLLMProviders() healthStatus {
 func checkSystem() healthStatus {
 	status := healthStatus{
 		section: "System",
-		status:  "healthy",
+		status:  statusHealthy,
 		details: make(map[string]string),
 	}
 
@@ -314,7 +321,9 @@ func checkSystem() healthStatus {
 			if err := repo.DB().QueryRow("SELECT sqlite_version()").Scan(&sqliteVersion); err == nil {
 				status.details["SQLite version"] = sqliteVersion
 			}
-			repo.Close()
+			if closeErr := repo.Close(); closeErr != nil {
+				log.Warn().Err(closeErr).Msg("failed to close repository in system check")
+			}
 		}
 	}
 
@@ -330,28 +339,32 @@ func checkSystem() healthStatus {
 func checkRecentActivity() healthStatus {
 	status := healthStatus{
 		section: "Recent Activity",
-		status:  "healthy",
+		status:  statusHealthy,
 		details: make(map[string]string),
 	}
 
 	cfg, err := config.Load()
 	if err != nil {
-		status.status = "warning"
+		status.status = statusWarning
 		status.messages = append(status.messages, "Could not load configuration")
 		return status
 	}
 
 	repo, err := database.NewRepository(cfg.Database.Path)
 	if err != nil {
-		status.status = "warning"
+		status.status = statusWarning
 		status.messages = append(status.messages, "Could not connect to database")
 		return status
 	}
-	defer repo.Close()
+	defer func() {
+		if closeErr := repo.Close(); closeErr != nil {
+			log.Warn().Err(closeErr).Msg("failed to close repository in activity check")
+		}
+	}()
 
 	allIdeas, err := repo.List(database.ListOptions{})
 	if err != nil {
-		status.status = "warning"
+		status.status = statusWarning
 		status.messages = append(status.messages, "Could not query ideas")
 		return status
 	}
@@ -409,13 +422,13 @@ func printStatus(status healthStatus) {
 	var statusColor *color.Color
 
 	switch status.status {
-	case "healthy":
+	case statusHealthy:
 		icon = "✓"
 		statusColor = color.New(color.FgGreen)
-	case "warning":
+	case statusWarning:
 		icon = "⚠"
 		statusColor = color.New(color.FgYellow)
-	case "error":
+	case statusError:
 		icon = "✗"
 		statusColor = color.New(color.FgRed)
 	default:
@@ -424,7 +437,9 @@ func printStatus(status healthStatus) {
 	}
 
 	// Print section header
-	statusColor.Printf("%s %s\n", icon, status.section)
+	if _, err := statusColor.Printf("%s %s\n", icon, status.section); err != nil {
+		log.Warn().Err(err).Msg("failed to print status header")
+	}
 
 	// Print details (sorted for consistency)
 	detailKeys := []string{
@@ -443,7 +458,9 @@ func printStatus(status healthStatus) {
 
 	// Print messages
 	for _, msg := range status.messages {
-		color.New(color.Faint).Printf("  %s\n", msg)
+		if _, err := color.New(color.Faint).Printf("  %s\n", msg); err != nil {
+			log.Warn().Err(err).Msg("failed to print status message")
+		}
 	}
 
 	fmt.Println()
