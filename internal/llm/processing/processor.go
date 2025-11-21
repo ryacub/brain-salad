@@ -25,7 +25,7 @@ type ProcessedResult struct {
 }
 
 // FallbackFunc is called when processing fails
-type FallbackFunc func(ideaContent string) (*ProcessedResult, error)
+type FallbackFunc func(ideaContent string, telos interface{}) (*ProcessedResult, error)
 
 // SimpleProcessor handles LLM response processing
 type SimpleProcessor struct {
@@ -40,7 +40,7 @@ func NewSimpleProcessor(fallbackFn FallbackFunc) *SimpleProcessor {
 }
 
 // Process parses an LLM response and returns the result
-func (sp *SimpleProcessor) Process(rawResponse string, ideaContent string) (*ProcessedResult, error) {
+func (sp *SimpleProcessor) Process(rawResponse string, ideaContent string, telos interface{}) (*ProcessedResult, error) {
 	// Try to parse JSON
 	var jsonResp struct {
 		Scores struct {
@@ -62,7 +62,7 @@ func (sp *SimpleProcessor) Process(rawResponse string, ideaContent string) (*Pro
 
 		// Use fallback
 		if sp.fallback != nil {
-			return sp.fallback(ideaContent)
+			return sp.fallback(ideaContent, telos)
 		}
 
 		return nil, err
@@ -87,7 +87,7 @@ func (sp *SimpleProcessor) Process(rawResponse string, ideaContent string) (*Pro
 	// Validate
 	if !sp.validate(result) {
 		if sp.fallback != nil {
-			result, err := sp.fallback(ideaContent)
+			result, err := sp.fallback(ideaContent, telos)
 			if err == nil {
 				result.UsedFallback = true
 			}

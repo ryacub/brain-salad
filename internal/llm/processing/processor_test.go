@@ -31,7 +31,7 @@ func TestSimpleProcessor_Process_ValidJSON(t *testing.T) {
 		}
 	}`
 
-	result, err := processor.Process(validResponse, "test idea")
+	result, err := processor.Process(validResponse, "test idea", nil)
 	if err != nil {
 		t.Fatalf("expected no error, got: %v", err)
 	}
@@ -61,7 +61,7 @@ func TestSimpleProcessor_Process_ValidJSON(t *testing.T) {
 
 func TestSimpleProcessor_Process_InvalidScores(t *testing.T) {
 	fallbackCalled := false
-	fallbackFunc := func(ideaContent string) (*ProcessedResult, error) {
+	fallbackFunc := func(ideaContent string, telos interface{}) (*ProcessedResult, error) {
 		fallbackCalled = true
 		return &ProcessedResult{
 			Scores: ScoreBreakdown{
@@ -90,7 +90,7 @@ func TestSimpleProcessor_Process_InvalidScores(t *testing.T) {
 		"explanations": {}
 	}`
 
-	result, err := processor.Process(invalidResponse, "test idea")
+	result, err := processor.Process(invalidResponse, "test idea", nil)
 	if err != nil {
 		t.Fatalf("expected no error, got: %v", err)
 	}
@@ -119,7 +119,7 @@ func TestSimpleProcessor_Process_RegexExtraction(t *testing.T) {
 	"final_score": 7.5
 	Therefore, this is a good idea.`
 
-	result, err := processor.Process(regexResponse, "test idea")
+	result, err := processor.Process(regexResponse, "test idea", nil)
 	if err != nil {
 		t.Fatalf("expected regex extraction to succeed, got error: %v", err)
 	}
@@ -140,7 +140,7 @@ func TestSimpleProcessor_Process_RegexExtraction(t *testing.T) {
 
 func TestSimpleProcessor_Process_FallbackOnJSONError(t *testing.T) {
 	fallbackCalled := false
-	fallbackFunc := func(ideaContent string) (*ProcessedResult, error) {
+	fallbackFunc := func(ideaContent string, telos interface{}) (*ProcessedResult, error) {
 		fallbackCalled = true
 		if ideaContent != "test idea" {
 			t.Errorf("expected ideaContent 'test idea', got %s", ideaContent)
@@ -163,7 +163,7 @@ func TestSimpleProcessor_Process_FallbackOnJSONError(t *testing.T) {
 	// Invalid response that can't be parsed
 	invalidResponse := "This is completely unparseable text"
 
-	result, err := processor.Process(invalidResponse, "test idea")
+	result, err := processor.Process(invalidResponse, "test idea", nil)
 	if err != nil {
 		t.Fatalf("expected no error with fallback, got: %v", err)
 	}
@@ -177,7 +177,7 @@ func TestSimpleProcessor_Process_FallbackOnJSONError(t *testing.T) {
 }
 
 func TestSimpleProcessor_Process_FallbackError(t *testing.T) {
-	fallbackFunc := func(ideaContent string) (*ProcessedResult, error) {
+	fallbackFunc := func(ideaContent string, telos interface{}) (*ProcessedResult, error) {
 		return nil, errors.New("fallback failed")
 	}
 
@@ -185,7 +185,7 @@ func TestSimpleProcessor_Process_FallbackError(t *testing.T) {
 
 	invalidResponse := "unparseable"
 
-	_, err := processor.Process(invalidResponse, "test idea")
+	_, err := processor.Process(invalidResponse, "test idea", nil)
 	if err == nil {
 		t.Fatal("expected error when fallback fails")
 	}
@@ -196,7 +196,7 @@ func TestSimpleProcessor_Process_NoFallback(t *testing.T) {
 
 	invalidResponse := "completely invalid"
 
-	_, err := processor.Process(invalidResponse, "test idea")
+	_, err := processor.Process(invalidResponse, "test idea", nil)
 	if err == nil {
 		t.Fatal("expected error without fallback")
 	}
@@ -361,7 +361,7 @@ func TestSimpleProcessor_Process_EmptyExplanations(t *testing.T) {
 		"recommendation": "CONSIDER LATER"
 	}`
 
-	result, err := processor.Process(response, "test")
+	result, err := processor.Process(response, "test", nil)
 	if err != nil {
 		t.Fatalf("unexpected error: %v", err)
 	}
@@ -388,7 +388,7 @@ func TestSimpleProcessor_Process_ZeroScores(t *testing.T) {
 		"explanations": {}
 	}`
 
-	result, err := processor.Process(response, "test")
+	result, err := processor.Process(response, "test", nil)
 	if err != nil {
 		t.Fatalf("unexpected error: %v", err)
 	}
@@ -414,7 +414,7 @@ func BenchmarkSimpleProcessor_Process_JSON(b *testing.B) {
 
 	b.ResetTimer()
 	for i := 0; i < b.N; i++ {
-		_, _ = processor.Process(response, "test idea")
+		_, _ = processor.Process(response, "test idea", nil)
 	}
 }
 
@@ -425,7 +425,7 @@ func BenchmarkSimpleProcessor_Process_Regex(b *testing.B) {
 
 	b.ResetTimer()
 	for i := 0; i < b.N; i++ {
-		_, _ = processor.Process(response, "test idea")
+		_, _ = processor.Process(response, "test idea", nil)
 	}
 }
 
@@ -496,7 +496,7 @@ func TestProcessedResult_ExplanationsInitialized(t *testing.T) {
 
 	jsonBytes, _ := json.Marshal(resp)
 
-	result, err := processor.Process(string(jsonBytes), "test")
+	result, err := processor.Process(string(jsonBytes), "test", nil)
 	if err != nil {
 		t.Fatalf("unexpected error: %v", err)
 	}
