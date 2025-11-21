@@ -232,10 +232,10 @@ func checkTelosConfig() healthStatus {
 	// Last modified
 	modTime := info.ModTime()
 	daysAgo := int(time.Since(modTime).Hours() / 24)
-	switch {
-	case daysAgo == 0:
+	switch daysAgo {
+	case 0:
 		status.details["Last modified"] = "today"
-	case daysAgo == 1:
+	case 1:
 		status.details["Last modified"] = "yesterday"
 	default:
 		status.details["Last modified"] = fmt.Sprintf("%d days ago", daysAgo)
