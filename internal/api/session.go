@@ -152,9 +152,29 @@ func (sm *SessionManager) GetSession(sessionID string) (*Session, error) {
 	}
 
 	// Parse timestamps
-	session.CreatedAt, _ = time.Parse(time.RFC3339, createdAt)
-	session.ExpiresAt, _ = time.Parse(time.RFC3339, expiresAt)
-	session.LastSeen, _ = time.Parse(time.RFC3339, lastSeen)
+	if createdAt != "" {
+		parsedTime, err := time.Parse(time.RFC3339, createdAt)
+		if err != nil {
+			return nil, fmt.Errorf("corrupted created_at timestamp in database: %w", err)
+		}
+		session.CreatedAt = parsedTime
+	}
+
+	if expiresAt != "" {
+		parsedTime, err := time.Parse(time.RFC3339, expiresAt)
+		if err != nil {
+			return nil, fmt.Errorf("corrupted expires_at timestamp in database: %w", err)
+		}
+		session.ExpiresAt = parsedTime
+	}
+
+	if lastSeen != "" {
+		parsedTime, err := time.Parse(time.RFC3339, lastSeen)
+		if err != nil {
+			return nil, fmt.Errorf("corrupted last_seen timestamp in database: %w", err)
+		}
+		session.LastSeen = parsedTime
+	}
 
 	// Check if session has expired
 	if session.IsExpired() {

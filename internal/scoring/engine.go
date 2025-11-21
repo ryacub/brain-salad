@@ -4,6 +4,7 @@ package scoring
 import (
 	"errors"
 	"math"
+	"reflect"
 	"regexp"
 	"strings"
 	"sync"
@@ -85,18 +86,16 @@ func GetEngine(telos *models.Telos) *Engine {
 }
 
 // telosUnchanged checks if telos content is unchanged.
-// Compares relevant fields that affect scoring to determine if engine can be reused.
+// Compares all fields that affect scoring to determine if engine can be reused.
+// Uses reflect.DeepEqual to perform a comprehensive deep comparison of all telos fields,
+// ensuring that changes to mission/challenge/goal text or stack items trigger engine recreation.
 func telosUnchanged(old, new *models.Telos) bool {
 	if old == nil || new == nil {
 		return false
 	}
-	// Compare relevant fields that affect scoring
-	// Using simple length-based comparison for arrays
-	return len(old.Missions) == len(new.Missions) &&
-		len(old.Challenges) == len(new.Challenges) &&
-		len(old.Goals) == len(new.Goals) &&
-		len(old.Stack.Primary) == len(new.Stack.Primary) &&
-		len(old.Stack.Secondary) == len(new.Stack.Secondary)
+	// Use reflect.DeepEqual for proper content comparison
+	// This ensures changes to mission text, challenges, goals, or stack trigger new engine creation
+	return reflect.DeepEqual(old, new)
 }
 
 // ResetEngine clears the singleton (useful for testing).
