@@ -729,9 +729,9 @@ func TestSplitCommaSeparated(t *testing.T) {
 
 	for _, tt := range tests {
 		t.Run(tt.name, func(t *testing.T) {
-			result := splitCommaSeparated(tt.input)
+			result := bulk.SplitCommaSeparated(tt.input)
 			if !reflect.DeepEqual(result, tt.expected) {
-				t.Errorf("splitCommaSeparated(%q) = %v, want %v", tt.input, result, tt.expected)
+				t.Errorf("SplitCommaSeparated(%q) = %v, want %v", tt.input, result, tt.expected)
 			}
 		})
 	}
@@ -778,9 +778,9 @@ func TestAddUniqueStrings(t *testing.T) {
 
 	for _, tt := range tests {
 		t.Run(tt.name, func(t *testing.T) {
-			result := addUniqueStrings(tt.existing, tt.newItems)
+			result := bulk.AddUniqueStrings(tt.existing, tt.newItems)
 			if !reflect.DeepEqual(result, tt.expected) {
-				t.Errorf("addUniqueStrings(%v, %v) = %v, want %v",
+				t.Errorf("AddUniqueStrings(%v, %v) = %v, want %v",
 					tt.existing, tt.newItems, result, tt.expected)
 			}
 		})
@@ -834,9 +834,9 @@ func TestRemoveStrings(t *testing.T) {
 
 	for _, tt := range tests {
 		t.Run(tt.name, func(t *testing.T) {
-			result := removeStrings(tt.existing, tt.toRemove)
+			result := bulk.RemoveStrings(tt.existing, tt.toRemove)
 			if !reflect.DeepEqual(result, tt.expected) {
-				t.Errorf("removeStrings(%v, %v) = %v, want %v",
+				t.Errorf("RemoveStrings(%v, %v) = %v, want %v",
 					tt.existing, tt.toRemove, result, tt.expected)
 			}
 		})
@@ -878,9 +878,9 @@ func TestContains(t *testing.T) {
 
 	for _, tt := range tests {
 		t.Run(tt.name, func(t *testing.T) {
-			result := contains(tt.slice, tt.item)
+			result := bulk.Contains(tt.slice, tt.item)
 			if result != tt.expected {
-				t.Errorf("contains(%v, %q) = %v, want %v",
+				t.Errorf("Contains(%v, %q) = %v, want %v",
 					tt.slice, tt.item, result, tt.expected)
 			}
 		})
