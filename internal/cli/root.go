@@ -7,6 +7,7 @@ import (
 
 	"github.com/fatih/color"
 	"github.com/rayyacub/telos-idea-matrix/internal/cli/analytics"
+	"github.com/rayyacub/telos-idea-matrix/internal/cli/bulk"
 	"github.com/rayyacub/telos-idea-matrix/internal/cli/dump"
 	"github.com/rayyacub/telos-idea-matrix/internal/database"
 	"github.com/rayyacub/telos-idea-matrix/internal/llm"
@@ -72,7 +73,7 @@ you focus on what truly matters.`,
 	rootCmd.AddCommand(analytics.NewAnalyticsCommand(getAnalyticsContext))
 	rootCmd.AddCommand(newLinkCommand())
 	rootCmd.AddCommand(newHealthCommand())
-	rootCmd.AddCommand(NewBulkCommand())
+	rootCmd.AddCommand(bulk.NewBulkCommand(getBulkContext))
 
 	// LLM commands (new hierarchical structure)
 	rootCmd.AddCommand(NewLLMCommand())
@@ -216,5 +217,17 @@ func getAnalyticsContext() *analytics.CLIContext {
 	return &analytics.CLIContext{
 		Repository: ctx.Repository,
 		DBPath:     ctx.DBPath,
+	}
+}
+
+// getBulkContext converts CLIContext to bulk.CLIContext
+func getBulkContext() *bulk.CLIContext {
+	if ctx == nil {
+		return nil
+	}
+	return &bulk.CLIContext{
+		Repository: ctx.Repository,
+		Telos:      ctx.Telos,
+		LLMManager: ctx.LLMManager,
 	}
 }

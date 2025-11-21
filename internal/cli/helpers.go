@@ -110,3 +110,15 @@ func displayIdeaAnalysis(idea *models.Idea, analysis *models.Analysis) {
 	}
 	fmt.Println(strings.Repeat("─", 80))
 }
+
+// confirm prompts the user for yes/no confirmation
+func confirm(prompt string) bool {
+	fmt.Printf("%s [y/N]: ", prompt)
+	var response string
+	if _, err := fmt.Scanln(&response); err != nil {
+		log.Warn().Err(err).Msg("failed to read user input")
+		return false
+	}
+	response = strings.ToLower(strings.TrimSpace(response))
+	return response == "y" || response == "yes"
+}
