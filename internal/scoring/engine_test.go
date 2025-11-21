@@ -395,3 +395,102 @@ func TestEngine_DetectsNoRevenue_LowRevenueScore(t *testing.T) {
 	// Should recognize no revenue
 	assert.LessOrEqual(t, analysis.Mission.RevenuePotential, 0.1, "No revenue should score low")
 }
+
+// ============================================================================
+// SINGLETON PATTERN TESTS
+// ============================================================================
+
+func TestGetEngine_ReusesSingleton(t *testing.T) {
+	scoring.ResetEngine() // Clean slate
+
+	telos := loadTestTelos(t)
+
+	engine1 := scoring.GetEngine(telos)
+	engine2 := scoring.GetEngine(telos)
+
+	// Should be same instance (pointer equality)
+	assert.Same(t, engine1, engine2, "Expected singleton to return same engine instance")
+}
+
+func TestGetEngine_RecreatesOnTelosChange(t *testing.T) {
+	scoring.ResetEngine()
+
+	telos1 := loadTestTelos(t)
+	engine1 := scoring.GetEngine(telos1)
+
+	// Create a modified telos
+	telos2 := loadTestTelos(t)
+	// Add an extra mission to trigger change detection
+	telos2.Missions = append(telos2.Missions, models.Mission{
+		ID:          "extra",
+		Description: "Extra mission",
+	})
+	engine2 := scoring.GetEngine(telos2)
+
+	// Should be different instances
+	assert.NotSame(t, engine1, engine2, "Expected new engine when telos changes")
+}
+
+func TestGetEngine_ReusesAfterReset(t *testing.T) {
+	scoring.ResetEngine()
+
+	telos := loadTestTelos(t)
+	engine1 := scoring.GetEngine(telos)
+
+	scoring.ResetEngine()
+
+	engine2 := scoring.GetEngine(telos)
+
+	// Should be different instances after reset
+	assert.NotSame(t, engine1, engine2, "Expected new engine after reset")
+}
+
+func TestGetEngine_ThreadSafe(t *testing.T) {
+	scoring.ResetEngine()
+
+	telos := loadTestTelos(t)
+
+	// Simulate concurrent access
+	const goroutines = 10
+	engines := make([]*scoring.Engine, goroutines)
+	done := make(chan bool, goroutines)
+
+	for i := 0; i < goroutines; i++ {
+		go func(index int) {
+			engines[index] = scoring.GetEngine(telos)
+			done <- true
+		}(i)
+	}
+
+	// Wait for all goroutines
+	for i := 0; i < goroutines; i++ {
+		<-done
+	}
+
+	// All should be the same instance
+	for i := 1; i < goroutines; i++ {
+		assert.Same(t, engines[0], engines[i], "All engines should be the same instance")
+	}
+}
+
+func TestGetEngine_ProducesSameScores(t *testing.T) {
+	scoring.ResetEngine()
+
+	telos := loadTestTelos(t)
+
+	// Get singleton engine
+	singletonEngine := scoring.GetEngine(telos)
+	analysis1, err := singletonEngine.CalculateScore(highScoreIdea)
+	require.NoError(t, err)
+
+	// Create new engine the old way
+	directEngine := scoring.NewEngine(telos)
+	analysis2, err := directEngine.CalculateScore(highScoreIdea)
+	require.NoError(t, err)
+
+	// Should produce identical scores
+	assert.InDelta(t, analysis1.FinalScore, analysis2.FinalScore, 0.001, "Singleton and direct engines should produce same scores")
+	assert.InDelta(t, analysis1.Mission.Total, analysis2.Mission.Total, 0.001)
+	assert.InDelta(t, analysis1.AntiChallenge.Total, analysis2.AntiChallenge.Total, 0.001)
+	assert.InDelta(t, analysis1.Strategic.Total, analysis2.Strategic.Total, 0.001)
+}

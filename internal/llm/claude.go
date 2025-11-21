@@ -83,6 +83,13 @@ func NewClaudeProvider(apiKey string, model string) *ClaudeProvider {
 		baseURL: "https://api.anthropic.com/v1/messages",
 		httpClient: &http.Client{
 			Timeout: 30 * time.Second,
+			Transport: &http.Transport{
+				MaxIdleConns:        100,             // Max idle connections across all hosts
+				MaxIdleConnsPerHost: 10,              // Max idle connections per host
+				MaxConnsPerHost:     10,              // Max total connections per host
+				IdleConnTimeout:     90 * time.Second, // Keep idle connections for 90s
+				DisableKeepAlives:   false,           // Enable connection reuse
+			},
 		},
 		maxRetries: 3,
 		processor:  processor,

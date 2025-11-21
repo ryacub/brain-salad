@@ -38,6 +38,13 @@ func NewOpenAIProvider() *OpenAIProvider {
 		baseURL: "https://api.openai.com/v1/chat/completions",
 		httpClient: &http.Client{
 			Timeout: 30 * time.Second,
+			Transport: &http.Transport{
+				MaxIdleConns:        100,             // Max idle connections across all hosts
+				MaxIdleConnsPerHost: 10,              // Max idle connections per host
+				MaxConnsPerHost:     10,              // Max total connections per host
+				IdleConnTimeout:     90 * time.Second, // Keep idle connections for 90s
+				DisableKeepAlives:   false,           // Enable connection reuse
+			},
 		},
 		maxRetries:  3,
 		rateLimiter: rate.NewLimiter(rate.Limit(3), 5), // 3 req/sec, burst of 5
