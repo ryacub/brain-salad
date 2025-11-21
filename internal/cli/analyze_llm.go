@@ -4,6 +4,7 @@ import (
 	"fmt"
 	"strings"
 
+	"github.com/rayyacub/telos-idea-matrix/internal/cliutil"
 	"github.com/rayyacub/telos-idea-matrix/internal/llm"
 	"github.com/rs/zerolog/log"
 	"github.com/spf13/cobra"
@@ -123,13 +124,13 @@ func displayLLMAnalysisResult(ideaText string, result *llm.AnalysisResult, verbo
 	}
 
 	// Score with color coding
-	scoreColor := getScoreColor(result.FinalScore)
+	scoreColor := cliutil.GetScoreColor(result.FinalScore)
 	if _, err := scoreColor.Printf("⭐ Score: %.1f/10.0\n", result.FinalScore); err != nil {
 		log.Warn().Err(err).Msg("failed to print score")
 	}
 
 	// Recommendation with emoji
-	recommendationColor := getRecommendationColor(result.Recommendation)
+	recommendationColor := cliutil.GetRecommendationColor(result.Recommendation)
 	recommendationEmoji := getRecommendationEmoji(result.Recommendation)
 	if _, err := recommendationColor.Printf("%s %s\n\n", recommendationEmoji, result.Recommendation); err != nil {
 		log.Warn().Err(err).Msg("failed to print recommendation")

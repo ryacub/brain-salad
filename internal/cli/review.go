@@ -4,6 +4,7 @@ import (
 	"fmt"
 	"strings"
 
+	"github.com/rayyacub/telos-idea-matrix/internal/cliutil"
 	"github.com/rayyacub/telos-idea-matrix/internal/database"
 	"github.com/rs/zerolog/log"
 	"github.com/spf13/cobra"
@@ -63,7 +64,7 @@ func runReview(cmd *cobra.Command, _ []string) error {
 	}
 
 	if len(ideas) == 0 {
-		if _, err := warningColor.Println("No ideas found matching your filters."); err != nil {
+		if _, err := cliutil.WarningColor.Println("No ideas found matching your filters."); err != nil {
 			log.Warn().Err(err).Msg("failed to print message")
 		}
 		return nil
@@ -71,7 +72,7 @@ func runReview(cmd *cobra.Command, _ []string) error {
 
 	// Display results
 	fmt.Println(strings.Repeat("═", 80))
-	if _, err := successColor.Printf(" %d Ideas Found\n", len(ideas)); err != nil {
+	if _, err := cliutil.SuccessColor.Printf(" %d Ideas Found\n", len(ideas)); err != nil {
 		log.Warn().Err(err).Msg("failed to print message")
 	}
 	fmt.Println(strings.Repeat("═", 80))
@@ -79,7 +80,7 @@ func runReview(cmd *cobra.Command, _ []string) error {
 
 	for i, idea := range ideas {
 		// Score color
-		scoreColor := getScoreColor(idea.FinalScore)
+		scoreColor := cliutil.GetScoreColor(idea.FinalScore)
 
 		// Header
 		fmt.Printf("%d. ", i+1)
@@ -89,11 +90,11 @@ func runReview(cmd *cobra.Command, _ []string) error {
 		fmt.Printf(" - ID: %s\n", idea.ID[:8])
 
 		// Content
-		fmt.Printf("   %s\n", truncateString(idea.Content, 70))
+		fmt.Printf("   %s\n", cliutil.TruncateText(idea.Content, 70))
 
 		// Recommendation
 		if idea.Recommendation != "" {
-			recColor := getRecommendationColor(idea.Recommendation)
+			recColor := cliutil.GetRecommendationColor(idea.Recommendation)
 			if _, err := recColor.Printf("   %s\n", idea.Recommendation); err != nil {
 				log.Warn().Err(err).Msg("failed to print recommendation")
 			}
@@ -101,7 +102,7 @@ func runReview(cmd *cobra.Command, _ []string) error {
 
 		// Patterns
 		if len(idea.Patterns) > 0 {
-			if _, err := warningColor.Printf("   Patterns: %d detected\n", len(idea.Patterns)); err != nil {
+			if _, err := cliutil.WarningColor.Printf("   Patterns: %d detected\n", len(idea.Patterns)); err != nil {
 				log.Warn().Err(err).Msg("failed to print message")
 			}
 		}
@@ -113,17 +114,10 @@ func runReview(cmd *cobra.Command, _ []string) error {
 	}
 
 	fmt.Println(strings.Repeat("═", 80))
-	if _, err := infoColor.Printf("Showing %d of your ideas (use --limit to see more)\n", len(ideas)); err != nil {
+	if _, err := cliutil.InfoColor.Printf("Showing %d of your ideas (use --limit to see more)\n", len(ideas)); err != nil {
 		log.Warn().Err(err).Msg("failed to print message")
 	}
 	fmt.Println(strings.Repeat("═", 80))
 
 	return nil
-}
-
-func truncateString(s string, maxLen int) string {
-	if len(s) <= maxLen {
-		return s
-	}
-	return s[:maxLen-3] + "..."
 }

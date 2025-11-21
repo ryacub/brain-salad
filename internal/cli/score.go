@@ -4,6 +4,7 @@ import (
 	"fmt"
 	"strings"
 
+	"github.com/rayyacub/telos-idea-matrix/internal/cliutil"
 	"github.com/rs/zerolog/log"
 	"github.com/spf13/cobra"
 )
@@ -27,7 +28,7 @@ func runScore(cmd *cobra.Command, args []string) error {
 	ideaText := strings.Join(args, " ")
 
 	// Show progress
-	if _, err := infoColor.Println("🎯 Scoring idea..."); err != nil {
+	if _, err := cliutil.InfoColor.Println("🎯 Scoring idea..."); err != nil {
 		log.Warn().Err(err).Msg("failed to print message")
 	}
 	fmt.Println()
@@ -46,14 +47,14 @@ func runScore(cmd *cobra.Command, args []string) error {
 	fmt.Printf("💡 %s\n\n", ideaText)
 
 	// Score with color coding
-	scoreColor := getScoreColor(analysis.FinalScore)
+	scoreColor := cliutil.GetScoreColor(analysis.FinalScore)
 	if _, err := scoreColor.Printf("⭐ Score: %.1f/10.0\n", analysis.FinalScore); err != nil {
 		log.Warn().Err(err).Msg("failed to print message")
 	}
 
 	// Recommendation
 	recommendation := analysis.GetRecommendation()
-	recommendationColor := getRecommendationColor(recommendation)
+	recommendationColor := cliutil.GetRecommendationColor(recommendation)
 	if _, err := recommendationColor.Printf("%s\n\n", recommendation); err != nil {
 		log.Warn().Err(err).Msg("failed to print message")
 	}
@@ -65,7 +66,7 @@ func runScore(cmd *cobra.Command, args []string) error {
 
 	// Patterns
 	if len(detectedPatterns) > 0 {
-		if _, err := warningColor.Println("⚠️  Patterns Detected:"); err != nil {
+		if _, err := cliutil.WarningColor.Println("⚠️  Patterns Detected:"); err != nil {
 			log.Warn().Err(err).Msg("failed to print message")
 		}
 		for _, p := range detectedPatterns {
@@ -75,7 +76,7 @@ func runScore(cmd *cobra.Command, args []string) error {
 	}
 
 	fmt.Println(strings.Repeat("─", 80))
-	if _, err := infoColor.Println("💡 Not saved - use 'tm dump' to save this idea"); err != nil {
+	if _, err := cliutil.InfoColor.Println("💡 Not saved - use 'tm dump' to save this idea"); err != nil {
 		log.Warn().Err(err).Msg("failed to print message")
 	}
 	fmt.Println(strings.Repeat("─", 80))

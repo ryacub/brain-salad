@@ -6,6 +6,9 @@ import (
 	"path/filepath"
 
 	"github.com/fatih/color"
+	"github.com/rayyacub/telos-idea-matrix/internal/cli/analytics"
+	"github.com/rayyacub/telos-idea-matrix/internal/cli/bulk"
+	"github.com/rayyacub/telos-idea-matrix/internal/cli/dump"
 	"github.com/rayyacub/telos-idea-matrix/internal/database"
 	"github.com/rayyacub/telos-idea-matrix/internal/llm"
 	"github.com/rayyacub/telos-idea-matrix/internal/models"
@@ -60,17 +63,17 @@ you focus on what truly matters.`,
 	rootCmd.PersistentFlags().StringVar(&telosPath, "telos", defaultTelosPath, "Path to telos.md file")
 
 	// Add subcommands
-	dumpCmd := newDumpCommand()
+	dumpCmd := dump.NewDumpCommand(getDumpContext)
 	dumpCmd.AddCommand(newBatchDumpCommand())
 	rootCmd.AddCommand(dumpCmd)
 	rootCmd.AddCommand(newScoreCommand())
 	rootCmd.AddCommand(newAnalyzeCommand())
 	rootCmd.AddCommand(newReviewCommand())
 	rootCmd.AddCommand(newPruneCommand())
-	rootCmd.AddCommand(newAnalyticsCommand())
+	rootCmd.AddCommand(analytics.NewAnalyticsCommand(getAnalyticsContext))
 	rootCmd.AddCommand(newLinkCommand())
 	rootCmd.AddCommand(newHealthCommand())
-	rootCmd.AddCommand(NewBulkCommand())
+	rootCmd.AddCommand(bulk.NewBulkCommand(getBulkContext))
 
 	// LLM commands (new hierarchical structure)
 	rootCmd.AddCommand(NewLLMCommand())
@@ -194,4 +197,41 @@ func ClearContext() {
 	// Also reset the global flag variables
 	dbPath = ""
 	telosPath = ""
+}
+
+// getDumpContext converts CLIContext to dump.CLIContext
+func getDumpContext() *dump.CLIContext {
+	if ctx == nil {
+		return nil
+	}
+	return &dump.CLIContext{
+		Repository: ctx.Repository,
+		Engine:     ctx.Engine,
+		Detector:   ctx.Detector,
+		Telos:      ctx.Telos,
+		LLMManager: ctx.LLMManager,
+	}
+}
+
+// getAnalyticsContext converts CLIContext to analytics.CLIContext
+func getAnalyticsContext() *analytics.CLIContext {
+	if ctx == nil {
+		return nil
+	}
+	return &analytics.CLIContext{
+		Repository: ctx.Repository,
+		DBPath:     ctx.DBPath,
+	}
+}
+
+// getBulkContext converts CLIContext to bulk.CLIContext
+func getBulkContext() *bulk.CLIContext {
+	if ctx == nil {
+		return nil
+	}
+	return &bulk.CLIContext{
+		Repository: ctx.Repository,
+		Telos:      ctx.Telos,
+		LLMManager: ctx.LLMManager,
+	}
 }
