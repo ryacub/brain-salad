@@ -161,3 +161,42 @@ func TestRateLimitMiddleware_WithProxyHeaders(t *testing.T) {
 		}
 	})
 }
+
+func TestRateLimitHeaders(t *testing.T) {
+	limiter := NewRateLimiter(100, 10)
+	handler := RateLimitMiddleware(limiter)(http.HandlerFunc(func(w http.ResponseWriter, _ *http.Request) {
+		w.WriteHeader(http.StatusOK)
+	}))
+
+	// Exhaust the rate limiter by making requests equal to burst + 1
+	clientIP := "192.0.2.1"
+	for i := 0; i < 11; i++ {
+		req := httptest.NewRequest("GET", "/test", nil)
+		req.RemoteAddr = clientIP + ":1234"
+		rec := httptest.NewRecorder()
+		handler.ServeHTTP(rec, req)
+	}
+
+	// This request should be rate limited
+	req := httptest.NewRequest("GET", "/test", nil)
+	req.RemoteAddr = clientIP + ":1234"
+	rec := httptest.NewRecorder()
+	handler.ServeHTTP(rec, req)
+
+	// Verify status code
+	if rec.Code != http.StatusTooManyRequests {
+		t.Errorf("Expected status %d, got %d", http.StatusTooManyRequests, rec.Code)
+	}
+
+	// Should be "100", not "*" (rune 100)
+	rateLimitHeader := rec.Header().Get("X-RateLimit-Limit")
+	if rateLimitHeader != "100" {
+		t.Errorf("Expected X-RateLimit-Limit to be '100', got '%s'", rateLimitHeader)
+	}
+
+	// Verify Retry-After header is also set
+	retryAfter := rec.Header().Get("Retry-After")
+	if retryAfter != "60" {
+		t.Errorf("Expected Retry-After to be '60', got '%s'", retryAfter)
+	}
+}
