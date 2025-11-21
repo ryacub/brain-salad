@@ -8,6 +8,7 @@ import (
 	"time"
 
 	"github.com/fatih/color"
+	"github.com/rayyacub/telos-idea-matrix/internal/bulk"
 	"github.com/rayyacub/telos-idea-matrix/internal/database"
 	"github.com/rayyacub/telos-idea-matrix/internal/export"
 	"github.com/rayyacub/telos-idea-matrix/internal/llm"
@@ -77,7 +78,8 @@ Use --min-score, --search, and --limit to control which ideas are tagged.`,
 
 			// Filter by search if provided
 			if search != "" {
-				ideas = filterBySearch(ideas, search)
+				service := bulk.NewService(ctx.Repository)
+				ideas = service.FilterBySearch(ideas, search)
 			}
 
 			if len(ideas) == 0 {
@@ -192,12 +194,14 @@ Use --max-score to archive ideas below a score threshold.`,
 			// Filter by age if specified
 			if olderThan > 0 {
 				cutoffDate := time.Now().UTC().Add(-time.Duration(olderThan) * 24 * time.Hour)
-				ideas = filterByAge(ideas, cutoffDate)
+				service := bulk.NewService(ctx.Repository)
+				ideas = service.FilterByAge(ideas, cutoffDate)
 			}
 
 			// Filter by search if provided
 			if search != "" {
-				ideas = filterBySearch(ideas, search)
+				service := bulk.NewService(ctx.Repository)
+				ideas = service.FilterBySearch(ideas, search)
 			}
 
 			if len(ideas) == 0 {
@@ -311,12 +315,14 @@ Always requires confirmation for safety.`,
 			// Filter by age if specified
 			if olderThan > 0 {
 				cutoffDate := time.Now().UTC().Add(-time.Duration(olderThan) * 24 * time.Hour)
-				ideas = filterByAge(ideas, cutoffDate)
+				service := bulk.NewService(ctx.Repository)
+				ideas = service.FilterByAge(ideas, cutoffDate)
 			}
 
 			// Filter by search if provided
 			if search != "" {
-				ideas = filterBySearch(ideas, search)
+				service := bulk.NewService(ctx.Repository)
+				ideas = service.FilterBySearch(ideas, search)
 			}
 
 			if len(ideas) == 0 {
@@ -520,7 +526,8 @@ Use filters to control which ideas are exported.`,
 
 			// Filter by search if provided
 			if search != "" {
-				ideas = filterBySearch(ideas, search)
+				service := bulk.NewService(ctx.Repository)
+				ideas = service.FilterBySearch(ideas, search)
 			}
 
 			if len(ideas) == 0 {
@@ -601,10 +608,10 @@ Examples:
 		RunE: func(cmd *cobra.Command, args []string) error {
 			return runBulkUpdate(bulkUpdateOptions{
 				setStatus:      setStatus,
-				addPatterns:    splitCommaSeparated(addPatterns),
-				removePatterns: splitCommaSeparated(removePatterns),
-				addTags:        splitCommaSeparated(addTags),
-				removeTags:     splitCommaSeparated(removeTags),
+				addPatterns:    bulk.SplitCommaSeparated(addPatterns),
+				removePatterns: bulk.SplitCommaSeparated(removePatterns),
+				addTags:        bulk.SplitCommaSeparated(addTags),
+				removeTags:     bulk.SplitCommaSeparated(removeTags),
 				scoreMin:       scoreMin,
 				scoreMax:       scoreMax,
 				statusFilter:   statusFilter,
@@ -659,7 +666,7 @@ func runBulkUpdate(opts bulkUpdateOptions) error {
 	// Validate status value if provided
 	if opts.setStatus != "" {
 		validStatuses := []string{"active", "archived", "deleted"}
-		if !contains(validStatuses, opts.setStatus) {
+		if !bulk.Contains(validStatuses, opts.setStatus) {
 			return fmt.Errorf("invalid status: %s (must be one of: %s)",
 				opts.setStatus, strings.Join(validStatuses, ", "))
 		}
@@ -737,28 +744,28 @@ func runBulkUpdate(opts bulkUpdateOptions) error {
 					color.CyanString("→"), idea.Status, opts.setStatus)
 			}
 			if len(opts.addPatterns) > 0 {
-				newPatterns := addUniqueStrings(idea.Patterns, opts.addPatterns)
+				newPatterns := bulk.AddUniqueStrings(idea.Patterns, opts.addPatterns)
 				if len(newPatterns) > len(idea.Patterns) {
 					fmt.Printf("   %s Patterns: %v → %v\n",
 						color.CyanString("→"), idea.Patterns, newPatterns)
 				}
 			}
 			if len(opts.removePatterns) > 0 {
-				newPatterns := removeStrings(idea.Patterns, opts.removePatterns)
+				newPatterns := bulk.RemoveStrings(idea.Patterns, opts.removePatterns)
 				if len(newPatterns) < len(idea.Patterns) {
 					fmt.Printf("   %s Patterns: %v → %v\n",
 						color.CyanString("→"), idea.Patterns, newPatterns)
 				}
 			}
 			if len(opts.addTags) > 0 {
-				newTags := addUniqueStrings(idea.Tags, opts.addTags)
+				newTags := bulk.AddUniqueStrings(idea.Tags, opts.addTags)
 				if len(newTags) > len(idea.Tags) {
 					fmt.Printf("   %s Tags: %v → %v\n",
 						color.CyanString("→"), idea.Tags, newTags)
 				}
 			}
 			if len(opts.removeTags) > 0 {
-				newTags := removeStrings(idea.Tags, opts.removeTags)
+				newTags := bulk.RemoveStrings(idea.Tags, opts.removeTags)
 				if len(newTags) < len(idea.Tags) {
 					fmt.Printf("   %s Tags: %v → %v\n",
 						color.CyanString("→"), idea.Tags, newTags)
@@ -780,50 +787,18 @@ func runBulkUpdate(opts bulkUpdateOptions) error {
 	failed := 0
 	errors := make([]string, 0)
 
+	service := bulk.NewService(ctx.Repository)
+	updateOpts := bulk.UpdateOptions{
+		SetStatus:      opts.setStatus,
+		AddPatterns:    opts.addPatterns,
+		RemovePatterns: opts.removePatterns,
+		AddTags:        opts.addTags,
+		RemoveTags:     opts.removeTags,
+	}
+
 	for i, idea := range ideas {
-		modified := false
-
-		// Apply status change
-		if opts.setStatus != "" && idea.Status != opts.setStatus {
-			idea.Status = opts.setStatus
-			modified = true
-		}
-
-		// Add patterns
-		if len(opts.addPatterns) > 0 {
-			newPatterns := addUniqueStrings(idea.Patterns, opts.addPatterns)
-			if len(newPatterns) > len(idea.Patterns) {
-				idea.Patterns = newPatterns
-				modified = true
-			}
-		}
-
-		// Remove patterns
-		if len(opts.removePatterns) > 0 {
-			newPatterns := removeStrings(idea.Patterns, opts.removePatterns)
-			if len(newPatterns) < len(idea.Patterns) {
-				idea.Patterns = newPatterns
-				modified = true
-			}
-		}
-
-		// Add tags
-		if len(opts.addTags) > 0 {
-			newTags := addUniqueStrings(idea.Tags, opts.addTags)
-			if len(newTags) > len(idea.Tags) {
-				idea.Tags = newTags
-				modified = true
-			}
-		}
-
-		// Remove tags
-		if len(opts.removeTags) > 0 {
-			newTags := removeStrings(idea.Tags, opts.removeTags)
-			if len(newTags) < len(idea.Tags) {
-				idea.Tags = newTags
-				modified = true
-			}
-		}
+		// Apply updates using service
+		modified := service.ApplyUpdates(idea, updateOpts)
 
 		// Only save if something actually changed
 		if modified {
@@ -863,33 +838,6 @@ func runBulkUpdate(opts bulkUpdateOptions) error {
 
 // Helper functions
 
-func filterBySearch(ideas []*models.Idea, searchTerm string) []*models.Idea {
-	searchLower := strings.ToLower(searchTerm)
-	filtered := make([]*models.Idea, 0)
-
-	for _, idea := range ideas {
-		if strings.Contains(strings.ToLower(idea.Content), searchLower) ||
-			strings.Contains(strings.ToLower(idea.Recommendation), searchLower) ||
-			strings.Contains(strings.ToLower(idea.AnalysisDetails), searchLower) {
-			filtered = append(filtered, idea)
-		}
-	}
-
-	return filtered
-}
-
-func filterByAge(ideas []*models.Idea, cutoffDate time.Time) []*models.Idea {
-	filtered := make([]*models.Idea, 0)
-
-	for _, idea := range ideas {
-		if idea.CreatedAt.Before(cutoffDate) {
-			filtered = append(filtered, idea)
-		}
-	}
-
-	return filtered
-}
-
 func truncate(s string, maxLen int) string {
 	if len(s) <= maxLen {
 		return s
@@ -905,59 +853,6 @@ func confirm(prompt string) bool {
 	}
 	response = strings.ToLower(strings.TrimSpace(response))
 	return response == "y" || response == "yes"
-}
-
-// splitCommaSeparated splits a comma-separated string into a slice
-func splitCommaSeparated(s string) []string {
-	if s == "" {
-		return []string{}
-	}
-	parts := strings.Split(s, ",")
-	result := make([]string, 0, len(parts))
-	for _, part := range parts {
-		trimmed := strings.TrimSpace(part)
-		if trimmed != "" {
-			result = append(result, trimmed)
-		}
-	}
-	return result
-}
-
-// addUniqueStrings adds new strings to existing slice, avoiding duplicates
-func addUniqueStrings(existing, newItems []string) []string {
-	result := make([]string, len(existing))
-	copy(result, existing)
-
-	for _, item := range newItems {
-		if !contains(result, item) {
-			result = append(result, item)
-		}
-	}
-
-	return result
-}
-
-// removeStrings removes specified strings from slice
-func removeStrings(existing, toRemove []string) []string {
-	result := make([]string, 0, len(existing))
-
-	for _, item := range existing {
-		if !contains(toRemove, item) {
-			result = append(result, item)
-		}
-	}
-
-	return result
-}
-
-// contains checks if a slice contains a string
-func contains(slice []string, item string) bool {
-	for _, s := range slice {
-		if s == item {
-			return true
-		}
-	}
-	return false
 }
 
 func newBulkAnalyzeCommand() *cobra.Command {
