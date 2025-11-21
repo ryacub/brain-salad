@@ -13,6 +13,7 @@ import (
 
 	"github.com/rayyacub/telos-idea-matrix/internal/llm/processing"
 	"github.com/rayyacub/telos-idea-matrix/internal/metrics"
+	"github.com/rayyacub/telos-idea-matrix/internal/models"
 )
 
 // ============================================================================
@@ -41,12 +42,19 @@ func NewClaudeProvider(apiKey string, model string) *ClaudeProvider {
 	}
 
 	// Create processor with rule-based fallback function
-	fallbackFunc := func(ideaContent string) (*processing.ProcessedResult, error) {
+	fallbackFunc := func(ideaContent string, telos interface{}) (*processing.ProcessedResult, error) {
 		// Use rule-based provider as fallback
 		ruleProvider := NewRuleBasedProvider()
+
+		// Convert telos to proper type
+		var telosModel *models.Telos
+		if t, ok := telos.(*models.Telos); ok {
+			telosModel = t
+		}
+
 		result, err := ruleProvider.Analyze(AnalysisRequest{
 			IdeaContent: ideaContent,
-			Telos:       nil, // TODO: Pass telos when available
+			Telos:       telosModel,
 		})
 		if err != nil {
 			return nil, err
@@ -186,7 +194,7 @@ func (cp *ClaudeProvider) Analyze(req AnalysisRequest) (*AnalysisResult, error) 
 	responseText := resp.Content[0].Text
 
 	// Process LLM response with fallback support
-	processed, err := cp.processor.Process(responseText, req.IdeaContent)
+	processed, err := cp.processor.Process(responseText, req.IdeaContent, req.Telos)
 	if err != nil {
 		metrics.RecordLLMRequest(cp.Name(), false, duration)
 		metrics.RecordLLMError(cp.Name(), "invalid_response")

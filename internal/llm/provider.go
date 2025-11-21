@@ -59,12 +59,19 @@ func NewOllamaProvider(baseURL string, model string) *OllamaProvider {
 	}
 
 	// Create processor with rule-based fallback function
-	fallbackFunc := func(ideaContent string) (*processing.ProcessedResult, error) {
+	fallbackFunc := func(ideaContent string, telos interface{}) (*processing.ProcessedResult, error) {
 		// Use rule-based provider as fallback
 		ruleProvider := NewRuleBasedProvider()
+
+		// Convert telos to proper type
+		var telosModel *models.Telos
+		if t, ok := telos.(*models.Telos); ok {
+			telosModel = t
+		}
+
 		result, err := ruleProvider.Analyze(AnalysisRequest{
 			IdeaContent: ideaContent,
-			Telos:       nil, // TODO: Pass telos when available
+			Telos:       telosModel,
 		})
 		if err != nil {
 			return nil, err
@@ -138,7 +145,7 @@ func (op *OllamaProvider) Analyze(req AnalysisRequest) (*AnalysisResult, error) 
 	}
 
 	// Process LLM response with fallback support
-	processed, err := op.processor.Process(resp.Response, req.IdeaContent)
+	processed, err := op.processor.Process(resp.Response, req.IdeaContent, req.Telos)
 	if err != nil {
 		// Record failure
 		metrics.RecordLLMRequest(op.Name(), false, duration)

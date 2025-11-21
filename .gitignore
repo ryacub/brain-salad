@@ -8,6 +8,7 @@
 *.out
 /cli
 /tm
+/tm-web
 /telos
 bin/
 
