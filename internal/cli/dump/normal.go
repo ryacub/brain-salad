@@ -5,6 +5,7 @@ import (
 	"fmt"
 	"strings"
 
+	clierrors "github.com/rayyacub/telos-idea-matrix/internal/cli/errors"
 	"github.com/rayyacub/telos-idea-matrix/internal/cliutil"
 	"github.com/rayyacub/telos-idea-matrix/internal/models"
 	"github.com/rayyacub/telos-idea-matrix/internal/patterns"
@@ -54,14 +55,14 @@ func runNormalDump(ideaText string, fromClipboard, toClipboard, useAI bool, prov
 			// Fall back to rule-based scoring
 			analysis, err = ctx.Engine.CalculateScore(ideaText)
 			if err != nil {
-				return fmt.Errorf("failed to score idea: %w", err)
+				return clierrors.WrapError(err, "Failed to score idea")
 			}
 		}
 	} else {
 		// Use rule-based scoring (default)
 		analysis, err = ctx.Engine.CalculateScore(ideaText)
 		if err != nil {
-			return fmt.Errorf("failed to score idea: %w", err)
+			return clierrors.WrapError(err, "Failed to score idea")
 		}
 	}
 
@@ -84,13 +85,13 @@ func runNormalDump(ideaText string, fromClipboard, toClipboard, useAI bool, prov
 	// Serialize analysis details
 	analysisJSON, err := json.Marshal(analysis)
 	if err != nil {
-		return fmt.Errorf("failed to serialize analysis: %w", err)
+		return clierrors.WrapError(err, "Failed to serialize analysis")
 	}
 	idea.AnalysisDetails = string(analysisJSON)
 
 	// Save to database
 	if err := ctx.Repository.Create(idea); err != nil {
-		return fmt.Errorf("failed to save idea: %w", err)
+		return clierrors.WrapError(err, "Failed to save idea")
 	}
 
 	// Display results
