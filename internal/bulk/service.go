@@ -22,12 +22,16 @@ func NewService(repo *database.Repository) *Service {
 // FilterBySearch filters ideas by searching their content, recommendation, or analysis
 func (s *Service) FilterBySearch(ideas []*models.Idea, searchTerm string) []*models.Idea {
 	searchLower := strings.ToLower(searchTerm)
-	filtered := make([]*models.Idea, 0)
+	filtered := make([]*models.Idea, 0, len(ideas)/4) // Pre-allocate with estimated capacity
 
 	for _, idea := range ideas {
-		if strings.Contains(strings.ToLower(idea.Content), searchLower) ||
-			strings.Contains(strings.ToLower(idea.Recommendation), searchLower) ||
-			strings.Contains(strings.ToLower(idea.AnalysisDetails), searchLower) {
+		contentLower := strings.ToLower(idea.Content)
+		recommendationLower := strings.ToLower(idea.Recommendation)
+		analysisLower := strings.ToLower(idea.AnalysisDetails)
+
+		if strings.Contains(contentLower, searchLower) ||
+			strings.Contains(recommendationLower, searchLower) ||
+			strings.Contains(analysisLower, searchLower) {
 			filtered = append(filtered, idea)
 		}
 	}
@@ -37,7 +41,7 @@ func (s *Service) FilterBySearch(ideas []*models.Idea, searchTerm string) []*mod
 
 // FilterByAge filters ideas created before the given cutoff date
 func (s *Service) FilterByAge(ideas []*models.Idea, cutoffDate time.Time) []*models.Idea {
-	filtered := make([]*models.Idea, 0)
+	filtered := make([]*models.Idea, 0, len(ideas)/2) // Pre-allocate with estimated capacity
 
 	for _, idea := range ideas {
 		if idea.CreatedAt.Before(cutoffDate) {
@@ -110,11 +114,22 @@ func (s *Service) ApplyUpdates(idea *models.Idea, opts UpdateOptions) bool {
 
 // AddUniqueStrings adds new items to existing slice, avoiding duplicates
 func AddUniqueStrings(existing, newItems []string) []string {
-	result := make([]string, len(existing))
-	copy(result, existing)
+	// Use map for O(1) lookups instead of O(n)
+	seen := make(map[string]bool, len(existing)+len(newItems))
+	result := make([]string, 0, len(existing)+len(newItems))
 
+	// Add existing items
+	for _, item := range existing {
+		if !seen[item] {
+			seen[item] = true
+			result = append(result, item)
+		}
+	}
+
+	// Add new items if not duplicates
 	for _, item := range newItems {
-		if !Contains(result, item) {
+		if !seen[item] {
+			seen[item] = true
 			result = append(result, item)
 		}
 	}
@@ -124,10 +139,15 @@ func AddUniqueStrings(existing, newItems []string) []string {
 
 // RemoveStrings removes specified items from a slice
 func RemoveStrings(existing, toRemove []string) []string {
-	result := make([]string, 0, len(existing))
+	// Use map for O(1) lookups instead of O(n)
+	removeMap := make(map[string]bool, len(toRemove))
+	for _, item := range toRemove {
+		removeMap[item] = true
+	}
 
+	result := make([]string, 0, len(existing))
 	for _, item := range existing {
-		if !Contains(toRemove, item) {
+		if !removeMap[item] {
 			result = append(result, item)
 		}
 	}
