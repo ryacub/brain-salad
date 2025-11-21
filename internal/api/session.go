@@ -8,7 +8,10 @@ import (
 	"errors"
 	"fmt"
 	"net/http"
+	"sync"
 	"time"
+
+	"github.com/rs/zerolog/log"
 )
 
 // SessionConfig holds configuration for session management
@@ -57,9 +60,10 @@ func (s *Session) IsExpired() bool {
 
 // SessionManager manages user sessions backed by SQLite
 type SessionManager struct {
-	db     *sql.DB
-	config SessionConfig
-	stopCh chan struct{}
+	db       *sql.DB
+	config   SessionConfig
+	stopCh   chan struct{}
+	stopOnce sync.Once
 }
 
 // NewSessionManager creates a new session manager
@@ -70,8 +74,18 @@ func NewSessionManager(db *sql.DB, config SessionConfig) *SessionManager {
 		stopCh: make(chan struct{}),
 	}
 
-	// Start cleanup goroutine
-	go sm.cleanupExpired()
+	// Start cleanup goroutine with panic recovery
+	go func() {
+		defer func() {
+			if r := recover(); r != nil {
+				log.Error().
+					Interface("panic", r).
+					Str("goroutine", "session-cleanup").
+					Msg("background goroutine panicked")
+			}
+		}()
+		sm.cleanupExpired()
+	}()
 
 	return sm
 }
@@ -266,8 +280,11 @@ func (sm *SessionManager) cleanupExpired() {
 }
 
 // Stop gracefully stops the session manager cleanup goroutine
+// Use sync.Once to prevent double-close panic
 func (sm *SessionManager) Stop() {
-	close(sm.stopCh)
+	sm.stopOnce.Do(func() {
+		close(sm.stopCh)
+	})
 }
 
 // GetSessionFromRequest extracts the session ID from a request cookie
