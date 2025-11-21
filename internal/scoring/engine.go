@@ -6,9 +6,19 @@ import (
 	"math"
 	"regexp"
 	"strings"
+	"sync"
 	"time"
 
 	"github.com/rayyacub/telos-idea-matrix/internal/models"
+)
+
+var (
+	// defaultEngine is the singleton engine instance
+	defaultEngine *Engine
+	// engineMu protects access to the singleton
+	engineMu sync.RWMutex
+	// engineTelos tracks the telos configuration for the current engine
+	engineTelos *models.Telos
 )
 
 // Engine calculates idea scores based on telos configuration.
@@ -45,6 +55,56 @@ func NewEngine(telos *models.Telos) *Engine {
 		// Accountability keywords
 		accountabilityRegex: regexp.MustCompile(`(?i)(customer|client|pre-order|cohort|public|twitter|github|build in public)`),
 	}
+}
+
+// GetEngine returns a singleton Engine instance for the given telos.
+// If the telos has changed, it creates a new engine.
+// This avoids recompiling regex patterns on every request, improving performance.
+func GetEngine(telos *models.Telos) *Engine {
+	engineMu.RLock()
+
+	// Check if we can reuse existing engine
+	if defaultEngine != nil && engineTelos != nil && telosUnchanged(engineTelos, telos) {
+		engineMu.RUnlock()
+		return defaultEngine
+	}
+	engineMu.RUnlock()
+
+	// Need to create new engine
+	engineMu.Lock()
+	defer engineMu.Unlock()
+
+	// Double-check after acquiring write lock
+	if defaultEngine != nil && engineTelos != nil && telosUnchanged(engineTelos, telos) {
+		return defaultEngine
+	}
+
+	defaultEngine = NewEngine(telos)
+	engineTelos = telos
+	return defaultEngine
+}
+
+// telosUnchanged checks if telos content is unchanged.
+// Compares relevant fields that affect scoring to determine if engine can be reused.
+func telosUnchanged(old, new *models.Telos) bool {
+	if old == nil || new == nil {
+		return false
+	}
+	// Compare relevant fields that affect scoring
+	// Using simple length-based comparison for arrays
+	return len(old.Missions) == len(new.Missions) &&
+		len(old.Challenges) == len(new.Challenges) &&
+		len(old.Goals) == len(new.Goals) &&
+		len(old.Stack.Primary) == len(new.Stack.Primary) &&
+		len(old.Stack.Secondary) == len(new.Stack.Secondary)
+}
+
+// ResetEngine clears the singleton (useful for testing).
+func ResetEngine() {
+	engineMu.Lock()
+	defer engineMu.Unlock()
+	defaultEngine = nil
+	engineTelos = nil
 }
 
 // CalculateScore calculates the complete analysis for an idea.
