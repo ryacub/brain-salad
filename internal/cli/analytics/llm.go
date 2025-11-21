@@ -1,4 +1,4 @@
-package cli
+package analytics
 
 import (
 	"encoding/json"
@@ -12,8 +12,8 @@ import (
 	"github.com/spf13/cobra"
 )
 
-// newAnalyticsLLMCommand creates the analytics llm subcommand
-func newAnalyticsLLMCommand() *cobra.Command {
+// NewLLMCommand creates the analytics llm subcommand
+func NewLLMCommand(getContext func() *CLIContext) *cobra.Command {
 	var (
 		jsonFormat bool
 		since      string

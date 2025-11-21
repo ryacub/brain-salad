@@ -12,6 +12,7 @@ import (
 // CLIContext represents the shared CLI dependencies
 type CLIContext struct {
 	Repository *database.Repository
+	DBPath     string
 }
 
 // NewAnalyticsCommand creates the analytics command with all subcommands

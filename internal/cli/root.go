@@ -6,6 +6,7 @@ import (
 	"path/filepath"
 
 	"github.com/fatih/color"
+	"github.com/rayyacub/telos-idea-matrix/internal/cli/analytics"
 	"github.com/rayyacub/telos-idea-matrix/internal/cli/dump"
 	"github.com/rayyacub/telos-idea-matrix/internal/database"
 	"github.com/rayyacub/telos-idea-matrix/internal/llm"
@@ -68,7 +69,7 @@ you focus on what truly matters.`,
 	rootCmd.AddCommand(newAnalyzeCommand())
 	rootCmd.AddCommand(newReviewCommand())
 	rootCmd.AddCommand(newPruneCommand())
-	rootCmd.AddCommand(newAnalyticsCommand())
+	rootCmd.AddCommand(analytics.NewAnalyticsCommand(getAnalyticsContext))
 	rootCmd.AddCommand(newLinkCommand())
 	rootCmd.AddCommand(newHealthCommand())
 	rootCmd.AddCommand(NewBulkCommand())
@@ -204,5 +205,16 @@ func getDumpContext() *dump.CLIContext {
 		Detector:   ctx.Detector,
 		Telos:      ctx.Telos,
 		LLMManager: ctx.LLMManager,
+	}
+}
+
+// getAnalyticsContext converts CLIContext to analytics.CLIContext
+func getAnalyticsContext() *analytics.CLIContext {
+	if ctx == nil {
+		return nil
+	}
+	return &analytics.CLIContext{
+		Repository: ctx.Repository,
+		DBPath:     ctx.DBPath,
 	}
 }
