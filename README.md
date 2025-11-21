@@ -14,6 +14,14 @@ Telos Matrix helps combat decision paralysis and context-switching by providing 
 
 ### Installation
 
+#### Quick Install (Linux/macOS)
+
+```bash
+curl -sSL https://raw.githubusercontent.com/ryacub/brain-salad/main/scripts/install.sh | bash
+```
+
+#### Manual Build
+
 ```bash
 # Clone repository
 git clone https://github.com/ryacub/brain-salad.git
@@ -27,6 +35,18 @@ go install ./cmd/cli
 
 # Run
 ./tm --help
+```
+
+#### First-Time Setup
+
+```bash
+# Initialize your workspace
+tm init
+
+# This creates:
+# - ~/.telos/telos.md (your goals and mission)
+# - ~/.telos/.env.example (configuration template)
+# - Database directory
 ```
 
 ### Docker
@@ -106,9 +126,37 @@ tm link create idea1 idea2 depends_on
 - **Clipboard Integration** - Paste ideas from clipboard
 - **Export** - CSV, JSON, Markdown formats
 
+### Shell Completion
+
+Enable shell completion for faster command entry:
+
+**Bash:**
+```bash
+source <(tm completion bash)
+# Or install permanently:
+sudo tm completion bash > /etc/bash_completion.d/tm
+```
+
+**Zsh:**
+```bash
+tm completion zsh > "${fpath[1]}/_tm"
+exec zsh
+```
+
+**Fish:**
+```bash
+tm completion fish > ~/.config/fish/completions/tm.fish
+```
+
+**PowerShell:**
+```powershell
+tm completion powershell | Out-String | Invoke-Expression
+```
+
 ## Commands
 
 ```bash
+tm init                     # Initialize workspace (first-time setup)
 tm dump <idea>              # Capture and analyze idea
 tm dump --interactive       # Interactive mode with step-by-step LLM analysis
 tm dump --quick            # Quick mode for fast capture
@@ -142,6 +190,7 @@ tm llm-config               # Configure providers
 tm llm-health               # Check provider health
 
 tm health                   # System health check
+tm completion [shell]       # Generate shell completion script
 ```
 
 ## Architecture
@@ -228,6 +277,12 @@ tm dump "idea" --use-ai --provider claude
 ```
 
 See [Configuration Guide](./docs/CONFIGURATION.md) for full details.
+
+## API Documentation
+
+Full API documentation is available in OpenAPI format:
+- [OpenAPI Specification](api/openapi.yaml)
+- [Interactive API Docs](http://localhost:8080/api/docs) (when server running)
 
 ## Documentation
 

@@ -2,6 +2,7 @@ package api
 
 import (
 	"encoding/json"
+	"fmt"
 	"net/http"
 	"strconv"
 	"time"
@@ -519,4 +520,17 @@ func (s *Server) MetricsHandler(w http.ResponseWriter, _ *http.Request) {
 	}
 
 	respondJSON(w, http.StatusOK, response)
+}
+
+// OpenAPIHandler serves the OpenAPI specification
+func (s *Server) OpenAPIHandler(w http.ResponseWriter, r *http.Request) {
+	http.ServeFile(w, r, "api/openapi.yaml")
+}
+
+// APIDocsHandler redirects to Swagger UI with the OpenAPI spec
+func (s *Server) APIDocsHandler(w http.ResponseWriter, r *http.Request) {
+	// Redirect to Swagger UI hosted online with our spec
+	specURL := "http://localhost:8080/api/openapi.yaml"
+	swaggerURL := fmt.Sprintf("https://petstore.swagger.io/?url=%s", specURL)
+	http.Redirect(w, r, swaggerURL, http.StatusFound)
 }
