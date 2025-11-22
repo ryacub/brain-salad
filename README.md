@@ -238,8 +238,14 @@ See [Architecture Documentation](./docs/ARCHITECTURE.md) for details.
 # Run all tests
 go test ./...
 
+# Run with integration tests (includes database tests)
+go test -tags=integration ./...
+
 # Run with coverage
-go test -cover ./...
+go test -cover -tags=integration ./...
+
+# Run with race detector
+go test -race -tags=integration ./...
 
 # Run specific package
 go test ./internal/cli/...
@@ -251,6 +257,14 @@ go test ./test/...
 make test
 make test-coverage
 ```
+
+**Note:** Database tests require the `integration` build tag because they:
+- Create temporary SQLite files on disk
+- Test actual database behavior (not mocked)
+- Take longer to run than pure unit tests
+- Should be run before commits to ensure data integrity
+
+Run `go test -tags=integration ./...` to include database tests in your test suite.
 
 ## Configuration
 

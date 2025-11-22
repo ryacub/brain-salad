@@ -9,6 +9,8 @@ import (
 	"github.com/rayyacub/telos-idea-matrix/internal/cli/analytics"
 	"github.com/rayyacub/telos-idea-matrix/internal/cli/bulk"
 	"github.com/rayyacub/telos-idea-matrix/internal/cli/dump"
+	clierrors "github.com/rayyacub/telos-idea-matrix/internal/cli/errors"
+	"github.com/rayyacub/telos-idea-matrix/internal/cli/health"
 	"github.com/rayyacub/telos-idea-matrix/internal/database"
 	"github.com/rayyacub/telos-idea-matrix/internal/llm"
 	"github.com/rayyacub/telos-idea-matrix/internal/models"
@@ -73,6 +75,7 @@ you focus on what truly matters.`,
 	rootCmd.AddCommand(analytics.NewAnalyticsCommand(getAnalyticsContext))
 	rootCmd.AddCommand(newLinkCommand())
 	rootCmd.AddCommand(newHealthCommand())
+	rootCmd.AddCommand(health.NewDoctorCommand())
 	rootCmd.AddCommand(bulk.NewBulkCommand(getBulkContext))
 
 	// LLM commands (new hierarchical structure)
@@ -99,7 +102,7 @@ func initializeCLI(cmd *cobra.Command, args []string) error {
 	// Create .telos directory if it doesn't exist
 	telosDir := filepath.Dir(telosPath)
 	if err := os.MkdirAll(telosDir, 0755); err != nil {
-		return fmt.Errorf("failed to create config directory: %w", err)
+		return clierrors.WrapError(err, "Failed to create config directory")
 	}
 
 	// Check if telos.md exists
@@ -109,20 +112,20 @@ func initializeCLI(cmd *cobra.Command, args []string) error {
 		}
 		fmt.Fprintf(os.Stderr, "Please create a telos.md file with your goals, strategies, and stack.\n")
 		fmt.Fprintf(os.Stderr, "Run 'tm init' to create a template or see documentation for format.\n\n")
-		return fmt.Errorf("telos file not found")
+		return clierrors.WrapError(fmt.Errorf("telos.md: no such file"), "Initialization failed")
 	}
 
 	// Parse telos.md
 	parser := telos.NewParser()
 	telosData, err := parser.ParseFile(telosPath)
 	if err != nil {
-		return fmt.Errorf("failed to parse telos.md: %w", err)
+		return clierrors.WrapError(err, "Failed to parse telos.md")
 	}
 
 	// Initialize database
 	repo, err := database.NewRepository(dbPath)
 	if err != nil {
-		return fmt.Errorf("failed to initialize database: %w", err)
+		return clierrors.WrapError(err, "Failed to initialize database")
 	}
 
 	// Create scoring engine and pattern detector
