@@ -11,12 +11,12 @@ import (
 	"github.com/go-chi/chi/v5"
 	"github.com/go-chi/chi/v5/middleware"
 	"github.com/go-chi/cors"
-	"github.com/rayyacub/telos-idea-matrix/internal/config"
-	"github.com/rayyacub/telos-idea-matrix/internal/database"
-	"github.com/rayyacub/telos-idea-matrix/internal/health"
-	"github.com/rayyacub/telos-idea-matrix/internal/logging"
-	"github.com/rayyacub/telos-idea-matrix/internal/models"
-	"github.com/rayyacub/telos-idea-matrix/internal/telos"
+	"github.com/ryacub/telos-idea-matrix/internal/config"
+	"github.com/ryacub/telos-idea-matrix/internal/database"
+	"github.com/ryacub/telos-idea-matrix/internal/health"
+	"github.com/ryacub/telos-idea-matrix/internal/logging"
+	"github.com/ryacub/telos-idea-matrix/internal/models"
+	"github.com/ryacub/telos-idea-matrix/internal/telos"
 )
 
 // Server represents the API server

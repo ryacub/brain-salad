@@ -223,15 +223,15 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## Project Links
 
-- **Repository**: [https://github.com/rayyacub/telos-idea-matrix](https://github.com/rayyacub/telos-idea-matrix)
-- **Docker Images**: [ghcr.io/rayyacub/telos-idea-matrix](https://github.com/rayyacub/telos-idea-matrix/pkgs/container/telos-idea-matrix)
-- **Issue Tracker**: [GitHub Issues](https://github.com/rayyacub/telos-idea-matrix/issues)
+- **Repository**: [https://github.com/ryacub/telos-idea-matrix](https://github.com/ryacub/telos-idea-matrix)
+- **Docker Images**: [ghcr.io/rayyacub/telos-idea-matrix](https://github.com/ryacub/telos-idea-matrix/pkgs/container/telos-idea-matrix)
+- **Issue Tracker**: [GitHub Issues](https://github.com/ryacub/telos-idea-matrix/issues)
 - **Documentation**: [docs/](./docs/)
 
 ---
 
 ## Version History
 
-[2.0.1]: https://github.com/rayyacub/brain-salad/releases/tag/v2.0.1
-[2.0.0]: https://github.com/rayyacub/brain-salad/releases/tag/v2.0.0
-[0.1.0]: https://github.com/rayyacub/telos-idea-matrix/releases/tag/v0.1.0
+[2.0.1]: https://github.com/ryacub/brain-salad/releases/tag/v2.0.1
+[2.0.0]: https://github.com/ryacub/brain-salad/releases/tag/v2.0.0
+[0.1.0]: https://github.com/ryacub/telos-idea-matrix/releases/tag/v0.1.0

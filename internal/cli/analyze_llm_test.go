@@ -3,7 +3,7 @@ package cli
 import (
 	"testing"
 
-	"github.com/rayyacub/telos-idea-matrix/internal/llm"
+	"github.com/ryacub/telos-idea-matrix/internal/llm"
 )
 
 func TestAnalyzeLLMCommand(t *testing.T) {

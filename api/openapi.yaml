@@ -5,7 +5,7 @@ info:
   version: 2.0.1
   contact:
     name: API Support
-    url: https://github.com/rayyacub/brain-salad
+    url: https://github.com/ryacub/brain-salad
 
 servers:
   - url: http://localhost:8080/api/v1

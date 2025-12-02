@@ -3,10 +3,10 @@ package analytics
 import (
 	"fmt"
 
-	"github.com/rayyacub/telos-idea-matrix/internal/analytics"
-	"github.com/rayyacub/telos-idea-matrix/internal/cliutil"
-	"github.com/rayyacub/telos-idea-matrix/internal/database"
 	"github.com/rs/zerolog/log"
+	"github.com/ryacub/telos-idea-matrix/internal/analytics"
+	"github.com/ryacub/telos-idea-matrix/internal/cliutil"
+	"github.com/ryacub/telos-idea-matrix/internal/database"
 	"github.com/spf13/cobra"
 )
 

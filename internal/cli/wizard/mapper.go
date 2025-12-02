@@ -4,7 +4,7 @@ import (
 	"sort"
 	"time"
 
-	"github.com/rayyacub/telos-idea-matrix/internal/profile"
+	"github.com/ryacub/telos-idea-matrix/internal/profile"
 )
 
 // MapAnswersToProfile converts wizard answers into a Profile.

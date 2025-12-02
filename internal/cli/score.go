@@ -4,9 +4,9 @@ import (
 	"fmt"
 	"strings"
 
-	"github.com/rayyacub/telos-idea-matrix/internal/cliutil"
-	"github.com/rayyacub/telos-idea-matrix/internal/scoring"
 	"github.com/rs/zerolog/log"
+	"github.com/ryacub/telos-idea-matrix/internal/cliutil"
+	"github.com/ryacub/telos-idea-matrix/internal/scoring"
 	"github.com/spf13/cobra"
 )
 

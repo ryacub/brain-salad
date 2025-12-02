@@ -29,9 +29,9 @@ Thank you for your interest in contributing to Brain-Salad! We welcome contribut
 - Fix typos or clarify confusing sections
 
 ### Community Support
-- Answer questions in [GitHub Discussions](https://github.com/rayyacub/brain-salad/discussions)
+- Answer questions in [GitHub Discussions](https://github.com/ryacub/brain-salad/discussions)
 - Share your configuration examples and scoring profiles
-- Report bugs and suggest enhancements in [GitHub Issues](https://github.com/rayyacub/brain-salad/issues)
+- Report bugs and suggest enhancements in [GitHub Issues](https://github.com/ryacub/brain-salad/issues)
 - Review pull requests
 
 ### Testing
@@ -46,7 +46,7 @@ Before contributing, please:
 1. **Read the documentation**: Familiarize yourself with the [README](./README.md) and project architecture
 2. **Check existing issues**: Look for related issues or discussions before starting work
 3. **Create an issue first**: For major changes, open an issue to discuss your approach before implementing
-4. **Join the community**: Participate in [GitHub Discussions](https://github.com/rayyacub/brain-salad/discussions)
+4. **Join the community**: Participate in [GitHub Discussions](https://github.com/ryacub/brain-salad/discussions)
 
 ## Development Setup
 
@@ -60,7 +60,7 @@ Before contributing, please:
 
 1. **Fork and Clone the Repository**
    ```bash
-   git clone https://github.com/rayyacub/brain-salad.git
+   git clone https://github.com/ryacub/brain-salad.git
    cd brain-salad
    ```
 
@@ -215,8 +215,8 @@ import (
     "github.com/spf13/cobra"
     "github.com/jmoiron/sqlx"
 
-    "github.com/rayyacub/telos-idea-matrix/internal/config"
-    "github.com/rayyacub/telos-idea-matrix/internal/scoring"
+    "github.com/ryacub/telos-idea-matrix/internal/config"
+    "github.com/ryacub/telos-idea-matrix/internal/scoring"
 )
 ```
 
@@ -525,7 +525,7 @@ We are committed to providing a welcoming and inclusive environment:
 
 ### Reporting
 
-If you experience or witness unacceptable behavior, please report it via [GitHub Issues](https://github.com/rayyacub/brain-salad/issues). All reports will be reviewed and investigated promptly and fairly.
+If you experience or witness unacceptable behavior, please report it via [GitHub Issues](https://github.com/ryacub/brain-salad/issues). All reports will be reviewed and investigated promptly and fairly.
 
 ### Attribution
 
@@ -551,7 +551,7 @@ This Code of Conduct is adapted from the [Contributor Covenant](https://www.cont
 
 ### Bug Fixes
 
-Check the [Issues](https://github.com/rayyacub/telos-idea-matrix/issues) page for reported bugs. Good candidates for first-time contributors include:
+Check the [Issues](https://github.com/ryacub/telos-idea-matrix/issues) page for reported bugs. Good candidates for first-time contributors include:
 - Small documentation fixes
 - Minor UI/UX improvements
 - Error message clarifications

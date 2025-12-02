@@ -16,7 +16,7 @@ Structured logging using zerolog for the Telos Idea Matrix application.
 ### Initialize Logger
 
 ```go
-import "github.com/rayyacub/telos-idea-matrix/internal/logging"
+import "github.com/ryacub/telos-idea-matrix/internal/logging"
 
 cfg := logging.Config{
     Level:      "info",
@@ -35,7 +35,7 @@ logger := logging.NewLogger(cfg)
 ```go
 import (
     "github.com/go-chi/chi/v5"
-    "github.com/rayyacub/telos-idea-matrix/internal/logging"
+    "github.com/ryacub/telos-idea-matrix/internal/logging"
 )
 
 r := chi.NewRouter()

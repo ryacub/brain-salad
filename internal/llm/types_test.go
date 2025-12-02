@@ -4,7 +4,7 @@ import (
 	"testing"
 	"time"
 
-	"github.com/rayyacub/telos-idea-matrix/internal/models"
+	"github.com/ryacub/telos-idea-matrix/internal/models"
 )
 
 func TestAnalysisRequest(t *testing.T) {

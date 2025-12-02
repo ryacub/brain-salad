@@ -10,12 +10,12 @@ import (
 	"syscall"
 	"time"
 
-	"github.com/rayyacub/telos-idea-matrix/internal/api"
-	"github.com/rayyacub/telos-idea-matrix/internal/config"
-	"github.com/rayyacub/telos-idea-matrix/internal/database"
-	"github.com/rayyacub/telos-idea-matrix/internal/logging"
-	"github.com/rayyacub/telos-idea-matrix/internal/tasks"
 	"github.com/rs/zerolog/log"
+	"github.com/ryacub/telos-idea-matrix/internal/api"
+	"github.com/ryacub/telos-idea-matrix/internal/config"
+	"github.com/ryacub/telos-idea-matrix/internal/database"
+	"github.com/ryacub/telos-idea-matrix/internal/logging"
+	"github.com/ryacub/telos-idea-matrix/internal/tasks"
 )
 
 func main() {

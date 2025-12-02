@@ -6,9 +6,9 @@ import (
 	"strings"
 	"time"
 
-	"github.com/rayyacub/telos-idea-matrix/internal/cli/dump"
-	"github.com/rayyacub/telos-idea-matrix/internal/cliutil"
 	"github.com/rs/zerolog/log"
+	"github.com/ryacub/telos-idea-matrix/internal/cli/dump"
+	"github.com/ryacub/telos-idea-matrix/internal/cliutil"
 	"github.com/spf13/cobra"
 )
 

@@ -7,8 +7,8 @@ import (
 
 	"github.com/spf13/cobra"
 
-	"github.com/rayyacub/telos-idea-matrix/internal/cli/wizard"
-	"github.com/rayyacub/telos-idea-matrix/internal/profile"
+	"github.com/ryacub/telos-idea-matrix/internal/cli/wizard"
+	"github.com/ryacub/telos-idea-matrix/internal/profile"
 )
 
 var initAdvanced bool

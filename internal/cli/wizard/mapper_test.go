@@ -3,7 +3,7 @@ package wizard
 import (
 	"testing"
 
-	"github.com/rayyacub/telos-idea-matrix/internal/profile"
+	"github.com/ryacub/telos-idea-matrix/internal/profile"
 	"github.com/stretchr/testify/assert"
 )
 

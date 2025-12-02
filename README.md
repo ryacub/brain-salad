@@ -21,7 +21,7 @@ Brain-Salad helps you decide which ideas to pursue by scoring them against your 
 curl -sSL https://raw.githubusercontent.com/rayyacub/brain-salad/main/scripts/install.sh | bash
 
 # Or with Go installed:
-go install github.com/rayyacub/telos-idea-matrix/cmd/cli@latest
+go install github.com/ryacub/telos-idea-matrix/cmd/cli@latest
 
 # Run the setup wizard (2 minutes)
 tm init
@@ -94,7 +94,7 @@ curl -sSL https://raw.githubusercontent.com/rayyacub/brain-salad/main/scripts/in
 ### Manual Build
 
 ```bash
-git clone https://github.com/rayyacub/brain-salad.git
+git clone https://github.com/ryacub/brain-salad.git
 cd brain-salad
 make build
 ./bin/tm --help
@@ -274,5 +274,5 @@ MIT License - see [LICENSE](./LICENSE)
 
 ## Support
 
-- [GitHub Issues](https://github.com/rayyacub/brain-salad/issues)
-- [GitHub Discussions](https://github.com/rayyacub/brain-salad/discussions)
+- [GitHub Issues](https://github.com/ryacub/brain-salad/issues)
+- [GitHub Discussions](https://github.com/ryacub/brain-salad/discussions)

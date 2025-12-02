@@ -4,9 +4,9 @@ import (
 	"fmt"
 
 	"github.com/fatih/color"
-	"github.com/rayyacub/telos-idea-matrix/internal/cliutil"
-	"github.com/rayyacub/telos-idea-matrix/internal/export"
 	"github.com/rs/zerolog/log"
+	"github.com/ryacub/telos-idea-matrix/internal/cliutil"
+	"github.com/ryacub/telos-idea-matrix/internal/export"
 	"github.com/spf13/cobra"
 )
 

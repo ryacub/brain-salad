@@ -591,7 +591,7 @@ If your question isn't answered here:
 1. Check the [User Guide](../user-guide/link-command.md) for detailed documentation
 2. Review the [Tutorial](../tutorials/getting-started-with-links.md) for hands-on examples
 3. Browse the [Cheat Sheet](../quick-reference/link-cheatsheet.md) for quick syntax
-4. Open an issue on [GitHub](https://github.com/rayyacub/telos-idea-matrix/issues)
+4. Open an issue on [GitHub](https://github.com/ryacub/telos-idea-matrix/issues)
 
 ---
 

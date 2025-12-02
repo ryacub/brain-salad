@@ -8,10 +8,10 @@ import (
 	"strings"
 	"testing"
 
-	"github.com/rayyacub/telos-idea-matrix/internal/database"
-	"github.com/rayyacub/telos-idea-matrix/internal/patterns"
-	"github.com/rayyacub/telos-idea-matrix/internal/scoring"
-	"github.com/rayyacub/telos-idea-matrix/internal/telos"
+	"github.com/ryacub/telos-idea-matrix/internal/database"
+	"github.com/ryacub/telos-idea-matrix/internal/patterns"
+	"github.com/ryacub/telos-idea-matrix/internal/scoring"
+	"github.com/ryacub/telos-idea-matrix/internal/telos"
 	"github.com/stretchr/testify/assert"
 	"github.com/stretchr/testify/require"
 )

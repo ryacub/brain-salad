@@ -6,7 +6,7 @@ import (
 	"testing"
 	"time"
 
-	"github.com/rayyacub/telos-idea-matrix/internal/models"
+	"github.com/ryacub/telos-idea-matrix/internal/models"
 )
 
 // MockProvider is a test implementation of the Provider interface

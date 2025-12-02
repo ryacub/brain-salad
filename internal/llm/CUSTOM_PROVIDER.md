@@ -212,8 +212,8 @@ The provider handles various error scenarios:
 package main
 
 import (
-    "github.com/rayyacub/telos-idea-matrix/internal/llm"
-    "github.com/rayyacub/telos-idea-matrix/internal/models"
+    "github.com/ryacub/telos-idea-matrix/internal/llm"
+    "github.com/ryacub/telos-idea-matrix/internal/models"
 )
 
 func main() {

@@ -7,7 +7,7 @@ import (
 	"testing"
 	"time"
 
-	"github.com/rayyacub/telos-idea-matrix/internal/models"
+	"github.com/ryacub/telos-idea-matrix/internal/models"
 )
 
 func TestNewClaudeProvider(t *testing.T) {

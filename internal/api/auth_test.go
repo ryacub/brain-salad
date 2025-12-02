@@ -5,7 +5,7 @@ import (
 	"net/http/httptest"
 	"testing"
 
-	"github.com/rayyacub/telos-idea-matrix/internal/config"
+	"github.com/ryacub/telos-idea-matrix/internal/config"
 	"github.com/stretchr/testify/assert"
 )
 

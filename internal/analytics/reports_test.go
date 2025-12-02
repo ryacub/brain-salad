@@ -5,7 +5,7 @@ import (
 	"testing"
 	"time"
 
-	"github.com/rayyacub/telos-idea-matrix/internal/models"
+	"github.com/ryacub/telos-idea-matrix/internal/models"
 	"github.com/stretchr/testify/assert"
 	"github.com/stretchr/testify/require"
 )

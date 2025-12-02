@@ -55,7 +55,7 @@ golangci-lint version
 ### 1. Clone the Repository
 
 ```bash
-git clone https://github.com/rayyacub/telos-idea-matrix.git
+git clone https://github.com/ryacub/telos-idea-matrix.git
 cd telos-idea-matrix
 ```
 
@@ -723,8 +723,8 @@ assert.Equal(t, expected, actual, "scores should match")
 
 ### Contact
 
-- **GitHub Issues**: https://github.com/rayyacub/telos-idea-matrix/issues
-- **Pull Requests**: https://github.com/rayyacub/telos-idea-matrix/pulls
+- **GitHub Issues**: https://github.com/ryacub/telos-idea-matrix/issues
+- **Pull Requests**: https://github.com/ryacub/telos-idea-matrix/pulls
 
 ---
 

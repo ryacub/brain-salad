@@ -9,12 +9,12 @@ import (
 
 	"github.com/go-chi/chi/v5"
 	"github.com/google/uuid"
-	"github.com/rayyacub/telos-idea-matrix/internal/database"
-	"github.com/rayyacub/telos-idea-matrix/internal/metrics"
-	"github.com/rayyacub/telos-idea-matrix/internal/models"
-	"github.com/rayyacub/telos-idea-matrix/internal/patterns"
-	"github.com/rayyacub/telos-idea-matrix/internal/scoring"
 	"github.com/rs/zerolog/log"
+	"github.com/ryacub/telos-idea-matrix/internal/database"
+	"github.com/ryacub/telos-idea-matrix/internal/metrics"
+	"github.com/ryacub/telos-idea-matrix/internal/models"
+	"github.com/ryacub/telos-idea-matrix/internal/patterns"
+	"github.com/ryacub/telos-idea-matrix/internal/scoring"
 )
 
 // Request/Response types

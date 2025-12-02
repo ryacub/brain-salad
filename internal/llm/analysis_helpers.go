@@ -3,7 +3,7 @@ package llm
 import (
 	"fmt"
 
-	"github.com/rayyacub/telos-idea-matrix/internal/models"
+	"github.com/ryacub/telos-idea-matrix/internal/models"
 )
 
 // ConvertResultToAnalysis converts an LLM analysis result to the models.Analysis format

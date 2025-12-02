@@ -4,7 +4,7 @@ import (
 	"math"
 	"testing"
 
-	"github.com/rayyacub/telos-idea-matrix/internal/models"
+	"github.com/ryacub/telos-idea-matrix/internal/models"
 )
 
 func TestConvertResultToAnalysis(t *testing.T) {

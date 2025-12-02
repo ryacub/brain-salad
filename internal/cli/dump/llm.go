@@ -1,8 +1,8 @@
 package dump
 
 import (
-	"github.com/rayyacub/telos-idea-matrix/internal/llm"
-	"github.com/rayyacub/telos-idea-matrix/internal/models"
+	"github.com/ryacub/telos-idea-matrix/internal/llm"
+	"github.com/ryacub/telos-idea-matrix/internal/models"
 )
 
 // runLLMAnalysisWithProvider runs LLM analysis with an optional provider override

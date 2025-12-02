@@ -7,10 +7,10 @@ import (
 	"time"
 
 	"github.com/fatih/color"
-	"github.com/rayyacub/telos-idea-matrix/internal/cliutil"
-	"github.com/rayyacub/telos-idea-matrix/internal/llm"
-	"github.com/rayyacub/telos-idea-matrix/internal/models"
 	"github.com/rs/zerolog/log"
+	"github.com/ryacub/telos-idea-matrix/internal/cliutil"
+	"github.com/ryacub/telos-idea-matrix/internal/llm"
+	"github.com/ryacub/telos-idea-matrix/internal/models"
 )
 
 var (

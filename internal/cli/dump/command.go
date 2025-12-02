@@ -4,12 +4,12 @@ import (
 	"fmt"
 	"strings"
 
-	"github.com/rayyacub/telos-idea-matrix/internal/cliutil"
-	"github.com/rayyacub/telos-idea-matrix/internal/llm"
-	"github.com/rayyacub/telos-idea-matrix/internal/models"
-	"github.com/rayyacub/telos-idea-matrix/internal/patterns"
-	"github.com/rayyacub/telos-idea-matrix/internal/scoring"
-	"github.com/rayyacub/telos-idea-matrix/internal/utils"
+	"github.com/ryacub/telos-idea-matrix/internal/cliutil"
+	"github.com/ryacub/telos-idea-matrix/internal/llm"
+	"github.com/ryacub/telos-idea-matrix/internal/models"
+	"github.com/ryacub/telos-idea-matrix/internal/patterns"
+	"github.com/ryacub/telos-idea-matrix/internal/scoring"
+	"github.com/ryacub/telos-idea-matrix/internal/utils"
 	"github.com/spf13/cobra"
 )
 

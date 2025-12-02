@@ -25,7 +25,7 @@ trap "rm -rf $TEMP_DIR" EXIT
 
 # Clone first to read go.mod for version
 echo "Cloning brain-salad..."
-git clone --depth 1 https://github.com/rayyacub/brain-salad.git
+git clone --depth 1 https://github.com/ryacub/brain-salad.git
 cd brain-salad
 
 # Get required Go version from go.mod (single source of truth)

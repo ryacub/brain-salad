@@ -8,8 +8,8 @@ import (
 	"sort"
 	"strings"
 
-	"github.com/rayyacub/telos-idea-matrix/internal/database"
-	"github.com/rayyacub/telos-idea-matrix/internal/models"
+	"github.com/ryacub/telos-idea-matrix/internal/database"
+	"github.com/ryacub/telos-idea-matrix/internal/models"
 	"github.com/spf13/cobra"
 )
 

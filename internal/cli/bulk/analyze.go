@@ -6,11 +6,11 @@ import (
 	"time"
 
 	"github.com/fatih/color"
-	"github.com/rayyacub/telos-idea-matrix/internal/bulk"
-	"github.com/rayyacub/telos-idea-matrix/internal/cliutil"
-	"github.com/rayyacub/telos-idea-matrix/internal/database"
-	"github.com/rayyacub/telos-idea-matrix/internal/patterns"
 	"github.com/rs/zerolog/log"
+	"github.com/ryacub/telos-idea-matrix/internal/bulk"
+	"github.com/ryacub/telos-idea-matrix/internal/cliutil"
+	"github.com/ryacub/telos-idea-matrix/internal/database"
+	"github.com/ryacub/telos-idea-matrix/internal/patterns"
 	"github.com/spf13/cobra"
 )
 

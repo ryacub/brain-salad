@@ -7,8 +7,8 @@ import (
 	"testing"
 	"time"
 
-	llmclient "github.com/rayyacub/telos-idea-matrix/internal/llm/client"
-	"github.com/rayyacub/telos-idea-matrix/internal/models"
+	llmclient "github.com/ryacub/telos-idea-matrix/internal/llm/client"
+	"github.com/ryacub/telos-idea-matrix/internal/models"
 )
 
 // TestOllamaIntegration_EndToEnd tests the full integration with Ollama

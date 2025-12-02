@@ -13,8 +13,8 @@ import (
 	"time"
 
 	_ "github.com/mattn/go-sqlite3"
-	"github.com/rayyacub/telos-idea-matrix/internal/models"
 	"github.com/rs/zerolog/log"
+	"github.com/ryacub/telos-idea-matrix/internal/models"
 )
 
 //go:embed migrations/*.sql

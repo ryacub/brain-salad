@@ -5,8 +5,8 @@ import (
 	"fmt"
 	"os"
 
-	"github.com/rayyacub/telos-idea-matrix/internal/models"
 	"github.com/rs/zerolog/log"
+	"github.com/ryacub/telos-idea-matrix/internal/models"
 )
 
 // ExportJSON writes ideas to a JSON file.

@@ -92,7 +92,7 @@ Found an error or want to improve the docs?
 
 1. Documentation source is in `/docs`
 2. See [DEVELOPMENT.md](DEVELOPMENT.md) for contribution guidelines
-3. Submit issues or PRs on [GitHub](https://github.com/rayyacub/telos-idea-matrix)
+3. Submit issues or PRs on [GitHub](https://github.com/ryacub/telos-idea-matrix)
 
 ---
 

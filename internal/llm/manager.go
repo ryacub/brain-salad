@@ -6,9 +6,9 @@ import (
 	"sync/atomic"
 	"time"
 
-	"github.com/rayyacub/telos-idea-matrix/internal/metrics"
-	"github.com/rayyacub/telos-idea-matrix/internal/models"
 	"github.com/rs/zerolog/log"
+	"github.com/ryacub/telos-idea-matrix/internal/metrics"
+	"github.com/ryacub/telos-idea-matrix/internal/models"
 )
 
 // Manager handles multiple LLM providers with fallback, health checks, and statistics
