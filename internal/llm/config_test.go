@@ -40,6 +40,7 @@ func TestLoadConfig_NewFile(t *testing.T) {
 
 	if config == nil {
 		t.Fatal("Config should not be nil")
+		return
 	}
 
 	if config.DefaultProvider != "" {

@@ -6,7 +6,7 @@ import (
 	"testing"
 	"time"
 
-	"github.com/rayyacub/telos-idea-matrix/internal/models"
+	"github.com/ryacub/telos-idea-matrix/internal/models"
 )
 
 // mockProviderForManager is a mock provider for manager testing
@@ -831,6 +831,7 @@ func TestAnalyzeWithTelos(t *testing.T) {
 
 	if result == nil {
 		t.Fatal("Expected analysis result, got nil")
+		return
 	}
 
 	if result.Provider != "rule_based" {

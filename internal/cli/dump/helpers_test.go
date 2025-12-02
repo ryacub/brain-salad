@@ -4,8 +4,8 @@ import (
 	"strings"
 	"testing"
 
-	"github.com/rayyacub/telos-idea-matrix/internal/cliutil"
-	"github.com/rayyacub/telos-idea-matrix/internal/llm"
+	"github.com/ryacub/telos-idea-matrix/internal/cliutil"
+	"github.com/ryacub/telos-idea-matrix/internal/llm"
 )
 
 func TestGetScoreIndicator(t *testing.T) {

@@ -39,8 +39,8 @@ If Ollama is unavailable or fails, it automatically falls back to the next provi
 
 ```go
 import (
-    "github.com/rayyacub/telos-idea-matrix/internal/llm"
-    "github.com/rayyacub/telos-idea-matrix/internal/telos"
+    "github.com/ryacub/telos-idea-matrix/internal/llm"
+    "github.com/ryacub/telos-idea-matrix/internal/telos"
 )
 
 // Load telos configuration
@@ -169,7 +169,7 @@ go test ./internal/llm/... -cover
 The `client` package provides a low-level HTTP client for Ollama:
 
 ```go
-import "github.com/rayyacub/telos-idea-matrix/internal/llm/client"
+import "github.com/ryacub/telos-idea-matrix/internal/llm/client"
 
 // Create client
 ollamaClient := client.NewOllamaClient("http://localhost:11434", 30*time.Second)

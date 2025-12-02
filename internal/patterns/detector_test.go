@@ -3,9 +3,9 @@ package patterns_test
 import (
 	"testing"
 
-	"github.com/rayyacub/telos-idea-matrix/internal/models"
-	"github.com/rayyacub/telos-idea-matrix/internal/patterns"
-	"github.com/rayyacub/telos-idea-matrix/internal/telos"
+	"github.com/ryacub/telos-idea-matrix/internal/models"
+	"github.com/ryacub/telos-idea-matrix/internal/patterns"
+	"github.com/ryacub/telos-idea-matrix/internal/telos"
 	"github.com/stretchr/testify/assert"
 	"github.com/stretchr/testify/require"
 )

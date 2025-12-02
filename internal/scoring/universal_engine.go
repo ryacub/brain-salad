@@ -5,7 +5,7 @@ import (
 	"strings"
 	"time"
 
-	"github.com/rayyacub/telos-idea-matrix/internal/profile"
+	"github.com/ryacub/telos-idea-matrix/internal/profile"
 )
 
 // UniversalEngine scores ideas based on user-defined profiles.

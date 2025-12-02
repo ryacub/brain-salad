@@ -11,7 +11,7 @@ import (
 	"text/template"
 	"time"
 
-	"github.com/rayyacub/telos-idea-matrix/internal/metrics"
+	"github.com/ryacub/telos-idea-matrix/internal/metrics"
 )
 
 // CustomProvider implements a generic HTTP/REST LLM provider that can work with any

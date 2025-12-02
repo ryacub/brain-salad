@@ -10,7 +10,7 @@ import (
 	"os"
 	"time"
 
-	"github.com/rayyacub/telos-idea-matrix/internal/metrics"
+	"github.com/ryacub/telos-idea-matrix/internal/metrics"
 	"golang.org/x/time/rate"
 )
 

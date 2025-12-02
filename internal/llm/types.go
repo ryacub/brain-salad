@@ -3,7 +3,7 @@ package llm
 import (
 	"time"
 
-	"github.com/rayyacub/telos-idea-matrix/internal/models"
+	"github.com/ryacub/telos-idea-matrix/internal/models"
 )
 
 // AnalysisRequest contains the information needed to analyze an idea using an LLM.

@@ -5,13 +5,13 @@ import (
 	"fmt"
 	"strings"
 
-	clierrors "github.com/rayyacub/telos-idea-matrix/internal/cli/errors"
-	"github.com/rayyacub/telos-idea-matrix/internal/cliutil"
-	"github.com/rayyacub/telos-idea-matrix/internal/models"
-	"github.com/rayyacub/telos-idea-matrix/internal/patterns"
-	"github.com/rayyacub/telos-idea-matrix/internal/scoring"
-	"github.com/rayyacub/telos-idea-matrix/internal/utils"
 	"github.com/rs/zerolog/log"
+	clierrors "github.com/ryacub/telos-idea-matrix/internal/cli/errors"
+	"github.com/ryacub/telos-idea-matrix/internal/cliutil"
+	"github.com/ryacub/telos-idea-matrix/internal/models"
+	"github.com/ryacub/telos-idea-matrix/internal/patterns"
+	"github.com/ryacub/telos-idea-matrix/internal/scoring"
+	"github.com/ryacub/telos-idea-matrix/internal/utils"
 )
 
 var (

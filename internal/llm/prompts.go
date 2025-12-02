@@ -7,7 +7,7 @@ import (
 	"strings"
 	"text/template"
 
-	"github.com/rayyacub/telos-idea-matrix/internal/models"
+	"github.com/ryacub/telos-idea-matrix/internal/models"
 )
 
 // PromptTemplate is the template for LLM analysis prompts.

@@ -1,6 +1,6 @@
 openapi: 3.0.3
 info:
-  title: Telos Idea Matrix API
+  title: Brain-Salad API
   description: AI-powered personal productivity system for decision-making and idea management
   version: 2.0.1
   contact:

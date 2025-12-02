@@ -114,7 +114,7 @@
 
 			<div class="flex gap-4 pt-4">
 				<a
-					href="https://github.com/rayyacub/telos-idea-matrix"
+					href="https://github.com/ryacub/telos-idea-matrix"
 					target="_blank"
 					rel="noopener noreferrer"
 					class="btn variant-ghost-surface"
@@ -123,7 +123,7 @@
 					View on GitHub
 				</a>
 				<a
-					href="https://github.com/rayyacub/telos-idea-matrix/blob/main/README.md"
+					href="https://github.com/ryacub/telos-idea-matrix/blob/main/README.md"
 					target="_blank"
 					rel="noopener noreferrer"
 					class="btn variant-ghost-surface"

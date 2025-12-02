@@ -8,12 +8,12 @@ import (
 	"sync"
 	"time"
 
-	"github.com/rayyacub/telos-idea-matrix/internal/llm/client"
-	"github.com/rayyacub/telos-idea-matrix/internal/llm/processing"
-	"github.com/rayyacub/telos-idea-matrix/internal/llm/quality"
-	"github.com/rayyacub/telos-idea-matrix/internal/metrics"
-	"github.com/rayyacub/telos-idea-matrix/internal/models"
-	"github.com/rayyacub/telos-idea-matrix/internal/scoring"
+	"github.com/ryacub/telos-idea-matrix/internal/llm/client"
+	"github.com/ryacub/telos-idea-matrix/internal/llm/processing"
+	"github.com/ryacub/telos-idea-matrix/internal/llm/quality"
+	"github.com/ryacub/telos-idea-matrix/internal/metrics"
+	"github.com/ryacub/telos-idea-matrix/internal/models"
+	"github.com/ryacub/telos-idea-matrix/internal/scoring"
 )
 
 // Error types for better error classification

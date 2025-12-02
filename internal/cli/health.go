@@ -5,8 +5,8 @@ import (
 	"fmt"
 	"time"
 
-	"github.com/rayyacub/telos-idea-matrix/internal/health"
 	"github.com/rs/zerolog/log"
+	"github.com/ryacub/telos-idea-matrix/internal/health"
 	"github.com/spf13/cobra"
 )
 

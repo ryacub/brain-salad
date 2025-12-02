@@ -4,8 +4,8 @@ import (
 	"net/http"
 	"strings"
 
-	"github.com/rayyacub/telos-idea-matrix/internal/config"
 	"github.com/rs/zerolog/log"
+	"github.com/ryacub/telos-idea-matrix/internal/config"
 )
 
 // AuthMiddleware checks API key authentication if enabled

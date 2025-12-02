@@ -9,10 +9,10 @@ import (
 	"path/filepath"
 	"testing"
 
-	"github.com/rayyacub/telos-idea-matrix/internal/api"
-	configPkg "github.com/rayyacub/telos-idea-matrix/internal/config"
-	"github.com/rayyacub/telos-idea-matrix/internal/database"
-	"github.com/rayyacub/telos-idea-matrix/internal/telos"
+	"github.com/ryacub/telos-idea-matrix/internal/api"
+	configPkg "github.com/ryacub/telos-idea-matrix/internal/config"
+	"github.com/ryacub/telos-idea-matrix/internal/database"
+	"github.com/ryacub/telos-idea-matrix/internal/telos"
 	"github.com/stretchr/testify/require"
 )
 

@@ -7,11 +7,11 @@ import (
 	"strings"
 	"time"
 
-	"github.com/rayyacub/telos-idea-matrix/internal/cliutil"
-	"github.com/rayyacub/telos-idea-matrix/internal/models"
-	"github.com/rayyacub/telos-idea-matrix/internal/scoring"
-	"github.com/rayyacub/telos-idea-matrix/internal/utils"
 	"github.com/rs/zerolog/log"
+	"github.com/ryacub/telos-idea-matrix/internal/cliutil"
+	"github.com/ryacub/telos-idea-matrix/internal/models"
+	"github.com/ryacub/telos-idea-matrix/internal/scoring"
+	"github.com/ryacub/telos-idea-matrix/internal/utils"
 )
 
 // Context interface defines the dependencies needed by dump operations

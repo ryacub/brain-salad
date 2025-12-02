@@ -9,8 +9,8 @@ import (
 	"strings"
 	"time"
 
-	"github.com/rayyacub/telos-idea-matrix/internal/models"
 	"github.com/rs/zerolog/log"
+	"github.com/ryacub/telos-idea-matrix/internal/models"
 )
 
 // ExportCSV writes ideas to a CSV file.

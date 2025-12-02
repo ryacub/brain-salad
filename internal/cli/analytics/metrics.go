@@ -8,8 +8,8 @@ import (
 	"strconv"
 	"strings"
 
-	"github.com/rayyacub/telos-idea-matrix/internal/analytics"
-	"github.com/rayyacub/telos-idea-matrix/internal/database"
+	"github.com/ryacub/telos-idea-matrix/internal/analytics"
+	"github.com/ryacub/telos-idea-matrix/internal/database"
 	"github.com/spf13/cobra"
 )
 

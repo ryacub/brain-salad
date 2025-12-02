@@ -1,7 +1,7 @@
 package llm
 
 import (
-	"github.com/rayyacub/telos-idea-matrix/internal/llm/cache"
+	"github.com/ryacub/telos-idea-matrix/internal/llm/cache"
 )
 
 // CachedProvider wraps a Provider with caching capabilities.

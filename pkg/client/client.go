@@ -17,7 +17,7 @@ import (
 	"strconv"
 	"time"
 
-	"github.com/rayyacub/telos-idea-matrix/internal/models"
+	"github.com/ryacub/telos-idea-matrix/internal/models"
 )
 
 // Client is a Go client for the Telos Idea Matrix API

@@ -1,6 +1,6 @@
-# Contributing to Telos Idea Matrix
+# Contributing to Brain-Salad
 
-Thank you for your interest in contributing to the Telos Idea Matrix! We welcome contributions from the community and are grateful for your time and effort. Whether you're fixing a bug, adding a feature, improving documentation, or sharing ideas, your contribution makes this tool better for everyone.
+Thank you for your interest in contributing to Brain-Salad! We welcome contributions from the community and are grateful for your time and effort. Whether you're fixing a bug, adding a feature, improving documentation, or sharing ideas, your contribution makes this tool better for everyone.
 
 ## Table of Contents
 
@@ -29,9 +29,9 @@ Thank you for your interest in contributing to the Telos Idea Matrix! We welcome
 - Fix typos or clarify confusing sections
 
 ### Community Support
-- Answer questions in discussions
-- Share your Telos configuration examples
-- Report bugs and suggest enhancements
+- Answer questions in [GitHub Discussions](https://github.com/ryacub/brain-salad/discussions)
+- Share your configuration examples and scoring profiles
+- Report bugs and suggest enhancements in [GitHub Issues](https://github.com/ryacub/brain-salad/issues)
 - Review pull requests
 
 ### Testing
@@ -46,13 +46,13 @@ Before contributing, please:
 1. **Read the documentation**: Familiarize yourself with the [README](./README.md) and project architecture
 2. **Check existing issues**: Look for related issues or discussions before starting work
 3. **Create an issue first**: For major changes, open an issue to discuss your approach before implementing
-4. **Join the community**: Connect with other contributors on [Discord](https://discord.gg/example)
+4. **Join the community**: Participate in [GitHub Discussions](https://github.com/ryacub/brain-salad/discussions)
 
 ## Development Setup
 
 ### Prerequisites
 
-- **Go 1.25.4 or higher**: Install via [official downloads](https://go.dev/dl/)
+- **Go**: Version specified in [go.mod](./go.mod) - Install via [official downloads](https://go.dev/dl/)
 - **SQLite**: Required for database functionality (typically pre-installed on most systems)
 - **Git**: For version control
 
@@ -60,8 +60,8 @@ Before contributing, please:
 
 1. **Fork and Clone the Repository**
    ```bash
-   git clone https://github.com/YOUR_USERNAME/telos-idea-matrix.git
-   cd telos-idea-matrix
+   git clone https://github.com/ryacub/brain-salad.git
+   cd brain-salad
    ```
 
 2. **Install Dependencies**
@@ -215,8 +215,8 @@ import (
     "github.com/spf13/cobra"
     "github.com/jmoiron/sqlx"
 
-    "github.com/rayyacub/telos-idea-matrix/internal/config"
-    "github.com/rayyacub/telos-idea-matrix/internal/scoring"
+    "github.com/ryacub/telos-idea-matrix/internal/config"
+    "github.com/ryacub/telos-idea-matrix/internal/scoring"
 )
 ```
 
@@ -525,7 +525,7 @@ We are committed to providing a welcoming and inclusive environment:
 
 ### Reporting
 
-If you experience or witness unacceptable behavior, please report it to the maintainers at ray@example.com. All reports will be reviewed and investigated promptly and fairly.
+If you experience or witness unacceptable behavior, please report it via [GitHub Issues](https://github.com/ryacub/brain-salad/issues). All reports will be reviewed and investigated promptly and fairly.
 
 ### Attribution
 
@@ -551,7 +551,7 @@ This Code of Conduct is adapted from the [Contributor Covenant](https://www.cont
 
 ### Bug Fixes
 
-Check the [Issues](https://github.com/rayyacub/telos-idea-matrix/issues) page for reported bugs. Good candidates for first-time contributors include:
+Check the [Issues](https://github.com/ryacub/telos-idea-matrix/issues) page for reported bugs. Good candidates for first-time contributors include:
 - Small documentation fixes
 - Minor UI/UX improvements
 - Error message clarifications
@@ -603,4 +603,4 @@ cmd/cli/main.go         # CLI entry point & command routing
 
 All contributors are recognized in the README and release notes. Major contributions may lead to maintainership opportunities.
 
-Thank you for contributing to Telos Idea Matrix! Your efforts help make this tool better for everyone.
+Thank you for contributing to Brain-Salad! Your efforts help make this tool better for everyone.

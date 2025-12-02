@@ -2,10 +2,9 @@
 set -e
 
 # Brain-Salad Installation Script
-# Usage: curl -sSL https://raw.githubusercontent.com/ryacub/brain-salad/main/scripts/install.sh | bash
+# Usage: curl -sSL https://raw.githubusercontent.com/rayyacub/brain-salad/main/scripts/install.sh | bash
 
 INSTALL_DIR="${INSTALL_DIR:-/usr/local/bin}"
-GO_VERSION="1.23.4"
 
 echo "Installing Brain-Salad..."
 
@@ -24,26 +23,60 @@ TEMP_DIR=$(mktemp -d)
 cd "$TEMP_DIR"
 trap "rm -rf $TEMP_DIR" EXIT
 
-# Install Go if not present
-if ! command -v go &> /dev/null; then
-    echo "Go not found. Downloading Go $GO_VERSION..."
+# Clone first to read go.mod for version
+echo "Cloning brain-salad..."
+git clone --depth 1 https://github.com/ryacub/brain-salad.git
+cd brain-salad
 
-    GO_TAR="go${GO_VERSION}.${OS}-${ARCH}.tar.gz"
+# Get required Go version from go.mod (single source of truth)
+REQUIRED_GO_VERSION=$(grep -E '^go [0-9]+\.[0-9]+' go.mod | awk '{print $2}')
+echo "Required Go version: $REQUIRED_GO_VERSION"
+
+# Install Go if not present or version too old
+install_go() {
+    local version="$1"
+    echo "Downloading Go $version..."
+
+    GO_TAR="go${version}.${OS}-${ARCH}.tar.gz"
     curl -sLO "https://go.dev/dl/${GO_TAR}"
-    tar -xzf "$GO_TAR"
+
+    if [ ! -f "$GO_TAR" ]; then
+        echo "Error: Failed to download Go $version"
+        exit 1
+    fi
+
+    tar -xzf "$GO_TAR" -C "$TEMP_DIR"
+    rm "$GO_TAR"
 
     export PATH="$TEMP_DIR/go/bin:$PATH"
     export GOROOT="$TEMP_DIR/go"
     export GOPATH="$TEMP_DIR/gopath"
     mkdir -p "$GOPATH"
 
-    echo "Go $GO_VERSION ready."
+    echo "Go $version ready."
+}
+
+if ! command -v go &> /dev/null; then
+    install_go "$REQUIRED_GO_VERSION"
+else
+    CURRENT_GO_VERSION=$(go version | awk '{print $3}' | sed 's/go//')
+    # Compare major.minor versions
+    CURRENT_MAJOR=$(echo "$CURRENT_GO_VERSION" | cut -d. -f1)
+    CURRENT_MINOR=$(echo "$CURRENT_GO_VERSION" | cut -d. -f2)
+    REQUIRED_MAJOR=$(echo "$REQUIRED_GO_VERSION" | cut -d. -f1)
+    REQUIRED_MINOR=$(echo "$REQUIRED_GO_VERSION" | cut -d. -f2)
+
+    if [ "$CURRENT_MAJOR" -lt "$REQUIRED_MAJOR" ] || \
+       ([ "$CURRENT_MAJOR" -eq "$REQUIRED_MAJOR" ] && [ "$CURRENT_MINOR" -lt "$REQUIRED_MINOR" ]); then
+        echo "Go $CURRENT_GO_VERSION found, but $REQUIRED_GO_VERSION required."
+        install_go "$REQUIRED_GO_VERSION"
+    else
+        echo "Go $CURRENT_GO_VERSION found (>= $REQUIRED_GO_VERSION required). OK."
+    fi
 fi
 
-# Clone and build
+# Build
 echo "Building brain-salad..."
-git clone --depth 1 https://github.com/ryacub/brain-salad.git
-cd brain-salad
 CGO_ENABLED=1 go build -o tm ./cmd/cli
 
 # Install

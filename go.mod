@@ -1,4 +1,4 @@
-module github.com/rayyacub/telos-idea-matrix
+module github.com/ryacub/telos-idea-matrix
 
 go 1.24.0
 

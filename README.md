@@ -2,9 +2,11 @@
 
 > A telos-idea-matrix: score ideas against what actually matters to you
 
-**Language:** Go 1.25.4+
+**Language:** Go (see [go.mod](go.mod) for version)
 **Status:** Production Ready
 **License:** MIT
+
+> **Note:** The repository is named `brain-salad` (product name), but the Go module path is `telos-idea-matrix` (the underlying methodology). Both refer to the same project.
 
 ## Overview
 
@@ -15,8 +17,11 @@ Brain-Salad helps you decide which ideas to pursue by scoring them against your 
 ## Quick Start
 
 ```bash
-# Install
-go install github.com/ryacub/brain-salad/cmd/cli@latest
+# Install (one-liner)
+curl -sSL https://raw.githubusercontent.com/rayyacub/brain-salad/main/scripts/install.sh | bash
+
+# Or with Go installed:
+go install github.com/ryacub/telos-idea-matrix/cmd/cli@latest
 
 # Run the setup wizard (2 minutes)
 tm init
@@ -83,7 +88,7 @@ Insights:
 ### Quick Install (Linux/macOS)
 
 ```bash
-curl -sSL https://raw.githubusercontent.com/ryacub/brain-salad/main/scripts/install.sh | bash
+curl -sSL https://raw.githubusercontent.com/rayyacub/brain-salad/main/scripts/install.sh | bash
 ```
 
 ### Manual Build
@@ -100,6 +105,44 @@ make build
 ```bash
 cd deployments/docker
 docker compose up
+```
+
+### Optional: Shell Aliases
+
+For faster workflows, you can install shell aliases using the setup script:
+
+```bash
+# Run the alias setup script
+./scripts/setup-aliases.sh
+
+# Reload your shell
+source ~/.zshrc  # or source ~/.bashrc
+```
+
+**Available aliases:**
+- `tm` - Main application
+- `tmd "idea"` - Quick idea dump (shortcut for `tm dump`)
+- `tma` - Analyze last idea
+- `tmr` - Review all ideas (shortcut for `tm review`)
+- `tmb` - Build project
+  - `tmb -d` - Development build
+  - `tmb -r` - Release build
+  - `tmb -c` - Check compilation only (fastest)
+- `tms` - Start LLM service
+- `tmst` - Stop LLM service
+- `tmm` - Update LLM models
+
+**Example workflow with aliases:**
+```bash
+# Capture ideas quickly
+tmd "Build a tool that helps analyze hotel review sentiment"
+
+# Review your ideas
+tmr
+
+# Start LLM service for AI analysis
+tms
+tm dump "idea with AI analysis"
 ```
 
 ## Commands

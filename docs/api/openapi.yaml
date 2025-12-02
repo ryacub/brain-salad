@@ -1,8 +1,8 @@
 openapi: 3.0.3
 info:
-  title: Telos Idea Matrix API
+  title: Brain-Salad API
   description: |
-    The Telos Idea Matrix API allows you to analyze ideas against your personal goals (telos)
+    The Brain-Salad API allows you to analyze ideas against your personal goals (telos)
     and retrieve analysis results. This API provides endpoints for creating, reading, updating,
     and deleting ideas, as well as getting analytics and generating CSRF tokens.
 
@@ -16,7 +16,7 @@ info:
   version: 1.0.0
   contact:
     name: API Support
-    url: https://github.com/rayyacub/telos-idea-matrix
+    url: https://github.com/ryacub/telos-idea-matrix
   license:
     name: MIT
     url: https://opensource.org/licenses/MIT

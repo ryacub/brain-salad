@@ -3,7 +3,7 @@ package cli
 import (
 	"testing"
 
-	"github.com/rayyacub/telos-idea-matrix/internal/llm"
+	"github.com/ryacub/telos-idea-matrix/internal/llm"
 )
 
 func TestNewLLMCommand(t *testing.T) {
@@ -19,7 +19,7 @@ func TestNewLLMCommand(t *testing.T) {
 	}
 
 	// Check that all subcommands are registered
-	expectedSubcommands := []string{"list", "test", "set-default", "config"}
+	expectedSubcommands := []string{"list", "test", "set-default", "config", "health"}
 	for _, expected := range expectedSubcommands {
 		found := false
 		for _, subcmd := range cmd.Commands() {

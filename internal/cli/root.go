@@ -6,18 +6,18 @@ import (
 	"path/filepath"
 
 	"github.com/fatih/color"
-	"github.com/rayyacub/telos-idea-matrix/internal/cli/analytics"
-	"github.com/rayyacub/telos-idea-matrix/internal/cli/bulk"
-	"github.com/rayyacub/telos-idea-matrix/internal/cli/dump"
-	clierrors "github.com/rayyacub/telos-idea-matrix/internal/cli/errors"
-	"github.com/rayyacub/telos-idea-matrix/internal/cli/health"
-	"github.com/rayyacub/telos-idea-matrix/internal/database"
-	"github.com/rayyacub/telos-idea-matrix/internal/llm"
-	"github.com/rayyacub/telos-idea-matrix/internal/models"
-	"github.com/rayyacub/telos-idea-matrix/internal/patterns"
-	"github.com/rayyacub/telos-idea-matrix/internal/profile"
-	"github.com/rayyacub/telos-idea-matrix/internal/scoring"
-	"github.com/rayyacub/telos-idea-matrix/internal/telos"
+	"github.com/ryacub/telos-idea-matrix/internal/cli/analytics"
+	"github.com/ryacub/telos-idea-matrix/internal/cli/bulk"
+	"github.com/ryacub/telos-idea-matrix/internal/cli/dump"
+	clierrors "github.com/ryacub/telos-idea-matrix/internal/cli/errors"
+	"github.com/ryacub/telos-idea-matrix/internal/cli/health"
+	"github.com/ryacub/telos-idea-matrix/internal/database"
+	"github.com/ryacub/telos-idea-matrix/internal/llm"
+	"github.com/ryacub/telos-idea-matrix/internal/models"
+	"github.com/ryacub/telos-idea-matrix/internal/patterns"
+	"github.com/ryacub/telos-idea-matrix/internal/profile"
+	"github.com/ryacub/telos-idea-matrix/internal/scoring"
+	"github.com/ryacub/telos-idea-matrix/internal/telos"
 	"github.com/spf13/cobra"
 	"github.com/spf13/pflag"
 )
@@ -63,10 +63,17 @@ var (
 func init() {
 	rootCmd = &cobra.Command{
 		Use:   "tm",
-		Short: "Telos Matrix - An AI-powered idea management system",
-		Long: `Telos Matrix helps you capture, analyze, and manage ideas aligned with your goals.
-It scores ideas based on your mission, anti-patterns, and strategic fit to help
-you focus on what truly matters.`,
+		Short: "Brain Salad - Score ideas against what matters to you",
+		Long: `Brain Salad helps you decide which ideas to pursue by scoring them
+against your goals and priorities.
+
+Quick Start:
+  tm init              Set up with a quick wizard
+  tm add "my idea"     Add and score an idea
+  tm list              Browse your ideas
+  tm show <id>         View idea details
+
+Run 'tm <command> --help' for details on any command.`,
 		PersistentPreRunE: initializeCLI,
 	}
 
@@ -78,32 +85,63 @@ you focus on what truly matters.`,
 	rootCmd.PersistentFlags().StringVar(&dbPath, "db", defaultDBPath, "Path to ideas database")
 	rootCmd.PersistentFlags().StringVar(&telosPath, "telos", defaultTelosPath, "Path to telos.md file")
 
-	// Add subcommands
-	dumpCmd := dump.NewDumpCommand(getDumpContext)
-	dumpCmd.AddCommand(newBatchDumpCommand())
-	rootCmd.AddCommand(dumpCmd)
-	rootCmd.AddCommand(newScoreCommand())
-	rootCmd.AddCommand(newAnalyzeCommand())
-	rootCmd.AddCommand(newReviewCommand())
-	rootCmd.AddCommand(newPruneCommand())
-	rootCmd.AddCommand(analytics.NewAnalyticsCommand(getAnalyticsContext))
-	rootCmd.AddCommand(newLinkCommand())
-	rootCmd.AddCommand(newHealthCommand())
-	rootCmd.AddCommand(health.NewDoctorCommand())
-	rootCmd.AddCommand(bulk.NewBulkCommand(getBulkContext))
+	// Primary commands (new simplified UX)
+	rootCmd.AddCommand(newAddCommand())
+	rootCmd.AddCommand(newListCommand())
+	rootCmd.AddCommand(newShowCommand())
+	rootCmd.AddCommand(newStatusCommand())
 
-	// LLM commands (new hierarchical structure)
-	rootCmd.AddCommand(NewLLMCommand())
-
-	// Legacy LLM commands (flat structure - may be deprecated)
-	rootCmd.AddCommand(newAnalyzeLLMCommand())
-	rootCmd.AddCommand(newLLMListCommand())
-	rootCmd.AddCommand(newLLMConfigCommand())
-	rootCmd.AddCommand(newLLMHealthCommand())
-
-	// Utility commands
+	// Setup and config
 	rootCmd.AddCommand(newInitCommand())
 	rootCmd.AddCommand(newProfileCommand())
+
+	// Management commands
+	rootCmd.AddCommand(newPruneCommand())
+	rootCmd.AddCommand(newLinkCommand())
+	rootCmd.AddCommand(analytics.NewAnalyticsCommand(getAnalyticsContext))
+	rootCmd.AddCommand(bulk.NewBulkCommand(getBulkContext))
+
+	// AI/LLM management
+	rootCmd.AddCommand(NewLLMCommand())
+
+	// Legacy commands (hidden, for backward compatibility)
+	dumpCmd := dump.NewDumpCommand(getDumpContext)
+	dumpCmd.Hidden = true
+	dumpCmd.Deprecated = "use 'tm add' instead"
+	dumpCmd.AddCommand(newBatchDumpCommand())
+	rootCmd.AddCommand(dumpCmd)
+
+	scoreCmd := newScoreCommand()
+	scoreCmd.Hidden = true
+	scoreCmd.Deprecated = "use 'tm add -n' instead"
+	rootCmd.AddCommand(scoreCmd)
+
+	analyzeCmd := newAnalyzeCommand()
+	analyzeCmd.Hidden = true
+	analyzeCmd.Deprecated = "use 'tm show' instead"
+	rootCmd.AddCommand(analyzeCmd)
+
+	reviewCmd := newReviewCommand()
+	reviewCmd.Hidden = true
+	reviewCmd.Deprecated = "use 'tm list' instead"
+	rootCmd.AddCommand(reviewCmd)
+
+	healthCmd := newHealthCommand()
+	healthCmd.Hidden = true
+	healthCmd.Deprecated = "use 'tm status' instead"
+	rootCmd.AddCommand(healthCmd)
+
+	doctorCmd := health.NewDoctorCommand()
+	doctorCmd.Hidden = true
+	doctorCmd.Deprecated = "use 'tm status' instead"
+	rootCmd.AddCommand(doctorCmd)
+
+	analyzeLLMCmd := newAnalyzeLLMCommand()
+	analyzeLLMCmd.Hidden = true
+	analyzeLLMCmd.Deprecated = "use 'tm add --ai' instead"
+	rootCmd.AddCommand(analyzeLLMCmd)
+
+	// Shell completion
 	rootCmd.AddCommand(newCompletionCommand())
 }
 

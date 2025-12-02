@@ -46,7 +46,7 @@ metrics.RecordDatabaseQueryDuration(time.Since(start))
 Pre-built functions for common application metrics:
 
 ```go
-import "github.com/rayyacub/telos-idea-matrix/internal/metrics"
+import "github.com/ryacub/telos-idea-matrix/internal/metrics"
 
 // Ideas
 metrics.RecordIdeaCreated()
@@ -184,7 +184,7 @@ The metrics system only captures aggregated statistics. **No sensitive data is c
 #### Recording Metrics
 
 ```go
-import "github.com/rayyacub/telos-idea-matrix/internal/metrics"
+import "github.com/ryacub/telos-idea-matrix/internal/metrics"
 
 // Record a successful LLM request
 start := time.Now()
@@ -314,16 +314,16 @@ The LLM manager automatically records fallback events when a primary provider fa
 
 ```bash
 # Run all metrics tests including LLM tests
-go test github.com/rayyacub/telos-idea-matrix/internal/metrics -v -cover
+go test github.com/ryacub/telos-idea-matrix/internal/metrics -v -cover
 
 # Run only LLM metrics tests
-go test github.com/rayyacub/telos-idea-matrix/internal/metrics -run LLM -v
+go test github.com/ryacub/telos-idea-matrix/internal/metrics -run LLM -v
 ```
 
 ## Testing
 
 ```bash
-go test github.com/rayyacub/telos-idea-matrix/internal/metrics -v -cover
+go test github.com/ryacub/telos-idea-matrix/internal/metrics -v -cover
 ```
 
 Coverage: 91.4% of statements

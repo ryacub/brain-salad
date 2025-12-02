@@ -1,6 +1,6 @@
 # Development Guide
 
-This guide covers everything you need to know to develop the Telos Idea Matrix Go implementation.
+This guide covers everything you need to know to develop the Brain-Salad Go implementation.
 
 ---
 
@@ -22,7 +22,7 @@ This guide covers everything you need to know to develop the Telos Idea Matrix G
 
 ### Required
 
-- **Go 1.25.4+** - [Download](https://go.dev/dl/)
+- **Go** - Version specified in [go.mod](../go.mod) - [Download](https://go.dev/dl/)
 - **SQLite3** - Should be installed on most systems
 - **make** - For running build targets
 
@@ -36,7 +36,7 @@ This guide covers everything you need to know to develop the Telos Idea Matrix G
 
 ```bash
 # Check Go version
-go version  # Should be 1.25.4 or higher
+go version  # Check against version in go.mod
 
 # Check SQLite
 sqlite3 --version
@@ -55,7 +55,7 @@ golangci-lint version
 ### 1. Clone the Repository
 
 ```bash
-git clone https://github.com/rayyacub/telos-idea-matrix.git
+git clone https://github.com/ryacub/telos-idea-matrix.git
 cd telos-idea-matrix
 ```
 
@@ -92,8 +92,50 @@ brew install golangci-lint
 go install github.com/golangci/golangci-lint/cmd/golangci-lint@latest
 
 # Install air for hot reload
-go install github.com/cosmtrek/air@latest
+go install github.com/air-verse/air@latest
 ```
+
+---
+
+## Hot Reload Development
+
+The project includes [Air](https://github.com/air-verse/air) configuration for hot reload during development. This automatically rebuilds and restarts the application when source files change.
+
+### CLI Development
+
+```bash
+# Start CLI with hot reload
+make dev-cli
+
+# Or directly with air
+air -c .air-cli.toml
+```
+
+This watches for changes in `.go` files and rebuilds `./tmp/tm`. The CLI will run with `--help` by default.
+
+### API Server Development
+
+```bash
+# Start API server with hot reload
+make dev-api
+
+# Or directly with air
+air -c .air-api.toml
+```
+
+This watches for changes and rebuilds `./tmp/tm-web`, then starts the API server.
+
+### Configuration
+
+The Air configuration files are:
+- `.air-cli.toml` - CLI hot reload settings
+- `.air-api.toml` - API server hot reload settings
+
+Both configurations:
+- Exclude test files, vendor, and node_modules
+- Use `tmp/` for build artifacts
+- Log build errors to `build-errors.log`
+- Include 1 second delay before rebuild (debouncing)
 
 ---
 
@@ -681,8 +723,8 @@ assert.Equal(t, expected, actual, "scores should match")
 
 ### Contact
 
-- **GitHub Issues**: https://github.com/rayyacub/telos-idea-matrix/issues
-- **Pull Requests**: https://github.com/rayyacub/telos-idea-matrix/pulls
+- **GitHub Issues**: https://github.com/ryacub/telos-idea-matrix/issues
+- **Pull Requests**: https://github.com/ryacub/telos-idea-matrix/pulls
 
 ---
 

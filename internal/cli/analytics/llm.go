@@ -8,7 +8,7 @@ import (
 	"strings"
 	"time"
 
-	"github.com/rayyacub/telos-idea-matrix/internal/metrics"
+	"github.com/ryacub/telos-idea-matrix/internal/metrics"
 	"github.com/spf13/cobra"
 )
 

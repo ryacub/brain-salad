@@ -4,7 +4,7 @@ import (
 	"fmt"
 	"time"
 
-	"github.com/rayyacub/telos-idea-matrix/internal/llm"
+	"github.com/ryacub/telos-idea-matrix/internal/llm"
 )
 
 // parseDuration parses duration strings like "7d", "30d", "24h"

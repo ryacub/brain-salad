@@ -5,7 +5,7 @@ import (
 	"fmt"
 	"os"
 
-	"github.com/rayyacub/telos-idea-matrix/internal/cli"
+	"github.com/ryacub/telos-idea-matrix/internal/cli"
 )
 
 func main() {

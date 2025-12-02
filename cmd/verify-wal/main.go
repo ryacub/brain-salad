@@ -7,7 +7,7 @@ import (
 	"os"
 	"path/filepath"
 
-	"github.com/rayyacub/telos-idea-matrix/internal/database"
+	"github.com/ryacub/telos-idea-matrix/internal/database"
 )
 
 func main() {
