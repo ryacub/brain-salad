@@ -6,6 +6,8 @@
 **Status:** Production Ready
 **License:** MIT
 
+> **Note:** The repository is named `brain-salad` (product name), but the Go module path is `telos-idea-matrix` (the underlying methodology). Both refer to the same project.
+
 ## Overview
 
 Brain-Salad helps you decide which ideas to pursue by scoring them against your *telos* — your goals, purpose, and what you're trying to achieve. Whether you're a potter, developer, event planner, or anyone with too many ideas — Brain-Salad learns your priorities through a quick interactive wizard and scores your ideas accordingly.

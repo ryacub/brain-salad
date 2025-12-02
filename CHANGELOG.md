@@ -5,6 +5,34 @@ All notable changes to this project will be documented in this file.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## [Unreleased]
+
+### Breaking Changes
+- **LLM commands migrated to hierarchical structure:**
+  - `tm llm-list` → `tm llm list`
+  - `tm llm-config` → `tm llm config`
+  - `tm llm-health` → `tm llm health`
+  - The old flat commands have been removed
+
+### Changed
+- Install script now reads Go version from `go.mod` (single source of truth)
+- Updated all documentation to reference `go.mod` for Go version requirements
+- Added curl one-liner installation option to README
+- Consolidated LLM analysis helpers into `internal/llm/analysis_helpers.go`
+- Migrated internal logging from `fmt.Printf` to structured zerolog
+
+### Added
+- `.air-cli.toml` and `.air-api.toml` for hot reload development workflow
+- `tm llm health` subcommand with `--watch` flag for continuous monitoring
+
+### Fixed
+- Fixed staticcheck SA5011 warnings in test files
+- Fixed duplicate code between `cli/llm_helpers.go` and `cli/dump/llm.go`
+
+### Removed
+- Removed deprecated flat LLM commands (`llm-list`, `llm-config`, `llm-health`)
+- Removed ~435 lines of duplicate code
+
 ## [2.0.1] - 2025-11-19
 
 ### Security

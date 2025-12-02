@@ -92,8 +92,50 @@ brew install golangci-lint
 go install github.com/golangci/golangci-lint/cmd/golangci-lint@latest
 
 # Install air for hot reload
-go install github.com/cosmtrek/air@latest
+go install github.com/air-verse/air@latest
 ```
+
+---
+
+## Hot Reload Development
+
+The project includes [Air](https://github.com/air-verse/air) configuration for hot reload during development. This automatically rebuilds and restarts the application when source files change.
+
+### CLI Development
+
+```bash
+# Start CLI with hot reload
+make dev-cli
+
+# Or directly with air
+air -c .air-cli.toml
+```
+
+This watches for changes in `.go` files and rebuilds `./tmp/tm`. The CLI will run with `--help` by default.
+
+### API Server Development
+
+```bash
+# Start API server with hot reload
+make dev-api
+
+# Or directly with air
+air -c .air-api.toml
+```
+
+This watches for changes and rebuilds `./tmp/tm-web`, then starts the API server.
+
+### Configuration
+
+The Air configuration files are:
+- `.air-cli.toml` - CLI hot reload settings
+- `.air-api.toml` - API server hot reload settings
+
+Both configurations:
+- Exclude test files, vendor, and node_modules
+- Use `tmp/` for build artifacts
+- Log build errors to `build-errors.log`
+- Include 1 second delay before rebuild (debouncing)
 
 ---
 
