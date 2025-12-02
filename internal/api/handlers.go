@@ -115,19 +115,18 @@ func ideaToResponse(idea *models.Idea) IdeaResponse {
 
 // HealthHandler handles health check requests
 func (s *Server) HealthHandler(w http.ResponseWriter, r *http.Request) {
-	ctx := r.Context()
-	status := s.healthMonitor.RunAllChecks(ctx)
-
-	// Return appropriate HTTP status code based on health status
+	// Simple health check: verify database connectivity
+	status := "healthy"
 	httpStatus := http.StatusOK
-	switch status.Status {
-	case "unhealthy":
+
+	if err := s.repo.Ping(); err != nil {
+		status = "unhealthy"
 		httpStatus = http.StatusServiceUnavailable
-	case "degraded":
-		httpStatus = http.StatusOK // Still return 200 for degraded
 	}
 
-	respondJSON(w, httpStatus, status)
+	respondJSON(w, httpStatus, map[string]string{
+		"status": status,
+	})
 }
 
 // AnalyzeHandler handles idea analysis requests
