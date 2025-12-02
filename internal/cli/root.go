@@ -54,7 +54,6 @@ var (
 
 	// Color definitions
 	successColor = color.New(color.FgGreen, color.Bold)
-	errorColor   = color.New(color.FgRed, color.Bold)
 	infoColor    = color.New(color.FgCyan)
 	warningColor = color.New(color.FgYellow)
 )
