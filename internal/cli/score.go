@@ -65,7 +65,7 @@ func runUniversalScore(ideaText string) error {
 	// Display insights if any
 	if len(analysis.Insights) > 0 {
 		fmt.Println()
-		cliutil.InfoColor.Println("Insights:")
+		_, _ = cliutil.InfoColor.Println("Insights:")
 		for _, insight := range analysis.Insights {
 			fmt.Printf("  • %s\n", insight)
 		}
@@ -101,7 +101,7 @@ func displayUniversalDimensions(scores *scoring.UniversalScores) {
 		}
 
 		// Format: "  Completion    ████████░░  1.6/2.0  Will I finish this?"
-		dimColor.Printf("  %-12s %s  %.1f/%.1f  %s\n",
+		_, _ = dimColor.Printf("  %-12s %s  %.1f/%.1f  %s\n",
 			dim.Name, bar, dim.Score, dim.MaxScore, dim.Description)
 	}
 }

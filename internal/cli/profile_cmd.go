@@ -51,13 +51,13 @@ func runProfile(cmd *cobra.Command, args []string) error {
 	dimColor := color.New(color.FgWhite)
 
 	fmt.Println()
-	headerColor.Println("Your Scoring Profile")
+	_, _ = headerColor.Println("Your Scoring Profile")
 	fmt.Println(strings.Repeat("─", 40))
 
 	// Goals
 	if len(p.Goals) > 0 {
 		fmt.Println()
-		headerColor.Println("Goals:")
+		_, _ = headerColor.Println("Goals:")
 		for _, goal := range p.Goals {
 			fmt.Printf("  • %s\n", goal)
 		}
@@ -66,7 +66,7 @@ func runProfile(cmd *cobra.Command, args []string) error {
 	// Avoid
 	if len(p.Avoid) > 0 {
 		fmt.Println()
-		headerColor.Println("Avoiding:")
+		_, _ = headerColor.Println("Avoiding:")
 		for _, avoid := range p.Avoid {
 			fmt.Printf("  • %s\n", avoid)
 		}
@@ -74,7 +74,7 @@ func runProfile(cmd *cobra.Command, args []string) error {
 
 	// Priorities (sorted by weight)
 	fmt.Println()
-	headerColor.Println("Priorities:")
+	_, _ = headerColor.Println("Priorities:")
 
 	type priority struct {
 		name   string
@@ -105,7 +105,7 @@ func runProfile(cmd *cobra.Command, args []string) error {
 		if desc == "" {
 			desc = pri.name
 		}
-		dimColor.Printf("  %s  %3.0f%%  %s\n", bar, pri.weight*100, desc)
+		_, _ = dimColor.Printf("  %s  %3.0f%%  %s\n", bar, pri.weight*100, desc)
 	}
 
 	fmt.Println()
