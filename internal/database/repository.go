@@ -20,6 +20,9 @@ import (
 //go:embed migrations/*.sql
 var migrationsFS embed.FS
 
+// nullJSON represents a JSON null value from the database
+const nullJSON = "null"
+
 // Repository handles database operations for ideas.
 type Repository struct {
 	db *sql.DB
@@ -261,14 +264,14 @@ func (r *Repository) GetByID(id string) (*models.Idea, error) {
 	}
 
 	// Parse patterns JSON
-	if patternsJSON != "" && patternsJSON != "null" {
+	if patternsJSON != "" && patternsJSON != nullJSON {
 		if err := json.Unmarshal([]byte(patternsJSON), &idea.Patterns); err != nil {
 			return nil, fmt.Errorf("failed to parse patterns: %w", err)
 		}
 	}
 
 	// Parse tags JSON
-	if tagsJSON != "" && tagsJSON != "null" {
+	if tagsJSON != "" && tagsJSON != nullJSON {
 		if err := json.Unmarshal([]byte(tagsJSON), &idea.Tags); err != nil {
 			return nil, fmt.Errorf("failed to parse tags: %w", err)
 		}
@@ -289,6 +292,77 @@ func (r *Repository) GetByID(id string) (*models.Idea, error) {
 			return nil, fmt.Errorf("corrupted reviewed_at timestamp in database: %w", err)
 		}
 		idea.ReviewedAt = &parsedTime
+	}
+
+	return &idea, nil
+}
+
+// GetByPartialID retrieves an idea by a partial ID prefix.
+func (r *Repository) GetByPartialID(partialID string) (*models.Idea, error) {
+	if partialID == "" {
+		return nil, errors.New("partial ID cannot be empty")
+	}
+
+	query := `
+		SELECT id, content, raw_score, final_score, patterns, tags,
+		       recommendation, analysis_details, created_at, reviewed_at, status
+		FROM ideas
+		WHERE id LIKE ?
+		LIMIT 1
+	`
+
+	var idea models.Idea
+	var patternsJSON string
+	var tagsJSON string
+	var createdAt string
+	var reviewedAt sql.NullString
+
+	err := r.db.QueryRow(query, partialID+"%").Scan(
+		&idea.ID,
+		&idea.Content,
+		&idea.RawScore,
+		&idea.FinalScore,
+		&patternsJSON,
+		&tagsJSON,
+		&idea.Recommendation,
+		&idea.AnalysisDetails,
+		&createdAt,
+		&reviewedAt,
+		&idea.Status,
+	)
+
+	if err == sql.ErrNoRows {
+		return nil, fmt.Errorf("%w: %s", ErrNotFound, partialID)
+	}
+	if err != nil {
+		return nil, fmt.Errorf("failed to query idea: %w", err)
+	}
+
+	// Parse patterns JSON
+	if patternsJSON != "" && patternsJSON != nullJSON {
+		if err := json.Unmarshal([]byte(patternsJSON), &idea.Patterns); err != nil {
+			log.Warn().Err(err).Msg("failed to parse patterns")
+		}
+	}
+
+	// Parse tags JSON
+	if tagsJSON != "" && tagsJSON != nullJSON {
+		if err := json.Unmarshal([]byte(tagsJSON), &idea.Tags); err != nil {
+			log.Warn().Err(err).Msg("failed to parse tags")
+		}
+	}
+
+	// Parse timestamps
+	if createdAt != "" {
+		if parsedTime, err := time.Parse(time.RFC3339, createdAt); err == nil {
+			idea.CreatedAt = parsedTime
+		}
+	}
+
+	if reviewedAt.Valid {
+		if parsedTime, err := time.Parse(time.RFC3339, reviewedAt.String); err == nil {
+			idea.ReviewedAt = &parsedTime
+		}
 	}
 
 	return &idea, nil
@@ -414,14 +488,14 @@ func scanIdeaRow(rows *sql.Rows) (*models.Idea, error) {
 	}
 
 	// Parse patterns JSON
-	if patternsJSON != "" && patternsJSON != "null" {
+	if patternsJSON != "" && patternsJSON != nullJSON {
 		if err := json.Unmarshal([]byte(patternsJSON), &idea.Patterns); err != nil {
 			return nil, fmt.Errorf("failed to parse patterns: %w", err)
 		}
 	}
 
 	// Parse tags JSON
-	if tagsJSON != "" && tagsJSON != "null" {
+	if tagsJSON != "" && tagsJSON != nullJSON {
 		if err := json.Unmarshal([]byte(tagsJSON), &idea.Tags); err != nil {
 			return nil, fmt.Errorf("failed to parse tags: %w", err)
 		}
