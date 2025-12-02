@@ -1,6 +1,6 @@
 # Brain-Salad
 
-> Universal idea scoring CLI that helps anyone evaluate ideas based on their personal priorities
+> A telos-idea-matrix: score ideas against what actually matters to you
 
 **Language:** Go 1.25.4+
 **Status:** Production Ready
@@ -8,7 +8,7 @@
 
 ## Overview
 
-Brain-Salad helps you decide which ideas to pursue by scoring them against what actually matters to you. Whether you're a potter, developer, event planner, or anyone with too many ideas — Brain-Salad learns your priorities through a quick interactive wizard and scores your ideas accordingly.
+Brain-Salad helps you decide which ideas to pursue by scoring them against your *telos* — your goals, purpose, and what you're trying to achieve. Whether you're a potter, developer, event planner, or anyone with too many ideas — Brain-Salad learns your priorities through a quick interactive wizard and scores your ideas accordingly.
 
 **No configuration files to write. No AI/tech jargon. Just answer a few questions and start scoring.**
 
