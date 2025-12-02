@@ -6,7 +6,6 @@ import (
 
 	"github.com/fatih/color"
 	"github.com/rs/zerolog/log"
-	"github.com/ryacub/telos-idea-matrix/internal/bulk"
 	"github.com/ryacub/telos-idea-matrix/internal/cliutil"
 	"github.com/ryacub/telos-idea-matrix/internal/database"
 	"github.com/spf13/cobra"
@@ -55,10 +54,10 @@ Examples:
 		RunE: func(cmd *cobra.Command, args []string) error {
 			return runBulkUpdate(getContext, bulkUpdateOptions{
 				setStatus:      setStatus,
-				addPatterns:    bulk.SplitCommaSeparated(addPatterns),
-				removePatterns: bulk.SplitCommaSeparated(removePatterns),
-				addTags:        bulk.SplitCommaSeparated(addTags),
-				removeTags:     bulk.SplitCommaSeparated(removeTags),
+				addPatterns:    splitCommaSeparated(addPatterns),
+				removePatterns: splitCommaSeparated(removePatterns),
+				addTags:        splitCommaSeparated(addTags),
+				removeTags:     splitCommaSeparated(removeTags),
 				scoreMin:       scoreMin,
 				scoreMax:       scoreMax,
 				statusFilter:   statusFilter,
@@ -113,7 +112,7 @@ func runBulkUpdate(getContext func() *CLIContext, opts bulkUpdateOptions) error 
 	// Validate status value if provided
 	if opts.setStatus != "" {
 		validStatuses := []string{"active", "archived", "deleted"}
-		if !bulk.Contains(validStatuses, opts.setStatus) {
+		if !contains(validStatuses, opts.setStatus) {
 			return fmt.Errorf("invalid status: %s (must be one of: %s)",
 				opts.setStatus, strings.Join(validStatuses, ", "))
 		}
@@ -191,28 +190,28 @@ func runBulkUpdate(getContext func() *CLIContext, opts bulkUpdateOptions) error 
 					color.CyanString("→"), idea.Status, opts.setStatus)
 			}
 			if len(opts.addPatterns) > 0 {
-				newPatterns := bulk.AddUniqueStrings(idea.Patterns, opts.addPatterns)
+				newPatterns := addUniqueStrings(idea.Patterns, opts.addPatterns)
 				if len(newPatterns) > len(idea.Patterns) {
 					fmt.Printf("   %s Patterns: %v → %v\n",
 						color.CyanString("→"), idea.Patterns, newPatterns)
 				}
 			}
 			if len(opts.removePatterns) > 0 {
-				newPatterns := bulk.RemoveStrings(idea.Patterns, opts.removePatterns)
+				newPatterns := removeStrings(idea.Patterns, opts.removePatterns)
 				if len(newPatterns) < len(idea.Patterns) {
 					fmt.Printf("   %s Patterns: %v → %v\n",
 						color.CyanString("→"), idea.Patterns, newPatterns)
 				}
 			}
 			if len(opts.addTags) > 0 {
-				newTags := bulk.AddUniqueStrings(idea.Tags, opts.addTags)
+				newTags := addUniqueStrings(idea.Tags, opts.addTags)
 				if len(newTags) > len(idea.Tags) {
 					fmt.Printf("   %s Tags: %v → %v\n",
 						color.CyanString("→"), idea.Tags, newTags)
 				}
 			}
 			if len(opts.removeTags) > 0 {
-				newTags := bulk.RemoveStrings(idea.Tags, opts.removeTags)
+				newTags := removeStrings(idea.Tags, opts.removeTags)
 				if len(newTags) < len(idea.Tags) {
 					fmt.Printf("   %s Tags: %v → %v\n",
 						color.CyanString("→"), idea.Tags, newTags)
@@ -234,8 +233,7 @@ func runBulkUpdate(getContext func() *CLIContext, opts bulkUpdateOptions) error 
 	failed := 0
 	errors := make([]string, 0)
 
-	service := bulk.NewService(ctx.Repository)
-	updateOpts := bulk.UpdateOptions{
+	updateOpts := updateOptions{
 		SetStatus:      opts.setStatus,
 		AddPatterns:    opts.addPatterns,
 		RemovePatterns: opts.removePatterns,
@@ -245,7 +243,7 @@ func runBulkUpdate(getContext func() *CLIContext, opts bulkUpdateOptions) error 
 
 	for i, idea := range ideas {
 		// Apply updates using service
-		modified := service.ApplyUpdates(idea, updateOpts)
+		modified := applyUpdates(idea, updateOpts)
 
 		// Only save if something actually changed
 		if modified {

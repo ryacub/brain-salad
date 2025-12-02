@@ -7,7 +7,6 @@ import (
 
 	"github.com/fatih/color"
 	"github.com/rs/zerolog/log"
-	"github.com/ryacub/telos-idea-matrix/internal/bulk"
 	"github.com/ryacub/telos-idea-matrix/internal/cliutil"
 	"github.com/ryacub/telos-idea-matrix/internal/database"
 	"github.com/ryacub/telos-idea-matrix/internal/patterns"
@@ -92,7 +91,6 @@ func runBulkAnalyze(getContext func() *CLIContext, opts bulkAnalyzeOptions) erro
 	}
 
 	// Create service once
-	service := bulk.NewService(ctx.Repository)
 
 	// Parse olderThan duration if specified
 	var cutoffTime time.Time
@@ -122,7 +120,7 @@ func runBulkAnalyze(getContext func() *CLIContext, opts bulkAnalyzeOptions) erro
 
 	// Filter by age if specified
 	if !cutoffTime.IsZero() {
-		ideas = service.FilterByAge(ideas, cutoffTime)
+		ideas = filterByAge(ideas, cutoffTime)
 	}
 
 	if len(ideas) == 0 {

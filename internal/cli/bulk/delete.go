@@ -5,7 +5,6 @@ import (
 	"time"
 
 	"github.com/rs/zerolog/log"
-	"github.com/ryacub/telos-idea-matrix/internal/bulk"
 	"github.com/ryacub/telos-idea-matrix/internal/cliutil"
 	"github.com/ryacub/telos-idea-matrix/internal/database"
 	"github.com/spf13/cobra"
@@ -32,7 +31,6 @@ Always requires confirmation for safety.`,
 			}
 
 			// Create service once
-			service := bulk.NewService(ctx.Repository)
 
 			// Build filter options
 			maxScorePtr := &maxScore
@@ -54,12 +52,12 @@ Always requires confirmation for safety.`,
 			// Filter by age if specified
 			if olderThan > 0 {
 				cutoffDate := time.Now().UTC().Add(-time.Duration(olderThan) * 24 * time.Hour)
-				ideas = service.FilterByAge(ideas, cutoffDate)
+				ideas = filterByAge(ideas, cutoffDate)
 			}
 
 			// Filter by search if provided
 			if search != "" {
-				ideas = service.FilterBySearch(ideas, search)
+				ideas = filterBySearch(ideas, search)
 			}
 
 			if len(ideas) == 0 {

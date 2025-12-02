@@ -167,10 +167,10 @@ func runAddLegacy(ideaText string, opts addOptions) error {
 	var err error
 
 	if opts.useAI {
-		analysis, err = runLLMAnalysisWithProvider(ideaText, opts.provider, "", ctx.LLMManager, ctx.Telos)
+		analysis, err = ctx.LLMManager.AnalyzeWithProviderOverride(ideaText, opts.provider, "", ctx.Telos)
 		if err != nil {
 			if !opts.quiet {
-				_, _ = warningColor.Printf("AI unavailable, using rule-based: %v\n", err)
+				_, _ = cliutil.WarningColor.Printf("AI unavailable, using rule-based: %v\n", err)
 			}
 			analysis, err = ctx.Engine.CalculateScore(ideaText)
 		}
@@ -330,4 +330,30 @@ func outputAddFullLegacy(idea *models.Idea, analysis *models.Analysis, opts addO
 	}
 
 	return nil
+}
+
+// displayUniversalDimensions shows a visual breakdown of universal scoring dimensions
+func displayUniversalDimensions(scores *scoring.UniversalScores) {
+	dimensions := scores.ToSlice()
+
+	for _, dim := range dimensions {
+		// Calculate bar width (10 chars = full bar)
+		ratio := dim.Score / dim.MaxScore
+		filledBars := int(ratio * 10)
+		emptyBars := 10 - filledBars
+
+		bar := strings.Repeat("█", filledBars) + strings.Repeat("░", emptyBars)
+
+		// Color based on score ratio
+		var dimColor = cliutil.InfoColor
+		if ratio >= 0.7 {
+			dimColor = cliutil.SuccessColor
+		} else if ratio < 0.4 {
+			dimColor = cliutil.WarningColor
+		}
+
+		// Format: "  Completion    ████████░░  1.6/2.0  Will I finish this?"
+		_, _ = dimColor.Printf("  %-12s %s  %.1f/%.1f  %s\n",
+			dim.Name, bar, dim.Score, dim.MaxScore, dim.Description)
+	}
 }

@@ -1,12 +1,17 @@
 package bulk
 
 import (
+	"encoding/csv"
 	"fmt"
+	"os"
+	"strconv"
+	"strings"
+	"time"
 
 	"github.com/fatih/color"
 	"github.com/rs/zerolog/log"
 	"github.com/ryacub/telos-idea-matrix/internal/cliutil"
-	"github.com/ryacub/telos-idea-matrix/internal/export"
+	"github.com/ryacub/telos-idea-matrix/internal/models"
 	"github.com/spf13/cobra"
 )
 
@@ -30,7 +35,7 @@ ID,Content,RawScore,FinalScore,Patterns,Recommendation,AnalysisDetails,CreatedAt
 			filename := args[0]
 
 			// Import from CSV
-			ideas, err := export.ImportCSV(filename)
+			ideas, err := importCSV(filename)
 			if err != nil {
 				return fmt.Errorf("failed to import CSV: %w", err)
 			}
@@ -103,4 +108,74 @@ ID,Content,RawScore,FinalScore,Patterns,Recommendation,AnalysisDetails,CreatedAt
 	cmd.Flags().BoolVar(&yes, "yes", false, "Auto-confirm (skip confirmation prompt)")
 
 	return cmd
+}
+
+// importCSV reads ideas from a CSV file.
+func importCSV(filename string) ([]*models.Idea, error) {
+	file, err := os.Open(filename)
+	if err != nil {
+		return nil, fmt.Errorf("open file: %w", err)
+	}
+	defer func() {
+		if err := file.Close(); err != nil {
+			log.Warn().Err(err).Msg("failed to close file")
+		}
+	}()
+
+	reader := csv.NewReader(file)
+	records, err := reader.ReadAll()
+	if err != nil {
+		return nil, fmt.Errorf("read csv: %w", err)
+	}
+
+	if len(records) == 0 {
+		return nil, fmt.Errorf("csv file is empty")
+	}
+
+	// Skip header row
+	if len(records) == 1 {
+		// Only header, return empty slice
+		return []*models.Idea{}, nil
+	}
+
+	ideas := make([]*models.Idea, 0, len(records)-1)
+
+	for i, record := range records[1:] {
+		if len(record) < 9 {
+			return nil, fmt.Errorf("row %d: invalid format, expected 9 columns, got %d", i+2, len(record))
+		}
+
+		// Parse scores (with default 0.0 on error)
+		rawScore, _ := strconv.ParseFloat(record[2], 64)
+		finalScore, _ := strconv.ParseFloat(record[3], 64)
+
+		// Parse patterns (split by comma)
+		var patterns []string
+		if record[4] != "" {
+			patterns = strings.Split(record[4], ",")
+		}
+
+		// Parse timestamp
+		createdAt, err := time.Parse(time.RFC3339, record[7])
+		if err != nil {
+			// Default to current time if parsing fails
+			createdAt = time.Now().UTC()
+		}
+
+		idea := &models.Idea{
+			ID:              record[0],
+			Content:         record[1],
+			RawScore:        rawScore,
+			FinalScore:      finalScore,
+			Patterns:        patterns,
+			Recommendation:  record[5],
+			AnalysisDetails: record[6],
+			CreatedAt:       createdAt,
+			Status:          record[8],
+		}
+
+		ideas = append(ideas, idea)
+	}
+
+	return ideas, nil
 }

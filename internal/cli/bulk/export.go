@@ -1,15 +1,19 @@
 package bulk
 
 import (
+	"encoding/csv"
+	"encoding/json"
 	"fmt"
+	"os"
 	"path/filepath"
+	"strconv"
 	"strings"
+	"time"
 
 	"github.com/rs/zerolog/log"
-	"github.com/ryacub/telos-idea-matrix/internal/bulk"
 	"github.com/ryacub/telos-idea-matrix/internal/cliutil"
 	"github.com/ryacub/telos-idea-matrix/internal/database"
-	"github.com/ryacub/telos-idea-matrix/internal/export"
+	"github.com/ryacub/telos-idea-matrix/internal/models"
 	"github.com/spf13/cobra"
 )
 
@@ -36,9 +40,6 @@ Use filters to control which ideas are exported.`,
 
 			filename := args[0]
 
-			// Create service once
-			service := bulk.NewService(ctx.Repository)
-
 			// Auto-detect format from extension if not specified
 			if format == "" {
 				ext := strings.ToLower(filepath.Ext(filename))
@@ -64,7 +65,7 @@ Use filters to control which ideas are exported.`,
 
 			// Filter by search if provided
 			if search != "" {
-				ideas = service.FilterBySearch(ideas, search)
+				ideas = filterBySearch(ideas, search)
 			}
 
 			if len(ideas) == 0 {
@@ -75,9 +76,9 @@ Use filters to control which ideas are exported.`,
 			// Export based on format
 			switch format {
 			case FormatJSON:
-				err = export.ExportJSON(ideas, filename, pretty)
+				err = exportJSON(ideas, filename, pretty)
 			case FormatCSV:
-				err = export.ExportCSV(ideas, filename)
+				err = exportCSV(ideas, filename)
 			default:
 				return fmt.Errorf("unsupported format: %s (use 'csv' or 'json')", format)
 			}
@@ -101,4 +102,84 @@ Use filters to control which ideas are exported.`,
 	cmd.Flags().BoolVar(&pretty, "pretty", false, "Pretty-print JSON output (only for JSON format)")
 
 	return cmd
+}
+
+// exportCSV writes ideas to a CSV file.
+func exportCSV(ideas []*models.Idea, filename string) error {
+	file, err := os.Create(filename)
+	if err != nil {
+		return fmt.Errorf("create file: %w", err)
+	}
+	defer func() {
+		if err := file.Close(); err != nil {
+			log.Warn().Err(err).Msg("failed to close file")
+		}
+	}()
+
+	writer := csv.NewWriter(file)
+	defer writer.Flush()
+
+	// Write header
+	header := []string{
+		"ID",
+		"Content",
+		"RawScore",
+		"FinalScore",
+		"Patterns",
+		"Recommendation",
+		"AnalysisDetails",
+		"CreatedAt",
+		"Status",
+	}
+	if err := writer.Write(header); err != nil {
+		return fmt.Errorf("write header: %w", err)
+	}
+
+	// Write rows
+	for _, idea := range ideas {
+		// Join patterns with semicolon
+		patterns := strings.Join(idea.Patterns, ",")
+
+		row := []string{
+			idea.ID,
+			idea.Content,
+			strconv.FormatFloat(idea.RawScore, 'f', 2, 64),
+			strconv.FormatFloat(idea.FinalScore, 'f', 2, 64),
+			patterns,
+			idea.Recommendation,
+			idea.AnalysisDetails,
+			idea.CreatedAt.Format(time.RFC3339),
+			idea.Status,
+		}
+
+		if err := writer.Write(row); err != nil {
+			return fmt.Errorf("write row: %w", err)
+		}
+	}
+
+	return writer.Error()
+}
+
+// exportJSON writes ideas to a JSON file.
+func exportJSON(ideas []*models.Idea, filename string, pretty bool) error {
+	file, err := os.Create(filename)
+	if err != nil {
+		return fmt.Errorf("create file: %w", err)
+	}
+	defer func() {
+		if err := file.Close(); err != nil {
+			log.Warn().Err(err).Msg("failed to close file")
+		}
+	}()
+
+	encoder := json.NewEncoder(file)
+	if pretty {
+		encoder.SetIndent("", "  ")
+	}
+
+	if err := encoder.Encode(ideas); err != nil {
+		return fmt.Errorf("encode json: %w", err)
+	}
+
+	return nil
 }

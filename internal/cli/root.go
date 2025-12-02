@@ -5,12 +5,10 @@ import (
 	"os"
 	"path/filepath"
 
-	"github.com/fatih/color"
-	"github.com/ryacub/telos-idea-matrix/internal/cli/analytics"
+"github.com/ryacub/telos-idea-matrix/internal/cli/analytics"
 	"github.com/ryacub/telos-idea-matrix/internal/cli/bulk"
-	"github.com/ryacub/telos-idea-matrix/internal/cli/dump"
 	clierrors "github.com/ryacub/telos-idea-matrix/internal/cli/errors"
-	"github.com/ryacub/telos-idea-matrix/internal/cli/health"
+	"github.com/ryacub/telos-idea-matrix/internal/cliutil"
 	"github.com/ryacub/telos-idea-matrix/internal/database"
 	"github.com/ryacub/telos-idea-matrix/internal/llm"
 	"github.com/ryacub/telos-idea-matrix/internal/models"
@@ -52,12 +50,6 @@ var (
 	dbPath    string
 	telosPath string
 	rootCmd   *cobra.Command
-
-	// Color definitions
-	successColor = color.New(color.FgGreen, color.Bold)
-	errorColor   = color.New(color.FgRed, color.Bold)
-	infoColor    = color.New(color.FgCyan)
-	warningColor = color.New(color.FgYellow)
 )
 
 func init() {
@@ -104,43 +96,6 @@ Run 'tm <command> --help' for details on any command.`,
 	// AI/LLM management
 	rootCmd.AddCommand(NewLLMCommand())
 
-	// Legacy commands (hidden, for backward compatibility)
-	dumpCmd := dump.NewDumpCommand(getDumpContext)
-	dumpCmd.Hidden = true
-	dumpCmd.Deprecated = "use 'tm add' instead"
-	dumpCmd.AddCommand(newBatchDumpCommand())
-	rootCmd.AddCommand(dumpCmd)
-
-	scoreCmd := newScoreCommand()
-	scoreCmd.Hidden = true
-	scoreCmd.Deprecated = "use 'tm add -n' instead"
-	rootCmd.AddCommand(scoreCmd)
-
-	analyzeCmd := newAnalyzeCommand()
-	analyzeCmd.Hidden = true
-	analyzeCmd.Deprecated = "use 'tm show' instead"
-	rootCmd.AddCommand(analyzeCmd)
-
-	reviewCmd := newReviewCommand()
-	reviewCmd.Hidden = true
-	reviewCmd.Deprecated = "use 'tm list' instead"
-	rootCmd.AddCommand(reviewCmd)
-
-	healthCmd := newHealthCommand()
-	healthCmd.Hidden = true
-	healthCmd.Deprecated = "use 'tm status' instead"
-	rootCmd.AddCommand(healthCmd)
-
-	doctorCmd := health.NewDoctorCommand()
-	doctorCmd.Hidden = true
-	doctorCmd.Deprecated = "use 'tm status' instead"
-	rootCmd.AddCommand(doctorCmd)
-
-	analyzeLLMCmd := newAnalyzeLLMCommand()
-	analyzeLLMCmd.Hidden = true
-	analyzeLLMCmd.Deprecated = "use 'tm add --ai' instead"
-	rootCmd.AddCommand(analyzeLLMCmd)
-
 	// Shell completion
 	rootCmd.AddCommand(newCompletionCommand())
 }
@@ -167,7 +122,7 @@ func initializeCLI(cmd *cobra.Command, args []string) error {
 		return initializeLegacyMode()
 	} else {
 		// No configuration found - prompt user to run init
-		_, _ = warningColor.Fprintf(os.Stderr, "⚠️  No configuration found.\n")
+		_, _ = cliutil.WarningColor.Fprintf(os.Stderr, "⚠️  No configuration found.\n")
 		fmt.Fprintf(os.Stderr, "Run 'tm init' to set up Brain Salad with a quick wizard.\n\n")
 		return clierrors.WrapError(fmt.Errorf("no configuration"), "Initialization failed")
 	}
@@ -315,20 +270,6 @@ func ClearContext() {
 	// Also reset the global flag variables
 	dbPath = ""
 	telosPath = ""
-}
-
-// getDumpContext converts CLIContext to dump.CLIContext
-func getDumpContext() *dump.CLIContext {
-	if ctx == nil {
-		return nil
-	}
-	return &dump.CLIContext{
-		Repository: ctx.Repository,
-		Engine:     ctx.Engine,
-		Detector:   ctx.Detector,
-		Telos:      ctx.Telos,
-		LLMManager: ctx.LLMManager,
-	}
 }
 
 // getAnalyticsContext converts CLIContext to analytics.CLIContext
