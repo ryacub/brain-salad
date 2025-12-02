@@ -94,27 +94,27 @@ func TestWrapError_InvalidTelosFormat(t *testing.T) {
 
 func TestWrapError_MissingAPIKey(t *testing.T) {
 	tests := []struct {
-		name             string
-		errMsg           string
-		expectedProvider string
+		name                 string
+		errMsg               string
+		expectedProvider     string
 		expectedInSuggestion string
 	}{
 		{
-			name:             "openai",
-			errMsg:           "OpenAI API not available",
-			expectedProvider: "OpenAI",
+			name:                 "openai",
+			errMsg:               "OpenAI API not available",
+			expectedProvider:     "OpenAI",
 			expectedInSuggestion: "OPENAI_API_KEY",
 		},
 		{
-			name:             "claude",
-			errMsg:           "Claude API not available",
-			expectedProvider: "Claude",
+			name:                 "claude",
+			errMsg:               "Claude API not available",
+			expectedProvider:     "Claude",
 			expectedInSuggestion: "CLAUDE_API_KEY",
 		},
 		{
-			name:             "ollama",
-			errMsg:           "Ollama API not available",
-			expectedProvider: "Ollama",
+			name:                 "ollama",
+			errMsg:               "Ollama API not available",
+			expectedProvider:     "Ollama",
 			expectedInSuggestion: "ollama",
 		},
 	}
@@ -266,8 +266,8 @@ func TestExtractProviderName(t *testing.T) {
 
 func TestGetSuggestionsForProvider(t *testing.T) {
 	tests := []struct {
-		provider              string
-		shouldContain         string
+		provider      string
+		shouldContain string
 	}{
 		{"OpenAI", "OPENAI_API_KEY"},
 		{"Claude", "CLAUDE_API_KEY"},

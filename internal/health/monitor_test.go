@@ -37,6 +37,7 @@ func TestHealthMonitor_NewMonitor(t *testing.T) {
 
 	if monitor == nil {
 		t.Fatal("NewHealthMonitor returned nil")
+		return
 	}
 
 	if monitor.startTime.IsZero() {

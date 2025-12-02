@@ -10,6 +10,7 @@ func TestNewSimpleTracker(t *testing.T) {
 	tracker := NewSimpleTracker()
 	if tracker == nil {
 		t.Fatal("expected tracker to be non-nil")
+		return
 	}
 
 	if tracker.records == nil {

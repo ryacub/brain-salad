@@ -12,6 +12,7 @@ func TestAnalyzeLLMCommand(t *testing.T) {
 	// Test command creation
 	if cmd == nil {
 		t.Fatal("Command creation failed")
+		return
 	}
 
 	// Test command name
@@ -38,6 +39,7 @@ func TestLLMListCommand(t *testing.T) {
 	// Test command creation
 	if cmd == nil {
 		t.Fatal("Command creation failed")
+		return
 	}
 
 	// Test command name
@@ -58,6 +60,7 @@ func TestLLMConfigCommand(t *testing.T) {
 	// Test command creation
 	if cmd == nil {
 		t.Fatal("Command creation failed")
+		return
 	}
 
 	// Test command name
@@ -96,6 +99,7 @@ func TestLLMHealthCommand(t *testing.T) {
 	// Test command creation
 	if cmd == nil {
 		t.Fatal("Command creation failed")
+		return
 	}
 
 	// Test command name

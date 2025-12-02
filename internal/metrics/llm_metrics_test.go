@@ -387,6 +387,7 @@ func TestHistogramStatistics(t *testing.T) {
 
 	if stats == nil {
 		t.Fatal("Expected histogram stats to exist")
+		return
 	}
 
 	// Check count

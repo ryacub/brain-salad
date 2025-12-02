@@ -140,11 +140,11 @@ func MaxPossibleScore() float64 {
 
 // ScoreThresholds defines the boundaries for recommendations.
 var ScoreThresholds = struct {
-	GreatFit  float64
-	GoodFit   float64
-	Maybe     float64
-	PoorFit   float64
-	Avoid     float64
+	GreatFit float64
+	GoodFit  float64
+	Maybe    float64
+	PoorFit  float64
+	Avoid    float64
 }{
 	GreatFit: 8.5,
 	GoodFit:  7.0,

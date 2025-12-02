@@ -9,6 +9,7 @@ func TestNewValidator(t *testing.T) {
 	v := NewValidator()
 	if v == nil {
 		t.Fatal("expected validator to be non-nil")
+		return
 	}
 
 	// Verify default thresholds

@@ -11,6 +11,7 @@ func TestNewLLMCommand(t *testing.T) {
 
 	if cmd == nil {
 		t.Fatal("Command should not be nil")
+		return
 	}
 
 	if cmd.Use != "llm" {
@@ -38,6 +39,7 @@ func TestLLMListSubcommand(t *testing.T) {
 
 	if cmd == nil {
 		t.Fatal("Command should not be nil")
+		return
 	}
 
 	if cmd.Use != "list" {
@@ -56,6 +58,7 @@ func TestLLMTestSubcommand(t *testing.T) {
 
 	if cmd == nil {
 		t.Fatal("Command should not be nil")
+		return
 	}
 
 	if cmd.Use != "test <provider-name>" {
@@ -68,6 +71,7 @@ func TestLLMSetDefaultSubcommand(t *testing.T) {
 
 	if cmd == nil {
 		t.Fatal("Command should not be nil")
+		return
 	}
 
 	if cmd.Use != "set-default <provider-name>" {
@@ -80,6 +84,7 @@ func TestLLMConfigSubcommand(t *testing.T) {
 
 	if cmd == nil {
 		t.Fatal("Command should not be nil")
+		return
 	}
 
 	if cmd.Use != "config [provider-name]" {

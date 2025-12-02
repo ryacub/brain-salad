@@ -118,9 +118,9 @@ func TestLoadCreateIdeas(t *testing.T) {
 
 	// Load test parameters
 	const (
-		numWorkers      = 10
+		numWorkers        = 10
 		requestsPerWorker = 50
-		testDuration    = 10 * time.Second
+		testDuration      = 10 * time.Second
 	)
 
 	metrics := &LoadTestMetrics{}
@@ -422,8 +422,8 @@ func TestConcurrentDatabaseOperations(t *testing.T) {
 	defer repo.Close()
 
 	const (
-		numWriters = 5
-		numReaders = 10
+		numWriters   = 5
+		numReaders   = 10
 		opsPerWorker = 20
 	)
 

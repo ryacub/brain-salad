@@ -42,27 +42,27 @@ func NewUniversalEngine(p *profile.Profile) *UniversalEngine {
 func (e *UniversalEngine) compilePatterns() {
 	// Timeline patterns: shorter = higher score
 	e.timelinePatterns = map[*regexp.Regexp]float64{
-		regexp.MustCompile(`(?i)(today|tonight|this evening)`):                   1.0,
-		regexp.MustCompile(`(?i)(tomorrow|next day)`):                            0.95,
-		regexp.MustCompile(`(?i)(this week|few days|couple days)`):               0.90,
-		regexp.MustCompile(`(?i)(next week|1 week|one week|weekend)`):            0.85,
-		regexp.MustCompile(`(?i)(2 weeks|two weeks|couple weeks|fortnight)`):     0.75,
-		regexp.MustCompile(`(?i)(this month|1 month|one month|30 days)`):         0.60,
-		regexp.MustCompile(`(?i)(few months|2-3 months|couple months|60 days)`):  0.40,
-		regexp.MustCompile(`(?i)(this year|6 months|half year|quarter)`):         0.25,
-		regexp.MustCompile(`(?i)(next year|long.?term|years?|eventually)`):       0.10,
+		regexp.MustCompile(`(?i)(today|tonight|this evening)`):                  1.0,
+		regexp.MustCompile(`(?i)(tomorrow|next day)`):                           0.95,
+		regexp.MustCompile(`(?i)(this week|few days|couple days)`):              0.90,
+		regexp.MustCompile(`(?i)(next week|1 week|one week|weekend)`):           0.85,
+		regexp.MustCompile(`(?i)(2 weeks|two weeks|couple weeks|fortnight)`):    0.75,
+		regexp.MustCompile(`(?i)(this month|1 month|one month|30 days)`):        0.60,
+		regexp.MustCompile(`(?i)(few months|2-3 months|couple months|60 days)`): 0.40,
+		regexp.MustCompile(`(?i)(this year|6 months|half year|quarter)`):        0.25,
+		regexp.MustCompile(`(?i)(next year|long.?term|years?|eventually)`):      0.10,
 	}
 
 	// Completion likelihood patterns: simpler = higher score
 	e.completionPatterns = map[*regexp.Regexp]float64{
-		regexp.MustCompile(`(?i)(simple|quick|easy|basic|minimal|tiny)`):         0.95,
+		regexp.MustCompile(`(?i)(simple|quick|easy|basic|minimal|tiny)`):            0.95,
 		regexp.MustCompile(`(?i)(mvp|prototype|proof of concept|v1|first version)`): 0.90,
-		regexp.MustCompile(`(?i)(small|focused|straightforward|lean)`):           0.85,
-		regexp.MustCompile(`(?i)(doable|achievable|manageable|realistic)`):       0.80,
-		regexp.MustCompile(`(?i)(moderate|medium|reasonable|standard)`):          0.50,
-		regexp.MustCompile(`(?i)(comprehensive|complete|full|extensive|thorough)`): 0.30,
-		regexp.MustCompile(`(?i)(complex|ambitious|large.?scale|massive)`):       0.20,
-		regexp.MustCompile(`(?i)(enterprise|production.?ready|perfect|polished)`): 0.15,
+		regexp.MustCompile(`(?i)(small|focused|straightforward|lean)`):              0.85,
+		regexp.MustCompile(`(?i)(doable|achievable|manageable|realistic)`):          0.80,
+		regexp.MustCompile(`(?i)(moderate|medium|reasonable|standard)`):             0.50,
+		regexp.MustCompile(`(?i)(comprehensive|complete|full|extensive|thorough)`):  0.30,
+		regexp.MustCompile(`(?i)(complex|ambitious|large.?scale|massive)`):          0.20,
+		regexp.MustCompile(`(?i)(enterprise|production.?ready|perfect|polished)`):   0.15,
 	}
 
 	// Revenue/reward patterns (used when money matters)
@@ -77,14 +77,14 @@ func (e *UniversalEngine) compilePatterns() {
 
 	// Motivation/accountability patterns
 	e.motivationPatterns = map[*regexp.Regexp]float64{
-		regexp.MustCompile(`(?i)(deadline|due date|committed|promised)`):          0.90,
-		regexp.MustCompile(`(?i)(public|share|publish|launch|announce)`):          0.85,
-		regexp.MustCompile(`(?i)(team|partner|collaborat|together)`):              0.80,
-		regexp.MustCompile(`(?i)(customer|client|user|audience)`):                 0.85,
-		regexp.MustCompile(`(?i)(excited|passionate|love|enjoy|fun)`):             0.75,
-		regexp.MustCompile(`(?i)(curious|interesting|explore|experiment)`):        0.70,
-		regexp.MustCompile(`(?i)(solo|alone|private|secret|just me)`):             0.30,
-		regexp.MustCompile(`(?i)(obligation|have to|should|must|forced)`):         0.25,
+		regexp.MustCompile(`(?i)(deadline|due date|committed|promised)`):   0.90,
+		regexp.MustCompile(`(?i)(public|share|publish|launch|announce)`):   0.85,
+		regexp.MustCompile(`(?i)(team|partner|collaborat|together)`):       0.80,
+		regexp.MustCompile(`(?i)(customer|client|user|audience)`):          0.85,
+		regexp.MustCompile(`(?i)(excited|passionate|love|enjoy|fun)`):      0.75,
+		regexp.MustCompile(`(?i)(curious|interesting|explore|experiment)`): 0.70,
+		regexp.MustCompile(`(?i)(solo|alone|private|secret|just me)`):      0.30,
+		regexp.MustCompile(`(?i)(obligation|have to|should|must|forced)`):  0.25,
 	}
 }
 

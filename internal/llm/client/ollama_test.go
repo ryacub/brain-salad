@@ -38,6 +38,7 @@ func TestOllamaClient_NewClient(t *testing.T) {
 			client := NewOllamaClient(tt.baseURL, tt.timeout)
 			if client == nil {
 				t.Fatal("expected client to be non-nil")
+				return
 			}
 			if client.baseURL != tt.wantBaseURL {
 				t.Errorf("expected baseURL %s, got %s", tt.wantBaseURL, client.baseURL)
@@ -99,6 +100,7 @@ func TestOllamaClient_Generate_Success(t *testing.T) {
 	}
 	if resp == nil {
 		t.Fatal("expected response to be non-nil")
+		return
 	}
 	if resp.Response != "This is a test response" {
 		t.Errorf("expected response text 'This is a test response', got %s", resp.Response)
