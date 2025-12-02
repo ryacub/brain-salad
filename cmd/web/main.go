@@ -15,7 +15,6 @@ import (
 	"github.com/ryacub/telos-idea-matrix/internal/config"
 	"github.com/ryacub/telos-idea-matrix/internal/database"
 	"github.com/ryacub/telos-idea-matrix/internal/logging"
-	"github.com/ryacub/telos-idea-matrix/internal/tasks"
 )
 
 func main() {
@@ -97,16 +96,13 @@ func run() error {
 		}
 	}()
 
-	// Create task manager for background tasks
-	taskManager := tasks.NewTaskManager()
-	log.Info().Msg("Task manager initialized")
-
-	// Spawn background tasks
-	setupBackgroundTasks(taskManager, repo)
-
 	// Setup graceful shutdown
 	done := make(chan os.Signal, 1)
 	signal.Notify(done, os.Interrupt, syscall.SIGINT, syscall.SIGTERM)
+
+	// Spawn background tasks with simple tickers
+	stopTasks := make(chan struct{})
+	setupBackgroundTasks(repo, stopTasks)
 
 	// Start server in goroutine
 	go func() {
@@ -127,65 +123,76 @@ func run() error {
 	<-done
 	log.Info().Msg("Shutting down gracefully...")
 
-	// Shutdown background tasks
-	if err := taskManager.Shutdown(5 * time.Second); err != nil {
-		log.Warn().Err(err).Msg("Task manager shutdown warning")
-	}
+	// Stop background tasks
+	close(stopTasks)
 
 	return nil
 }
 
-// setupBackgroundTasks initializes and spawns background tasks
-func setupBackgroundTasks(tm *tasks.TaskManager, repo *database.Repository) {
+// setupBackgroundTasks initializes and spawns background tasks using simple tickers
+func setupBackgroundTasks(repo *database.Repository, stop <-chan struct{}) {
 	// Database cleanup task - runs once per day
-	cleanupTask := tasks.NewScheduledTask(
-		"database-cleanup",
-		24*time.Hour,
-		func(_ context.Context) error {
-			log.Info().Msg("Running database vacuum")
-			if _, err := repo.DB().Exec("VACUUM"); err != nil {
-				log.Warn().Err(err).Msg("Database vacuum failed")
-				return err
-			}
-			log.Info().Msg("Database vacuum completed")
-			return nil
-		},
-	).WithTimeout(10 * time.Minute)
+	go func() {
+		ticker := time.NewTicker(24 * time.Hour)
+		defer ticker.Stop()
 
-	tm.Spawn(cleanupTask)
-	log.Info().Msg("Spawned database cleanup task (runs every 24 hours)")
+		log.Info().Msg("Started database cleanup task (runs every 24 hours)")
+
+		for {
+			select {
+			case <-ticker.C:
+				log.Info().Msg("Running database vacuum")
+				if _, err := repo.DB().Exec("VACUUM"); err != nil {
+					log.Warn().Err(err).Msg("Database vacuum failed")
+				} else {
+					log.Info().Msg("Database vacuum completed")
+				}
+			case <-stop:
+				log.Info().Msg("Stopping database cleanup task")
+				return
+			}
+		}
+	}()
 
 	// Metrics collection task - runs every 5 minutes
-	metricsTask := tasks.NewScheduledTask(
-		"metrics-collection",
-		5*time.Minute,
-		func(_ context.Context) error {
-			stats := repo.DB().Stats()
-			log.Debug().
-				Int("open_connections", stats.OpenConnections).
-				Int("in_use", stats.InUse).
-				Msg("Database connection stats")
-			return nil
-		},
-	).WithTimeout(1 * time.Minute)
+	go func() {
+		ticker := time.NewTicker(5 * time.Minute)
+		defer ticker.Stop()
 
-	tm.Spawn(metricsTask)
-	log.Info().Msg("Spawned metrics collection task (runs every 5 minutes)")
+		log.Info().Msg("Started metrics collection task (runs every 5 minutes)")
+
+		for {
+			select {
+			case <-ticker.C:
+				stats := repo.DB().Stats()
+				log.Debug().
+					Int("open_connections", stats.OpenConnections).
+					Int("in_use", stats.InUse).
+					Msg("Database connection stats")
+			case <-stop:
+				log.Info().Msg("Stopping metrics collection task")
+				return
+			}
+		}
+	}()
 
 	// Health check task - runs every 30 seconds
-	healthCheckTask := tasks.NewScheduledTask(
-		"health-check",
-		30*time.Second,
-		func(_ context.Context) error {
-			// Verify database connection
-			if err := repo.Ping(); err != nil {
-				log.Error().Err(err).Msg("Database health check failed")
-				return err
-			}
-			return nil
-		},
-	).WithTimeout(10 * time.Second)
+	go func() {
+		ticker := time.NewTicker(30 * time.Second)
+		defer ticker.Stop()
 
-	tm.Spawn(healthCheckTask)
-	log.Info().Msg("Spawned health check task (runs every 30 seconds)")
+		log.Info().Msg("Started health check task (runs every 30 seconds)")
+
+		for {
+			select {
+			case <-ticker.C:
+				if err := repo.Ping(); err != nil {
+					log.Error().Err(err).Msg("Database health check failed")
+				}
+			case <-stop:
+				log.Info().Msg("Stopping health check task")
+				return
+			}
+		}
+	}()
 }
