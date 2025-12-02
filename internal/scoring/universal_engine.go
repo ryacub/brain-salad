@@ -150,10 +150,8 @@ func (e *UniversalEngine) scoreSkillFit(ideaLower string) float64 {
 	// Match against goal keywords to infer domain familiarity
 	goalMatch := profile.MatchScore(ideaLower, e.goalKeywords)
 
-	// Base score from keyword matching
-	baseScore := 0.4 + (goalMatch * 0.5) // 0.4 to 0.9 range
-
 	// Adjust based on familiar preference
+	var baseScore float64
 	if e.profile.Preferences.PrefersFamiliar {
 		// User prefers familiar - boost matching scores
 		baseScore = 0.3 + (goalMatch * 0.7)
@@ -204,7 +202,8 @@ func (e *UniversalEngine) scoreRewardAlignment(ideaLower string) float64 {
 	baseScore := goalMatch
 
 	// Secondary: check revenue patterns based on money preference
-	if e.profile.Preferences.MoneyMatters == profile.MoneyMattersYes {
+	switch e.profile.Preferences.MoneyMatters {
+	case profile.MoneyMattersYes:
 		// User wants money - boost revenue-related ideas
 		revenueScore := 0.0
 		for pattern, score := range e.revenuePatterns {
@@ -216,11 +215,11 @@ func (e *UniversalEngine) scoreRewardAlignment(ideaLower string) float64 {
 		}
 		// Blend goal match with revenue signals
 		baseScore = (baseScore * 0.6) + (revenueScore * 0.4)
-	} else if e.profile.Preferences.MoneyMatters == profile.MoneyMattersNotReally {
+	case profile.MoneyMattersNotReally:
 		// User doesn't care about money - don't penalize non-revenue ideas
 		// Just use goal matching
 		baseScore = goalMatch
-	} else {
+	default:
 		// Sometimes - slight revenue consideration
 		revenueScore := 0.3 // Neutral default
 		for pattern, score := range e.revenuePatterns {
