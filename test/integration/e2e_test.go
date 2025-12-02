@@ -552,5 +552,5 @@ func TestHealthCheck(t *testing.T) {
 	body, err := io.ReadAll(resp.Body)
 	require.NoError(t, err)
 
-	assert.Contains(t, string(body), "ok")
+	assert.Contains(t, string(body), "healthy")
 }
