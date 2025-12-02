@@ -112,7 +112,7 @@ func runBulkUpdate(getContext func() *CLIContext, opts bulkUpdateOptions) error 
 	// Validate status value if provided
 	if opts.setStatus != "" {
 		validStatuses := []string{"active", "archived", "deleted"}
-		if !bulk.Contains(validStatuses, opts.setStatus) {
+		if !contains(validStatuses, opts.setStatus) {
 			return fmt.Errorf("invalid status: %s (must be one of: %s)",
 				opts.setStatus, strings.Join(validStatuses, ", "))
 		}
@@ -190,28 +190,28 @@ func runBulkUpdate(getContext func() *CLIContext, opts bulkUpdateOptions) error 
 					color.CyanString("→"), idea.Status, opts.setStatus)
 			}
 			if len(opts.addPatterns) > 0 {
-				newPatterns := bulk.AddUniqueStrings(idea.Patterns, opts.addPatterns)
+				newPatterns := addUniqueStrings(idea.Patterns, opts.addPatterns)
 				if len(newPatterns) > len(idea.Patterns) {
 					fmt.Printf("   %s Patterns: %v → %v\n",
 						color.CyanString("→"), idea.Patterns, newPatterns)
 				}
 			}
 			if len(opts.removePatterns) > 0 {
-				newPatterns := bulk.RemoveStrings(idea.Patterns, opts.removePatterns)
+				newPatterns := removeStrings(idea.Patterns, opts.removePatterns)
 				if len(newPatterns) < len(idea.Patterns) {
 					fmt.Printf("   %s Patterns: %v → %v\n",
 						color.CyanString("→"), idea.Patterns, newPatterns)
 				}
 			}
 			if len(opts.addTags) > 0 {
-				newTags := bulk.AddUniqueStrings(idea.Tags, opts.addTags)
+				newTags := addUniqueStrings(idea.Tags, opts.addTags)
 				if len(newTags) > len(idea.Tags) {
 					fmt.Printf("   %s Tags: %v → %v\n",
 						color.CyanString("→"), idea.Tags, newTags)
 				}
 			}
 			if len(opts.removeTags) > 0 {
-				newTags := bulk.RemoveStrings(idea.Tags, opts.removeTags)
+				newTags := removeStrings(idea.Tags, opts.removeTags)
 				if len(newTags) < len(idea.Tags) {
 					fmt.Printf("   %s Tags: %v → %v\n",
 						color.CyanString("→"), idea.Tags, newTags)
