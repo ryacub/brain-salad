@@ -11,7 +11,6 @@ import (
 	"time"
 
 	"github.com/rs/zerolog/log"
-	"github.com/ryacub/telos-idea-matrix/internal/bulk"
 	"github.com/ryacub/telos-idea-matrix/internal/cliutil"
 	"github.com/ryacub/telos-idea-matrix/internal/database"
 	"github.com/ryacub/telos-idea-matrix/internal/models"
@@ -41,9 +40,6 @@ Use filters to control which ideas are exported.`,
 
 			filename := args[0]
 
-			// Create service once
-			service := bulk.NewService(ctx.Repository)
-
 			// Auto-detect format from extension if not specified
 			if format == "" {
 				ext := strings.ToLower(filepath.Ext(filename))
@@ -69,7 +65,7 @@ Use filters to control which ideas are exported.`,
 
 			// Filter by search if provided
 			if search != "" {
-				ideas = service.FilterBySearch(ideas, search)
+				ideas = filterBySearch(ideas, search)
 			}
 
 			if len(ideas) == 0 {

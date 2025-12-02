@@ -6,7 +6,6 @@ import (
 
 	"github.com/fatih/color"
 	"github.com/rs/zerolog/log"
-	"github.com/ryacub/telos-idea-matrix/internal/bulk"
 	"github.com/ryacub/telos-idea-matrix/internal/cliutil"
 	"github.com/ryacub/telos-idea-matrix/internal/database"
 	"github.com/spf13/cobra"
@@ -55,10 +54,10 @@ Examples:
 		RunE: func(cmd *cobra.Command, args []string) error {
 			return runBulkUpdate(getContext, bulkUpdateOptions{
 				setStatus:      setStatus,
-				addPatterns:    bulk.SplitCommaSeparated(addPatterns),
-				removePatterns: bulk.SplitCommaSeparated(removePatterns),
-				addTags:        bulk.SplitCommaSeparated(addTags),
-				removeTags:     bulk.SplitCommaSeparated(removeTags),
+				addPatterns:    splitCommaSeparated(addPatterns),
+				removePatterns: splitCommaSeparated(removePatterns),
+				addTags:        splitCommaSeparated(addTags),
+				removeTags:     splitCommaSeparated(removeTags),
 				scoreMin:       scoreMin,
 				scoreMax:       scoreMax,
 				statusFilter:   statusFilter,
@@ -234,8 +233,7 @@ func runBulkUpdate(getContext func() *CLIContext, opts bulkUpdateOptions) error 
 	failed := 0
 	errors := make([]string, 0)
 
-	service := bulk.NewService(ctx.Repository)
-	updateOpts := bulk.UpdateOptions{
+	updateOpts := updateOptions{
 		SetStatus:      opts.setStatus,
 		AddPatterns:    opts.addPatterns,
 		RemovePatterns: opts.removePatterns,
@@ -245,7 +243,7 @@ func runBulkUpdate(getContext func() *CLIContext, opts bulkUpdateOptions) error 
 
 	for i, idea := range ideas {
 		// Apply updates using service
-		modified := service.ApplyUpdates(idea, updateOpts)
+		modified := applyUpdates(idea, updateOpts)
 
 		// Only save if something actually changed
 		if modified {
