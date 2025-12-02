@@ -110,3 +110,7 @@ site/
 *.tar
 *.rar
 go/telos
+
+# Claude Code local data
+.claude/data/
+.claude/settings.local.json

@@ -16,7 +16,7 @@ Brain-Salad helps you decide which ideas to pursue by scoring them against your 
 
 ```bash
 # Install
-go install github.com/ryacub/brain-salad/cmd/cli@latest
+go install github.com/rayyacub/brain-salad/cmd/cli@latest
 
 # Run the setup wizard (2 minutes)
 tm init
@@ -83,13 +83,13 @@ Insights:
 ### Quick Install (Linux/macOS)
 
 ```bash
-curl -sSL https://raw.githubusercontent.com/ryacub/brain-salad/main/scripts/install.sh | bash
+curl -sSL https://raw.githubusercontent.com/rayyacub/brain-salad/main/scripts/install.sh | bash
 ```
 
 ### Manual Build
 
 ```bash
-git clone https://github.com/ryacub/brain-salad.git
+git clone https://github.com/rayyacub/brain-salad.git
 cd brain-salad
 make build
 ./bin/tm --help
@@ -100,6 +100,44 @@ make build
 ```bash
 cd deployments/docker
 docker compose up
+```
+
+### Optional: Shell Aliases
+
+For faster workflows, you can install shell aliases using the setup script:
+
+```bash
+# Run the alias setup script
+./scripts/setup-aliases.sh
+
+# Reload your shell
+source ~/.zshrc  # or source ~/.bashrc
+```
+
+**Available aliases:**
+- `tm` - Main application
+- `tmd "idea"` - Quick idea dump (shortcut for `tm dump`)
+- `tma` - Analyze last idea
+- `tmr` - Review all ideas (shortcut for `tm review`)
+- `tmb` - Build project
+  - `tmb -d` - Development build
+  - `tmb -r` - Release build
+  - `tmb -c` - Check compilation only (fastest)
+- `tms` - Start LLM service
+- `tmst` - Stop LLM service
+- `tmm` - Update LLM models
+
+**Example workflow with aliases:**
+```bash
+# Capture ideas quickly
+tmd "Build a tool that helps analyze hotel review sentiment"
+
+# Review your ideas
+tmr
+
+# Start LLM service for AI analysis
+tms
+tm dump "idea with AI analysis"
 ```
 
 ## Commands
@@ -231,5 +269,5 @@ MIT License - see [LICENSE](./LICENSE)
 
 ## Support
 
-- [GitHub Issues](https://github.com/ryacub/brain-salad/issues)
-- [GitHub Discussions](https://github.com/ryacub/brain-salad/discussions)
+- [GitHub Issues](https://github.com/rayyacub/brain-salad/issues)
+- [GitHub Discussions](https://github.com/rayyacub/brain-salad/discussions)

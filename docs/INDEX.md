@@ -1,6 +1,6 @@
-# Telos Idea Matrix - Documentation Index
+# Brain-Salad - Documentation Index
 
-Complete documentation for the Telos Idea Matrix CLI tool.
+Complete documentation for the Brain-Salad CLI tool.
 
 ## Getting Started
 

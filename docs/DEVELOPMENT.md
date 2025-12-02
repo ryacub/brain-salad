@@ -1,6 +1,6 @@
 # Development Guide
 
-This guide covers everything you need to know to develop the Telos Idea Matrix Go implementation.
+This guide covers everything you need to know to develop the Brain-Salad Go implementation.
 
 ---
 

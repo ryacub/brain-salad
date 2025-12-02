@@ -2,7 +2,7 @@
 
 ## Overview
 
-Telos Idea Matrix is a **Go application** providing both CLI and web API interfaces for capturing ideas and evaluating them against personalized goals and strategies. The system is designed to be modular, extensible, and privacy-focused with local-first architecture.
+Brain-Salad is a **Go application** providing both CLI and web API interfaces for capturing ideas and evaluating them against personalized goals and strategies. The system is designed to be modular, extensible, and privacy-focused with local-first architecture.
 
 ## System Architecture
 

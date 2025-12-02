@@ -1,6 +1,6 @@
 # API Authentication
 
-This document describes the authentication system for the Telos Idea Matrix API.
+This document describes the authentication system for the Brain-Salad API.
 
 ## Overview
 

@@ -1,6 +1,6 @@
-# Contributing to Telos Idea Matrix
+# Contributing to Brain-Salad
 
-Thank you for your interest in contributing to the Telos Idea Matrix! We welcome contributions from the community and are grateful for your time and effort. Whether you're fixing a bug, adding a feature, improving documentation, or sharing ideas, your contribution makes this tool better for everyone.
+Thank you for your interest in contributing to Brain-Salad! We welcome contributions from the community and are grateful for your time and effort. Whether you're fixing a bug, adding a feature, improving documentation, or sharing ideas, your contribution makes this tool better for everyone.
 
 ## Table of Contents
 
@@ -29,9 +29,9 @@ Thank you for your interest in contributing to the Telos Idea Matrix! We welcome
 - Fix typos or clarify confusing sections
 
 ### Community Support
-- Answer questions in discussions
-- Share your Telos configuration examples
-- Report bugs and suggest enhancements
+- Answer questions in [GitHub Discussions](https://github.com/rayyacub/brain-salad/discussions)
+- Share your configuration examples and scoring profiles
+- Report bugs and suggest enhancements in [GitHub Issues](https://github.com/rayyacub/brain-salad/issues)
 - Review pull requests
 
 ### Testing
@@ -46,7 +46,7 @@ Before contributing, please:
 1. **Read the documentation**: Familiarize yourself with the [README](./README.md) and project architecture
 2. **Check existing issues**: Look for related issues or discussions before starting work
 3. **Create an issue first**: For major changes, open an issue to discuss your approach before implementing
-4. **Join the community**: Connect with other contributors on [Discord](https://discord.gg/example)
+4. **Join the community**: Participate in [GitHub Discussions](https://github.com/rayyacub/brain-salad/discussions)
 
 ## Development Setup
 
@@ -60,8 +60,8 @@ Before contributing, please:
 
 1. **Fork and Clone the Repository**
    ```bash
-   git clone https://github.com/YOUR_USERNAME/telos-idea-matrix.git
-   cd telos-idea-matrix
+   git clone https://github.com/rayyacub/brain-salad.git
+   cd brain-salad
    ```
 
 2. **Install Dependencies**
@@ -525,7 +525,7 @@ We are committed to providing a welcoming and inclusive environment:
 
 ### Reporting
 
-If you experience or witness unacceptable behavior, please report it to the maintainers at ray@example.com. All reports will be reviewed and investigated promptly and fairly.
+If you experience or witness unacceptable behavior, please report it via [GitHub Issues](https://github.com/rayyacub/brain-salad/issues). All reports will be reviewed and investigated promptly and fairly.
 
 ### Attribution
 
@@ -603,4 +603,4 @@ cmd/cli/main.go         # CLI entry point & command routing
 
 All contributors are recognized in the README and release notes. Major contributions may lead to maintainership opportunities.
 
-Thank you for contributing to Telos Idea Matrix! Your efforts help make this tool better for everyone.
+Thank you for contributing to Brain-Salad! Your efforts help make this tool better for everyone.

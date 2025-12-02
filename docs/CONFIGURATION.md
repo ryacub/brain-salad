@@ -2,7 +2,7 @@
 
 ## Overview
 
-The Telos Idea Matrix is personalized per user via a Telos configuration file. This file describes your:
+Brain-Salad is personalized per user via a Telos configuration file. This file describes your:
 - Goals and deadlines
 - Strategies and focus areas
 - Technology stack preferences

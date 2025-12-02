@@ -1,11 +1,11 @@
 openapi: 3.0.3
 info:
-  title: Telos Idea Matrix API
+  title: Brain-Salad API
   description: AI-powered personal productivity system for decision-making and idea management
   version: 2.0.1
   contact:
     name: API Support
-    url: https://github.com/ryacub/brain-salad
+    url: https://github.com/rayyacub/brain-salad
 
 servers:
   - url: http://localhost:8080/api/v1

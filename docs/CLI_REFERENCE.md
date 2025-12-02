@@ -1,6 +1,6 @@
-# Telos Idea Matrix - CLI Reference
+# Brain-Salad - CLI Reference
 
-Complete command-line interface reference for the Telos Idea Matrix tool.
+Complete command-line interface reference for the Brain-Salad tool.
 
 ## Table of Contents
 
@@ -489,7 +489,7 @@ tm server --rate-limit 500
 #### Output
 
 ```
-Starting Telos Idea Matrix API Server
+Starting Brain-Salad API Server
 ======================================
 
 Configuration:
@@ -546,7 +546,7 @@ tm version --json
 #### Output
 
 ```
-Telos Idea Matrix
+Brain-Salad
 Version: 1.0.0
 Build: 2025-11-19T10:30:00Z
 Go Version: go1.25.4

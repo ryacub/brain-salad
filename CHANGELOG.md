@@ -204,6 +204,6 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## Version History
 
-[2.0.1]: https://github.com/ryacub/brain-salad/releases/tag/v2.0.1
-[2.0.0]: https://github.com/ryacub/brain-salad/releases/tag/v2.0.0
+[2.0.1]: https://github.com/rayyacub/brain-salad/releases/tag/v2.0.1
+[2.0.0]: https://github.com/rayyacub/brain-salad/releases/tag/v2.0.0
 [0.1.0]: https://github.com/rayyacub/telos-idea-matrix/releases/tag/v0.1.0

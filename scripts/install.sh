@@ -2,10 +2,10 @@
 set -e
 
 # Brain-Salad Installation Script
-# Usage: curl -sSL https://raw.githubusercontent.com/ryacub/brain-salad/main/scripts/install.sh | bash
+# Usage: curl -sSL https://raw.githubusercontent.com/rayyacub/brain-salad/main/scripts/install.sh | bash
 
 INSTALL_DIR="${INSTALL_DIR:-/usr/local/bin}"
-GO_VERSION="1.23.4"
+GO_VERSION="1.25.4"
 
 echo "Installing Brain-Salad..."
 
@@ -42,7 +42,7 @@ fi
 
 # Clone and build
 echo "Building brain-salad..."
-git clone --depth 1 https://github.com/ryacub/brain-salad.git
+git clone --depth 1 https://github.com/rayyacub/brain-salad.git
 cd brain-salad
 CGO_ENABLED=1 go build -o tm ./cmd/cli
 
