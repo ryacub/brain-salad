@@ -8,6 +8,7 @@ import (
 
 	"github.com/rayyacub/telos-idea-matrix/internal/metrics"
 	"github.com/rayyacub/telos-idea-matrix/internal/models"
+	"github.com/rs/zerolog/log"
 )
 
 // Manager handles multiple LLM providers with fallback, health checks, and statistics
@@ -148,11 +149,11 @@ func (m *Manager) selectPrimaryProvider() {
 		for _, p := range m.providers {
 			if p.Name() == defaultProvider && p.IsAvailable() {
 				m.primary = p
-				fmt.Printf("[Manager] Loaded default provider from config: %s\n", defaultProvider)
+				log.Debug().Str("provider", defaultProvider).Msg("loaded default provider from config")
 				return
 			}
 		}
-		fmt.Printf("[Manager] Warning: Saved provider '%s' not available, using fallback\n", defaultProvider)
+		log.Warn().Str("provider", defaultProvider).Msg("saved provider not available, using fallback")
 	}
 
 	// Fallback to priority order - select first available

@@ -92,14 +92,9 @@ you focus on what truly matters.`,
 	rootCmd.AddCommand(health.NewDoctorCommand())
 	rootCmd.AddCommand(bulk.NewBulkCommand(getBulkContext))
 
-	// LLM commands (new hierarchical structure)
+	// LLM commands
 	rootCmd.AddCommand(NewLLMCommand())
-
-	// Legacy LLM commands (flat structure - may be deprecated)
 	rootCmd.AddCommand(newAnalyzeLLMCommand())
-	rootCmd.AddCommand(newLLMListCommand())
-	rootCmd.AddCommand(newLLMConfigCommand())
-	rootCmd.AddCommand(newLLMHealthCommand())
 
 	// Utility commands
 	rootCmd.AddCommand(newInitCommand())

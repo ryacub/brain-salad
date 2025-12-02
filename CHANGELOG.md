@@ -74,7 +74,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - Runtime performance: Identical
 
 ### Breaking Changes for Developers
-- Must use Go 1.25.4+ for development
+- Must use Go version specified in go.mod for development
 - Build command changed: `go build` instead of `cargo build`
 - Test command changed: `go test` instead of `cargo test`
 

@@ -3,6 +3,7 @@ package cli
 import (
 	"fmt"
 	"strings"
+	"time"
 
 	"github.com/rayyacub/telos-idea-matrix/internal/cliutil"
 	"github.com/rayyacub/telos-idea-matrix/internal/llm"
@@ -33,6 +34,7 @@ Examples:
 	cmd.AddCommand(newLLMTestSubcommand())
 	cmd.AddCommand(newLLMSetDefaultSubcommand())
 	cmd.AddCommand(newLLMConfigSubcommand())
+	cmd.AddCommand(newLLMHealthSubcommand())
 
 	return cmd
 }
@@ -441,4 +443,120 @@ func getFirstExplanation(explanations map[string]string) string {
 		return exp
 	}
 	return ""
+}
+
+// ============================================================================
+// LLM HEALTH SUBCOMMAND
+// ============================================================================
+
+func newLLMHealthSubcommand() *cobra.Command {
+	var watch bool
+	var interval int
+
+	cmd := &cobra.Command{
+		Use:   "health",
+		Short: "Check health of all LLM providers",
+		Long: `Run health checks on all registered LLM providers.
+
+Use --watch to continuously monitor provider health.
+
+Examples:
+  tm llm health                    # Check all providers once
+  tm llm health --watch            # Continuous monitoring
+  tm llm health --watch --interval 10`,
+		RunE: func(cmd *cobra.Command, args []string) error {
+			return runLLMHealthSubcmd(ctx.LLMManager, watch, interval)
+		},
+	}
+
+	cmd.Flags().BoolVar(&watch, "watch", false, "Continuously monitor health")
+	cmd.Flags().IntVar(&interval, "interval", 30, "Check interval in seconds (with --watch)")
+
+	return cmd
+}
+
+func runLLMHealthSubcmd(manager *llm.Manager, watch bool, intervalSec int) error {
+	if watch {
+		return watchHealthSubcmd(manager, intervalSec)
+	}
+
+	// Single health check
+	health := manager.HealthCheck()
+	displayHealthStatusSubcmd(health)
+	return nil
+}
+
+func displayHealthStatusSubcmd(health map[string]bool) {
+	// Sort provider names for consistent output
+	var providerNames []string
+	for name := range health {
+		providerNames = append(providerNames, name)
+	}
+
+	fmt.Println("LLM Provider Health:")
+	fmt.Println()
+
+	healthy := 0
+	for _, name := range providerNames {
+		isHealthy := health[name]
+		status := "✗ Unavailable"
+		if isHealthy {
+			status = "✓ Healthy"
+			healthy++
+		}
+		fmt.Printf("  %s %s\n", status, name)
+	}
+
+	fmt.Println()
+	fmt.Printf("Healthy: %d/%d providers\n", healthy, len(health))
+}
+
+func watchHealthSubcmd(manager *llm.Manager, intervalSec int) error {
+	ticker := time.NewTicker(time.Duration(intervalSec) * time.Second)
+	defer ticker.Stop()
+
+	// Clear screen
+	clearScreen := func() {
+		fmt.Print("\033[H\033[2J")
+	}
+
+	// Display initial
+	clearScreen()
+	displayWatchHealthSubcmd(manager, intervalSec)
+
+	// Watch loop
+	for range ticker.C {
+		clearScreen()
+		displayWatchHealthSubcmd(manager, intervalSec)
+	}
+
+	return nil
+}
+
+func displayWatchHealthSubcmd(manager *llm.Manager, intervalSec int) {
+	health := manager.HealthCheck()
+
+	var providerNames []string
+	for name := range health {
+		providerNames = append(providerNames, name)
+	}
+
+	fmt.Printf("LLM Provider Health (refreshing every %ds)\n", intervalSec)
+	fmt.Printf("Last check: %s\n", time.Now().Format("15:04:05"))
+	fmt.Println()
+
+	healthy := 0
+	for _, name := range providerNames {
+		isHealthy := health[name]
+		status := "✗ Unavailable"
+		if isHealthy {
+			status = "✓ Healthy"
+			healthy++
+		}
+		fmt.Printf("  %s %s\n", status, name)
+	}
+
+	fmt.Println()
+	fmt.Printf("Healthy: %d/%d providers\n", healthy, len(health))
+	fmt.Println("\nPress Ctrl+C to exit")
 }

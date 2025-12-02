@@ -22,7 +22,7 @@ This guide covers everything you need to know to develop the Brain-Salad Go impl
 
 ### Required
 
-- **Go 1.25.4+** - [Download](https://go.dev/dl/)
+- **Go** - Version specified in [go.mod](../go.mod) - [Download](https://go.dev/dl/)
 - **SQLite3** - Should be installed on most systems
 - **make** - For running build targets
 
@@ -36,7 +36,7 @@ This guide covers everything you need to know to develop the Brain-Salad Go impl
 
 ```bash
 # Check Go version
-go version  # Should be 1.25.4 or higher
+go version  # Check against version in go.mod
 
 # Check SQLite
 sqlite3 --version

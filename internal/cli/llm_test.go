@@ -19,7 +19,7 @@ func TestNewLLMCommand(t *testing.T) {
 	}
 
 	// Check that all subcommands are registered
-	expectedSubcommands := []string{"list", "test", "set-default", "config"}
+	expectedSubcommands := []string{"list", "test", "set-default", "config", "health"}
 	for _, expected := range expectedSubcommands {
 		found := false
 		for _, subcmd := range cmd.Commands() {

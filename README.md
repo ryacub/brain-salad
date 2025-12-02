@@ -2,7 +2,7 @@
 
 > A telos-idea-matrix: score ideas against what actually matters to you
 
-**Language:** Go 1.25.4+
+**Language:** Go (see [go.mod](go.mod) for version)
 **Status:** Production Ready
 **License:** MIT
 
@@ -15,8 +15,11 @@ Brain-Salad helps you decide which ideas to pursue by scoring them against your 
 ## Quick Start
 
 ```bash
-# Install
-go install github.com/rayyacub/brain-salad/cmd/cli@latest
+# Install (one-liner)
+curl -sSL https://raw.githubusercontent.com/rayyacub/brain-salad/main/scripts/install.sh | bash
+
+# Or with Go installed:
+go install github.com/rayyacub/telos-idea-matrix/cmd/cli@latest
 
 # Run the setup wizard (2 minutes)
 tm init

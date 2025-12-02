@@ -831,6 +831,7 @@ func TestAnalyzeWithTelos(t *testing.T) {
 
 	if result == nil {
 		t.Fatal("Expected analysis result, got nil")
+		return
 	}
 
 	if result.Provider != "rule_based" {

@@ -141,6 +141,7 @@ func TestProvider_FallbackChain(t *testing.T) {
 			if !tt.wantError {
 				if result == nil {
 					t.Fatal("expected result to be non-nil")
+					return
 				}
 				if result.Provider != tt.wantProvider {
 					t.Errorf("expected provider %s, got %s", tt.wantProvider, result.Provider)
@@ -186,6 +187,7 @@ func TestProvider_FallbackToRuleBased(t *testing.T) {
 	}
 	if result == nil {
 		t.Fatal("expected result to be non-nil")
+		return
 	}
 	if result.Provider != "rule_based" {
 		t.Errorf("expected provider 'rule_based', got %s", result.Provider)

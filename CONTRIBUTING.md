@@ -52,7 +52,7 @@ Before contributing, please:
 
 ### Prerequisites
 
-- **Go 1.25.4 or higher**: Install via [official downloads](https://go.dev/dl/)
+- **Go**: Version specified in [go.mod](./go.mod) - Install via [official downloads](https://go.dev/dl/)
 - **SQLite**: Required for database functionality (typically pre-installed on most systems)
 - **Git**: For version control
 

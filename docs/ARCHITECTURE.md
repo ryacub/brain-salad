@@ -511,7 +511,7 @@ Run tests with: `go test ./...`
 
 ### Local Development
 1. Clone repository
-2. Install Go 1.25.4+
+2. Install Go (version per go.mod)
 3. Run `go mod download`
 4. Create `~/.telos/telos.md` with your configuration
 5. Run CLI: `go run ./cmd/cli`
