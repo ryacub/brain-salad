@@ -6,22 +6,30 @@ import (
 	"path/filepath"
 
 	"github.com/spf13/cobra"
+
+	"github.com/rayyacub/telos-idea-matrix/internal/cli/wizard"
+	"github.com/rayyacub/telos-idea-matrix/internal/profile"
 )
+
+var initAdvanced bool
 
 func newInitCommand() *cobra.Command {
 	cmd := &cobra.Command{
 		Use:   "init",
-		Short: "Initialize Telos Idea Matrix for first-time use",
-		Long: `Initialize your Telos Idea Matrix workspace.
+		Short: "Set up Brain Salad with an interactive discovery wizard",
+		Long: `Initialize Brain Salad for first-time use.
 
 This command will:
-  - Create a data directory
-  - Generate a template telos.md file
-  - Initialize the database
-  - Set up default configuration
+  - Run an interactive discovery wizard to learn your preferences
+  - Create a personalized scoring profile
+  - Set up the database for storing ideas
+
+Use --advanced to create a telos.md file for power-user configuration.
 `,
 		RunE: runInit,
 	}
+
+	cmd.Flags().BoolVar(&initAdvanced, "advanced", false, "Create telos.md for advanced configuration")
 
 	// Skip initialization for init command (doesn't need existing telos.md)
 	// Override the parent's PersistentPreRunE with a no-op function
@@ -33,7 +41,108 @@ This command will:
 }
 
 func runInit(cmd *cobra.Command, args []string) error {
-	fmt.Println("🚀 Initializing Telos Idea Matrix...")
+	// Check for existing profile
+	profilePath, err := profile.DefaultPath()
+	if err != nil {
+		return fmt.Errorf("failed to determine profile path: %w", err)
+	}
+
+	// Check for existing telos.md (legacy)
+	home, err := os.UserHomeDir()
+	if err != nil {
+		return fmt.Errorf("failed to get home directory: %w", err)
+	}
+	legacyTelosPath := filepath.Join(home, ".telos", "telos.md")
+
+	// Handle existing configurations
+	if profile.Exists(profilePath) {
+		runner := wizard.NewRunner()
+		if !runner.Confirm("A profile already exists. Do you want to start over?") {
+			fmt.Println("Keeping existing profile.")
+			return nil
+		}
+	}
+
+	// If advanced mode, use legacy telos.md setup
+	if initAdvanced {
+		return runAdvancedInit()
+	}
+
+	// Check for legacy telos.md and offer migration
+	if _, err := os.Stat(legacyTelosPath); err == nil {
+		fmt.Println()
+		fmt.Println("Found existing telos.md configuration.")
+		fmt.Println()
+		runner := wizard.NewRunner()
+		if runner.Confirm("Would you like to create a new profile instead? (recommended)") {
+			return runWizardInit(profilePath)
+		}
+		fmt.Println("Keeping telos.md for advanced mode. Run 'tm init --advanced' to modify it.")
+		return nil
+	}
+
+	// Run the discovery wizard
+	return runWizardInit(profilePath)
+}
+
+// runWizardInit runs the interactive discovery wizard.
+func runWizardInit(profilePath string) error {
+	runner := wizard.NewRunner()
+
+	// Run the wizard
+	answers, err := runner.Run()
+	if err != nil {
+		runner.PrintError(fmt.Sprintf("Wizard failed: %v", err))
+		return err
+	}
+
+	// Map answers to profile
+	p := wizard.MapAnswersToProfile(answers)
+
+	// Generate and display what we learned
+	summary := wizard.GenerateSummary(p)
+	runner.PrintSummary(summary)
+
+	// Show profile preview with visual weights
+	runner.PrintProfilePreview(p.Priorities, p.Goals, p.Avoid)
+
+	// Confirm before saving
+	if !runner.ConfirmSave() {
+		fmt.Println()
+		fmt.Println("Profile not saved. Run 'tm init' to try again.")
+		return nil
+	}
+
+	// Save the profile
+	if err := profile.Save(p, profilePath); err != nil {
+		runner.PrintError(fmt.Sprintf("Failed to save profile: %v", err))
+		return err
+	}
+
+	runner.PrintSuccess(profilePath)
+
+	// Create data directory for database
+	dataDir, err := profile.DefaultDir()
+	if err != nil {
+		return err
+	}
+	if err := os.MkdirAll(dataDir, 0755); err != nil {
+		return fmt.Errorf("failed to create data directory: %w", err)
+	}
+
+	// Show next steps
+	fmt.Println("Next steps:")
+	fmt.Println("  1. Score your first idea: tm score \"Your idea here\"")
+	fmt.Println("  2. Save an idea: tm dump \"Your idea here\"")
+	fmt.Println("  3. Review saved ideas: tm review")
+	fmt.Println()
+
+	return nil
+}
+
+// runAdvancedInit creates the legacy telos.md setup for power users.
+func runAdvancedInit() error {
+	fmt.Println("Setting up advanced mode with telos.md...")
 	fmt.Println()
 
 	// 1. Create data directory
@@ -69,7 +178,6 @@ func runInit(cmd *cobra.Command, args []string) error {
 	// 3. Initialize database
 	dbPath := filepath.Join(dataDir, "ideas.db")
 	if _, err := os.Stat(dbPath); os.IsNotExist(err) {
-		// Database will be created on first run
 		fmt.Printf("✓ Database will be created at: %s\n", dbPath)
 	} else {
 		fmt.Printf("⚠ Database already exists: %s\n", dbPath)
@@ -84,7 +192,7 @@ func runInit(cmd *cobra.Command, args []string) error {
 
 	// 5. Show next steps
 	fmt.Println()
-	fmt.Println("🎉 Initialization complete!")
+	fmt.Println("Advanced mode initialized!")
 	fmt.Println()
 	fmt.Println("Next steps:")
 	fmt.Printf("  1. Edit your mission and goals: %s\n", telosPath)
