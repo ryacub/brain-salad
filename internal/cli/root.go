@@ -10,7 +10,6 @@ import (
 	"github.com/ryacub/telos-idea-matrix/internal/cli/bulk"
 	"github.com/ryacub/telos-idea-matrix/internal/cli/dump"
 	clierrors "github.com/ryacub/telos-idea-matrix/internal/cli/errors"
-	"github.com/ryacub/telos-idea-matrix/internal/cli/health"
 	"github.com/ryacub/telos-idea-matrix/internal/database"
 	"github.com/ryacub/telos-idea-matrix/internal/llm"
 	"github.com/ryacub/telos-idea-matrix/internal/models"
