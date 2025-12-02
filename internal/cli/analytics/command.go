@@ -37,10 +37,7 @@ Examples:
 	cmd.AddCommand(NewTrendsCommand(getContext))
 	cmd.AddCommand(NewReportCommand(getContext))
 	cmd.AddCommand(NewPatternsCommand(getContext))
-	cmd.AddCommand(NewPerformanceCommand(getContext))
-	cmd.AddCommand(NewAnomalyCommand(getContext))
 	cmd.AddCommand(NewMetricsCommand(getContext))
-	cmd.AddCommand(NewLLMCommand(getContext))
 
 	return cmd
 }
