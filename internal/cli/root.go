@@ -52,7 +52,6 @@ var (
 	rootCmd   *cobra.Command
 
 	// Color definitions
-	successColor = color.New(color.FgGreen, color.Bold)
 	infoColor    = color.New(color.FgCyan)
 	warningColor = color.New(color.FgYellow)
 )
