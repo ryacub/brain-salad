@@ -199,7 +199,7 @@ func runLinkCreate(sourceID, targetID, relTypeStr string, noConfirm bool) error 
 
 	// Show confirmation
 	fmt.Println()
-	if _, err := infoColor.Println("Creating relationship:"); err != nil {
+	if _, err := cliutil.InfoColor.Println("Creating relationship:"); err != nil {
 		log.Warn().Err(err).Msg("failed to print message")
 	}
 	fmt.Printf("  Source: [%s] %s\n", truncateID(sourceID), cliutil.TruncateText(sourceIdea.Content, 60))
@@ -257,7 +257,7 @@ func runLinkList(ideaID string) error {
 	}
 
 	fmt.Println()
-	if _, err := infoColor.Printf("🔗 Relationships for idea: %s\n", truncateID(ideaID)); err != nil {
+	if _, err := cliutil.InfoColor.Printf("🔗 Relationships for idea: %s\n", truncateID(ideaID)); err != nil {
 		log.Warn().Err(err).Msg("failed to print message")
 	}
 	fmt.Printf("   %s\n", cliutil.TruncateText(idea.Content, 60))
@@ -303,7 +303,7 @@ func runLinkList(ideaID string) error {
 
 	// Display incoming relationships
 	if len(incoming) > 0 {
-		if _, err := infoColor.Println("Incoming (where this idea is the target):"); err != nil {
+		if _, err := cliutil.InfoColor.Println("Incoming (where this idea is the target):"); err != nil {
 			log.Warn().Err(err).Msg("failed to print message")
 		}
 		for i, rel := range incoming {
@@ -378,7 +378,7 @@ func runLinkShow(ideaID, relTypeStr string) error {
 	}
 
 	fmt.Println()
-	if _, err := infoColor.Printf("🔗 Related ideas for: %s%s\n", truncateID(ideaID), filterText); err != nil {
+	if _, err := cliutil.InfoColor.Printf("🔗 Related ideas for: %s%s\n", truncateID(ideaID), filterText); err != nil {
 		log.Warn().Err(err).Msg("failed to print message")
 	}
 	fmt.Printf("   %s\n", cliutil.TruncateText(idea.Content, 60))
@@ -476,7 +476,7 @@ func runLinkPath(sourceID, targetID string, maxDepth int) error {
 	}
 
 	fmt.Println()
-	if _, err := infoColor.Printf("🔍 Finding paths from %s to %s...\n", truncateID(sourceID), truncateID(targetID)); err != nil {
+	if _, err := cliutil.InfoColor.Printf("🔍 Finding paths from %s to %s...\n", truncateID(sourceID), truncateID(targetID)); err != nil {
 		log.Warn().Err(err).Msg("failed to print message")
 	}
 	fmt.Println()

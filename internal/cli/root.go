@@ -5,10 +5,10 @@ import (
 	"os"
 	"path/filepath"
 
-	"github.com/fatih/color"
 	"github.com/ryacub/telos-idea-matrix/internal/cli/analytics"
 	"github.com/ryacub/telos-idea-matrix/internal/cli/bulk"
 	clierrors "github.com/ryacub/telos-idea-matrix/internal/cli/errors"
+	"github.com/ryacub/telos-idea-matrix/internal/cliutil"
 	"github.com/ryacub/telos-idea-matrix/internal/database"
 	"github.com/ryacub/telos-idea-matrix/internal/llm"
 	"github.com/ryacub/telos-idea-matrix/internal/models"
@@ -50,10 +50,6 @@ var (
 	dbPath    string
 	telosPath string
 	rootCmd   *cobra.Command
-
-	// Color definitions
-	infoColor    = color.New(color.FgCyan)
-	warningColor = color.New(color.FgYellow)
 )
 
 func init() {
@@ -126,7 +122,7 @@ func initializeCLI(cmd *cobra.Command, args []string) error {
 		return initializeLegacyMode()
 	} else {
 		// No configuration found - prompt user to run init
-		_, _ = warningColor.Fprintf(os.Stderr, "⚠️  No configuration found.\n")
+		_, _ = cliutil.WarningColor.Fprintf(os.Stderr, "⚠️  No configuration found.\n")
 		fmt.Fprintf(os.Stderr, "Run 'tm init' to set up Brain Salad with a quick wizard.\n\n")
 		return clierrors.WrapError(fmt.Errorf("no configuration"), "Initialization failed")
 	}

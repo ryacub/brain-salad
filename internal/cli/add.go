@@ -170,7 +170,7 @@ func runAddLegacy(ideaText string, opts addOptions) error {
 		analysis, err = runLLMAnalysisWithProvider(ideaText, opts.provider, "", ctx.LLMManager, ctx.Telos)
 		if err != nil {
 			if !opts.quiet {
-				_, _ = warningColor.Printf("AI unavailable, using rule-based: %v\n", err)
+				_, _ = cliutil.WarningColor.Printf("AI unavailable, using rule-based: %v\n", err)
 			}
 			analysis, err = ctx.Engine.CalculateScore(ideaText)
 		}
