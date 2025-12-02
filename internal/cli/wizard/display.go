@@ -101,36 +101,36 @@ func (r *Runner) Run() (*WizardAnswers, error) {
 // printHeader displays the wizard introduction.
 func (r *Runner) printHeader() {
 	fmt.Println()
-	headerColor.Println("Let's figure out how you evaluate ideas.")
-	subtextColor.Println("I'll show you some tradeoffs — pick what feels right.")
+	_, _ = headerColor.Println("Let's figure out how you evaluate ideas.")
+	_, _ = subtextColor.Println("I'll show you some tradeoffs — pick what feels right.")
 	fmt.Println()
 }
 
 // printDivider displays a visual separator.
 func (r *Runner) printDivider() {
-	dividerColor.Println("─────────────────────────────────────────────────────")
+	_, _ = dividerColor.Println("─────────────────────────────────────────────────────")
 	fmt.Println()
 }
 
 // printProgress displays the current step progress.
 func (r *Runner) printProgress(current, total int) {
-	progressColor.Printf("Step %d of %d\n\n", current, total)
+	_, _ = progressColor.Printf("Step %d of %d\n\n", current, total)
 }
 
 // askQuestion displays a question and collects the answer.
 func (r *Runner) askQuestion(q Question, num, total int) (*Answer, error) {
 	// Display question
-	promptColor.Printf("Q%d: %s\n", num, q.Text)
+	_, _ = promptColor.Printf("Q%d: %s\n", num, q.Text)
 	if q.Subtext != "" {
-		subtextColor.Printf("    %s\n", q.Subtext)
+		_, _ = subtextColor.Printf("    %s\n", q.Subtext)
 	}
 	fmt.Println()
 
 	// Display options
 	for _, opt := range q.Options {
-		optionColor.Printf("    [%s] %s\n", opt.Key, opt.Text)
+		_, _ = optionColor.Printf("    [%s] %s\n", opt.Key, opt.Text)
 		if opt.Description != "" {
-			subtextColor.Printf("        %s\n", opt.Description)
+			_, _ = subtextColor.Printf("        %s\n", opt.Description)
 		}
 	}
 	fmt.Println()
@@ -160,8 +160,8 @@ func (r *Runner) askQuestion(q Question, num, total int) (*Answer, error) {
 		}
 
 		// Friendly error with valid options
-		errorColor.Printf("Hmm, '%s' isn't one of the options.\n", strings.ToLower(input))
-		subtextColor.Printf("Try typing %s\n\n", strings.Join(keyList, ", "))
+		_, _ = errorColor.Printf("Hmm, '%s' isn't one of the options.\n", strings.ToLower(input))
+		_, _ = subtextColor.Printf("Try typing %s\n\n", strings.Join(keyList, ", "))
 	}
 }
 
@@ -170,20 +170,20 @@ func (r *Runner) collectGoals() ([]string, error) {
 	prompt := GetGoalPrompt()
 	examples := GoalExamples()
 
-	promptColor.Printf("Q6: %s\n", prompt.Text)
-	subtextColor.Printf("    %s\n", prompt.Subtext)
+	_, _ = promptColor.Printf("Q6: %s\n", prompt.Text)
+	_, _ = subtextColor.Printf("    %s\n", prompt.Subtext)
 	fmt.Println()
 
 	// Show examples to guide the user
-	subtextColor.Println("    Examples:")
+	_, _ = subtextColor.Println("    Examples:")
 	for _, ex := range examples[:3] { // Show first 3 examples
-		subtextColor.Printf("      • %s\n", ex)
+		_, _ = subtextColor.Printf("      • %s\n", ex)
 	}
 	fmt.Println()
 
 	const (
-		maxRetries    = 3
-		maxInputLen   = 500
+		maxRetries  = 3
+		maxInputLen = 500
 	)
 
 	goals := []string{}
@@ -191,11 +191,11 @@ func (r *Runner) collectGoals() ([]string, error) {
 
 	for i := 1; i <= prompt.MaxGoals; i++ {
 		if i == 1 {
-			subtextColor.Printf("    Goal %d: ", i)
+			_, _ = subtextColor.Printf("    Goal %d: ", i)
 		} else if i <= prompt.MinGoals {
-			subtextColor.Printf("    Goal %d: ", i)
+			_, _ = subtextColor.Printf("    Goal %d: ", i)
 		} else {
-			subtextColor.Printf("    Goal %d (optional, Enter to skip): ", i)
+			_, _ = subtextColor.Printf("    Goal %d (optional, Enter to skip): ", i)
 		}
 		fmt.Print("> ")
 
@@ -208,7 +208,7 @@ func (r *Runner) collectGoals() ([]string, error) {
 
 		// Validate input length
 		if len(input) > maxInputLen {
-			errorColor.Printf("Input too long (max %d characters). Please shorten.\n", maxInputLen)
+			_, _ = errorColor.Printf("Input too long (max %d characters). Please shorten.\n", maxInputLen)
 			i-- // Retry this goal
 			continue
 		}
@@ -219,7 +219,7 @@ func (r *Runner) collectGoals() ([]string, error) {
 				if retryCount >= maxRetries {
 					return nil, fmt.Errorf("no goals provided after %d attempts", maxRetries)
 				}
-				errorColor.Printf("Please enter at least one goal. (%d/%d attempts)\n", retryCount, maxRetries)
+				_, _ = errorColor.Printf("Please enter at least one goal. (%d/%d attempts)\n", retryCount, maxRetries)
 				i-- // Retry this goal
 				continue
 			}
@@ -241,13 +241,13 @@ func (r *Runner) collectAvoid() ([]string, error) {
 	prompt := GetAvoidPrompt()
 	examples := AvoidExamples()
 
-	promptColor.Printf("Q7: %s\n", prompt.Text)
-	subtextColor.Printf("    %s\n", prompt.Subtext)
+	_, _ = promptColor.Printf("Q7: %s\n", prompt.Text)
+	_, _ = subtextColor.Printf("    %s\n", prompt.Subtext)
 	fmt.Println()
 
 	// Show examples
-	subtextColor.Println("    Examples:")
-	subtextColor.Printf("      %s\n", strings.Join(examples[:3], ", "))
+	_, _ = subtextColor.Println("    Examples:")
+	_, _ = subtextColor.Printf("      %s\n", strings.Join(examples[:3], ", "))
 	fmt.Println()
 
 	fmt.Print("> ")
@@ -260,12 +260,12 @@ func (r *Runner) collectAvoid() ([]string, error) {
 
 	// Validate input length
 	if len(input) > maxInputLen {
-		errorColor.Printf("Input too long (max %d characters). Truncating.\n", maxInputLen)
+		_, _ = errorColor.Printf("Input too long (max %d characters). Truncating.\n", maxInputLen)
 		input = input[:maxInputLen]
 	}
 
 	if input == "" {
-		subtextColor.Println("    (skipped)")
+		_, _ = subtextColor.Println("    (skipped)")
 		return []string{}, nil
 	}
 
@@ -286,32 +286,32 @@ func (r *Runner) collectAvoid() ([]string, error) {
 // PrintSummary displays what the wizard learned about the user.
 func (r *Runner) PrintSummary(summaryLines []string) {
 	fmt.Println()
-	headerColor.Println("Here's what I learned:")
+	_, _ = headerColor.Println("Here's what I learned:")
 	fmt.Println()
 
 	for _, line := range summaryLines {
-		successColor.Printf("  • %s\n", line)
+		_, _ = successColor.Printf("  • %s\n", line)
 	}
 	fmt.Println()
 }
 
 // PrintSuccess displays the completion message.
 func (r *Runner) PrintSuccess(profilePath string) {
-	successColor.Printf("✓ Profile saved to %s\n", profilePath)
+	_, _ = successColor.Printf("✓ Profile saved to %s\n", profilePath)
 	fmt.Println()
-	subtextColor.Println("Run `brain-salad profile` to view your profile")
-	subtextColor.Println("Run `brain-salad profile reset` to start over")
+	_, _ = subtextColor.Println("Run `brain-salad profile` to view your profile")
+	_, _ = subtextColor.Println("Run `brain-salad profile reset` to start over")
 	fmt.Println()
 }
 
 // PrintError displays an error message.
 func (r *Runner) PrintError(message string) {
-	errorColor.Printf("✗ %s\n", message)
+	_, _ = errorColor.Printf("✗ %s\n", message)
 }
 
 // Confirm asks for yes/no confirmation.
 func (r *Runner) Confirm(prompt string) bool {
-	promptColor.Printf("%s [y/N]: ", prompt)
+	_, _ = promptColor.Printf("%s [y/N]: ", prompt)
 
 	input, err := r.reader.ReadString('\n')
 	if err != nil {
@@ -325,13 +325,13 @@ func (r *Runner) Confirm(prompt string) bool {
 // PrintProfilePreview displays a visual preview of the scoring weights.
 func (r *Runner) PrintProfilePreview(priorities map[string]float64, goals, avoid []string) {
 	fmt.Println()
-	headerColor.Println("Your Profile Preview")
-	dividerColor.Println("─────────────────────────────────────────────────────")
+	_, _ = headerColor.Println("Your Profile Preview")
+	_, _ = dividerColor.Println("─────────────────────────────────────────────────────")
 	fmt.Println()
 
 	// Show goals
 	if len(goals) > 0 {
-		promptColor.Println("Goals:")
+		_, _ = promptColor.Println("Goals:")
 		for _, goal := range goals {
 			fmt.Printf("  • %s\n", goal)
 		}
@@ -340,7 +340,7 @@ func (r *Runner) PrintProfilePreview(priorities map[string]float64, goals, avoid
 
 	// Show avoid
 	if len(avoid) > 0 {
-		promptColor.Println("Avoiding:")
+		_, _ = promptColor.Println("Avoiding:")
 		for _, a := range avoid {
 			fmt.Printf("  • %s\n", a)
 		}
@@ -348,7 +348,7 @@ func (r *Runner) PrintProfilePreview(priorities map[string]float64, goals, avoid
 	}
 
 	// Show scoring weights as visual bars
-	promptColor.Println("Scoring Weights:")
+	_, _ = promptColor.Println("Scoring Weights:")
 
 	// Dimension labels (human-friendly)
 	labels := map[string]string{

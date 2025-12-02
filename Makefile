@@ -1,7 +1,8 @@
-.PHONY: help build test lint clean dev-cli dev-api fmt
+.PHONY: help build test lint clean dev-cli dev-api fmt check
 
 help:
 	@echo "Available targets:"
+	@echo "  check          - Run all CI checks (fmt, lint, test) - RUN BEFORE PUSH"
 	@echo "  build          - Build all binaries"
 	@echo "  build-cli      - Build CLI binary"
 	@echo "  build-api      - Build API server binary"
@@ -56,3 +57,21 @@ dev-cli:
 
 dev-api:
 	@air -c .air-api.toml
+
+# CI-equivalent checks - run before push to avoid linter failures
+check: fmt
+	@echo "Running CI checks..."
+	@echo ""
+	@echo "=== Lint ==="
+	@golangci-lint run || (echo "❌ Lint failed. Run 'make lint' to see details." && exit 1)
+	@echo "✓ Lint passed"
+	@echo ""
+	@echo "=== Tests ==="
+	@go test ./... -race || (echo "❌ Tests failed." && exit 1)
+	@echo "✓ Tests passed"
+	@echo ""
+	@echo "=== Build ==="
+	@go build ./... || (echo "❌ Build failed." && exit 1)
+	@echo "✓ Build passed"
+	@echo ""
+	@echo "✅ All checks passed - safe to push!"
