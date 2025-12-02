@@ -19,13 +19,13 @@ func init() {
 }
 
 var (
-	headerColor  = color.New(color.FgCyan, color.Bold)
-	promptColor  = color.New(color.FgYellow)
-	optionColor  = color.New(color.FgWhite)
-	successColor = color.New(color.FgGreen)
-	subtextColor = color.New(color.FgHiBlack)
-	errorColor   = color.New(color.FgRed)
-	dividerColor = color.New(color.FgHiBlack)
+	headerColor   = color.New(color.FgCyan, color.Bold)
+	promptColor   = color.New(color.FgYellow)
+	optionColor   = color.New(color.FgWhite)
+	successColor  = color.New(color.FgGreen)
+	subtextColor  = color.New(color.FgHiBlack)
+	errorColor    = color.New(color.FgRed)
+	dividerColor  = color.New(color.FgHiBlack)
 	progressColor = color.New(color.FgHiBlack)
 )
 

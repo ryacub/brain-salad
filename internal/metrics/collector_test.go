@@ -172,6 +172,7 @@ func TestMetricsCollector_HistogramStats(t *testing.T) {
 	stats := collector.GetHistogramStats("latency")
 	if stats == nil {
 		t.Fatal("Expected histogram stats to exist")
+		return
 	}
 
 	if stats.Count != 10 {

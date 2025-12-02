@@ -92,7 +92,7 @@ func applyPersistenceAnswer(answers *WizardAnswers, weights map[string]float64, 
 
 	case "C": // Move on to something new
 		weights[profile.DimensionCompletionLikelihood] += 0.08 // Need simpler projects
-		weights[profile.DimensionSustainability] += 0.05      // Need more motivation
+		weights[profile.DimensionSustainability] += 0.05       // Need more motivation
 		p.Preferences.PushesThrough = false
 	}
 }

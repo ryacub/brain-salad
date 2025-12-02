@@ -155,8 +155,8 @@ func WrapError(err error, context string) error {
 
 	// Generic wrapper with context
 	return &FriendlyError{
-		Title:       context,
-		Cause:       err,
+		Title: context,
+		Cause: err,
 		Suggestions: []string{
 			"Check the error message above for details",
 			"Run 'tm doctor' to diagnose system health",

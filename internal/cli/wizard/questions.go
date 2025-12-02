@@ -68,20 +68,20 @@ func Questions() []Question {
 
 // GoalPrompt returns the prompt for collecting user goals.
 type GoalPrompt struct {
-	Text       string
-	Subtext    string
-	MaxGoals   int
-	MinGoals   int
+	Text        string
+	Subtext     string
+	MaxGoals    int
+	MinGoals    int
 	Placeholder string
 }
 
 // GetGoalPrompt returns the goal collection prompt.
 func GetGoalPrompt() GoalPrompt {
 	return GoalPrompt{
-		Text:       "What are you trying to achieve right now?",
-		Subtext:    "(write 1-3 goals — anything goes)",
-		MaxGoals:   3,
-		MinGoals:   1,
+		Text:        "What are you trying to achieve right now?",
+		Subtext:     "(write 1-3 goals — anything goes)",
+		MaxGoals:    3,
+		MinGoals:    1,
 		Placeholder: "sell pottery at farmer's market",
 	}
 }
@@ -99,18 +99,18 @@ func GoalExamples() []string {
 
 // AvoidPrompt returns the prompt for collecting things to avoid.
 type AvoidPrompt struct {
-	Text       string
-	Subtext    string
-	Optional   bool
+	Text        string
+	Subtext     string
+	Optional    bool
 	Placeholder string
 }
 
 // GetAvoidPrompt returns the avoidance collection prompt.
 func GetAvoidPrompt() AvoidPrompt {
 	return AvoidPrompt{
-		Text:       "Anything you want to avoid?",
-		Subtext:    "(optional — separate with commas, or press Enter to skip)",
-		Optional:   true,
+		Text:        "Anything you want to avoid?",
+		Subtext:     "(optional — separate with commas, or press Enter to skip)",
+		Optional:    true,
 		Placeholder: "large inventory, wholesale accounts",
 	}
 }
