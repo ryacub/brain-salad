@@ -126,15 +126,15 @@ Run 'tm <command> --help' for details on any command.`,
 	reviewCmd.Deprecated = "use 'tm list' instead"
 	rootCmd.AddCommand(reviewCmd)
 
-	healthCmd := newHealthCommand()
-	healthCmd.Hidden = true
-	healthCmd.Deprecated = "use 'tm status' instead"
-	rootCmd.AddCommand(healthCmd)
+	// healthCmd := newHealthCommand() // Deprecated - removed health package
+	// healthCmd.Hidden = true
+	// healthCmd.Deprecated = "use 'tm status' instead"
+	// rootCmd.AddCommand(healthCmd)
 
-	doctorCmd := health.NewDoctorCommand()
-	doctorCmd.Hidden = true
-	doctorCmd.Deprecated = "use 'tm status' instead"
-	rootCmd.AddCommand(doctorCmd)
+	// doctorCmd := health.NewDoctorCommand() // Deprecated - removed health package
+	// doctorCmd.Hidden = true
+	// doctorCmd.Deprecated = "use 'tm status' instead"
+	// rootCmd.AddCommand(doctorCmd)
 
 	analyzeLLMCmd := newAnalyzeLLMCommand()
 	analyzeLLMCmd.Hidden = true
