@@ -353,7 +353,7 @@ func gatherSystemStatus() statusGroup {
 	runtime.ReadMemStats(&m)
 	group.Details["memory"] = fmt.Sprintf("%.1f MB", float64(m.Alloc)/1024/1024)
 
-// Simple health checks
+	// Simple health checks
 	if ctx != nil && ctx.Repository != nil {
 		// Check database
 		if err := ctx.Repository.Ping(); err != nil {

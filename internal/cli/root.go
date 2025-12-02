@@ -5,7 +5,7 @@ import (
 	"os"
 	"path/filepath"
 
-"github.com/ryacub/telos-idea-matrix/internal/cli/analytics"
+	"github.com/ryacub/telos-idea-matrix/internal/cli/analytics"
 	"github.com/ryacub/telos-idea-matrix/internal/cli/bulk"
 	clierrors "github.com/ryacub/telos-idea-matrix/internal/cli/errors"
 	"github.com/ryacub/telos-idea-matrix/internal/cliutil"
