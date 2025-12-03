@@ -1,7 +1,6 @@
 package cli
 
 import (
-	"context"
 	"encoding/json"
 	"fmt"
 	"net/http"
@@ -14,7 +13,6 @@ import (
 	"github.com/rs/zerolog/log"
 	"github.com/ryacub/telos-idea-matrix/internal/config"
 	"github.com/ryacub/telos-idea-matrix/internal/database"
-	"github.com/ryacub/telos-idea-matrix/internal/health"
 	"github.com/ryacub/telos-idea-matrix/internal/profile"
 	"github.com/spf13/cobra"
 )
@@ -355,21 +353,18 @@ func gatherSystemStatus() statusGroup {
 	runtime.ReadMemStats(&m)
 	group.Details["memory"] = fmt.Sprintf("%.1f MB", float64(m.Alloc)/1024/1024)
 
-	// Run health checks
+	// Simple health checks
 	if ctx != nil && ctx.Repository != nil {
-		monitor := health.NewHealthMonitor()
-		monitor.AddCheck(health.NewDatabaseHealthChecker(ctx.Repository.DB()))
-		monitor.AddCheck(health.NewMemoryHealthChecker(500.0))
-
-		checkCtx, cancel := context.WithTimeout(context.Background(), 5*time.Second)
-		defer cancel()
-
-		healthStatus := monitor.RunAllChecks(checkCtx)
-		switch healthStatus.Status {
-		case health.Unhealthy:
+		// Check database
+		if err := ctx.Repository.Ping(); err != nil {
 			group.Status = statusError
-		case health.Degraded:
+			group.Issues = append(group.Issues, "Database connection failed")
+		}
+
+		// Check memory (warn if > 500MB)
+		if float64(m.Alloc)/1024/1024 > 500.0 {
 			group.Status = statusWarning
+			group.Issues = append(group.Issues, "Memory usage high")
 		}
 	}
 

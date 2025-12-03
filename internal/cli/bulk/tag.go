@@ -6,7 +6,6 @@ import (
 
 	"github.com/fatih/color"
 	"github.com/rs/zerolog/log"
-	"github.com/ryacub/telos-idea-matrix/internal/bulk"
 	"github.com/ryacub/telos-idea-matrix/internal/cliutil"
 	"github.com/ryacub/telos-idea-matrix/internal/database"
 	"github.com/spf13/cobra"
@@ -34,7 +33,6 @@ Use --min-score, --search, and --limit to control which ideas are tagged.`,
 			tagName := args[0]
 
 			// Create service once
-			service := bulk.NewService(ctx.Repository)
 
 			// Find matching ideas
 			minScorePtr := &minScore
@@ -51,7 +49,7 @@ Use --min-score, --search, and --limit to control which ideas are tagged.`,
 
 			// Filter by search if provided
 			if search != "" {
-				ideas = service.FilterBySearch(ideas, search)
+				ideas = filterBySearch(ideas, search)
 			}
 
 			if len(ideas) == 0 {

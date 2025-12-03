@@ -13,7 +13,6 @@ import (
 	"github.com/go-chi/cors"
 	"github.com/ryacub/telos-idea-matrix/internal/config"
 	"github.com/ryacub/telos-idea-matrix/internal/database"
-	"github.com/ryacub/telos-idea-matrix/internal/health"
 	"github.com/ryacub/telos-idea-matrix/internal/logging"
 	"github.com/ryacub/telos-idea-matrix/internal/models"
 	"github.com/ryacub/telos-idea-matrix/internal/telos"
@@ -28,25 +27,11 @@ type Server struct {
 	rateLimiter    *RateLimiter
 	csrfProtection *CSRFProtection
 	sessionManager *SessionManager
-	healthMonitor  *health.HealthMonitor
 	authConfig     config.AuthConfig
 }
 
 // NewServer creates a new API server from a telos configuration object
 func NewServer(repo *database.Repository, telosConfig *models.Telos, authConfig config.AuthConfig) *Server {
-	// Create health monitor and register checks
-	healthMonitor := health.NewHealthMonitor()
-	healthMonitor.SetVersion("1.0.0")
-
-	// Add database health checker
-	healthMonitor.AddCheck(health.NewDatabaseHealthChecker(repo.DB()))
-
-	// Add memory health checker (warn if using > 500MB)
-	healthMonitor.AddCheck(health.NewMemoryHealthChecker(500.0))
-
-	// Add disk space health checker (warn if < 1GB free)
-	healthMonitor.AddCheck(health.NewDiskSpaceHealthChecker("/tmp", 1024))
-
 	// Create session manager with secure configuration
 	sessionConfig := DefaultSessionConfig()
 	// Set SecureCookie based on environment
@@ -63,7 +48,6 @@ func NewServer(repo *database.Repository, telosConfig *models.Telos, authConfig 
 		rateLimiter:    NewRateLimiter(100, 10),          // 100 req/min, burst of 10
 		csrfProtection: NewCSRFProtection(1 * time.Hour), // 1-hour token TTL
 		sessionManager: sessionManager,
-		healthMonitor:  healthMonitor,
 		authConfig:     authConfig,
 	}
 

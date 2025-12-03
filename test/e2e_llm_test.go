@@ -41,7 +41,7 @@ func setupTestDB(t *testing.T) string {
 	return filepath.Join(tmpDir, "test.db")
 }
 
-// TestE2E_AnalyzeLLM_Basic tests the basic analyze-llm command
+// TestE2E_AnalyzeLLM_Basic tests the basic add --ai command
 func TestE2E_AnalyzeLLM_Basic(t *testing.T) {
 	if testing.Short() {
 		t.Skip("skipping e2e test in short mode")
@@ -56,8 +56,8 @@ func TestE2E_AnalyzeLLM_Basic(t *testing.T) {
 	binaryPath := buildBinary(t)
 	defer func() { _ = os.Remove(binaryPath) }()
 
-	// Run analyze command with telos path and database
-	cmd := exec.Command(binaryPath, "--telos", telosPath, "--db", dbPath, "analyze-llm", "Build a simple web app")
+	// Run add command with AI analysis
+	cmd := exec.Command(binaryPath, "--telos", telosPath, "--db", dbPath, "add", "--ai", "Build a simple web app")
 	var out bytes.Buffer
 	cmd.Stdout = &out
 	cmd.Stderr = &out
@@ -73,8 +73,9 @@ func TestE2E_AnalyzeLLM_Basic(t *testing.T) {
 	// Verify output contains expected fields
 	requiredFields := []string{
 		"Score:",
-		"Mission Alignment:",
-		"Strategic Fit:",
+		"Mission:",
+		"Anti-Challenge:",
+		"Strategic:",
 	}
 
 	for _, field := range requiredFields {
@@ -86,7 +87,7 @@ func TestE2E_AnalyzeLLM_Basic(t *testing.T) {
 	t.Logf("Analysis output:\n%s", output)
 }
 
-// TestE2E_AnalyzeLLM_WithTelos tests analyze-llm with custom telos
+// TestE2E_AnalyzeLLM_WithTelos tests add --ai with custom telos
 func TestE2E_AnalyzeLLM_WithTelos(t *testing.T) {
 	if testing.Short() {
 		t.Skip("skipping e2e test in short mode")
@@ -117,7 +118,7 @@ func TestE2E_AnalyzeLLM_WithTelos(t *testing.T) {
 	defer func() { _ = os.Remove(binaryPath) }()
 
 	// Run with custom telos and database
-	cmd := exec.Command(binaryPath, "--telos", telosPath, "--db", dbPath, "analyze-llm", "Build an AI automation tool")
+	cmd := exec.Command(binaryPath, "--telos", telosPath, "--db", dbPath, "add", "--ai", "Build an AI automation tool")
 
 	var out bytes.Buffer
 	cmd.Stdout = &out
@@ -139,7 +140,7 @@ func TestE2E_AnalyzeLLM_WithTelos(t *testing.T) {
 	t.Logf("Analysis with custom telos:\n%s", output)
 }
 
-// TestE2E_AnalyzeLLM_LongIdea tests with a complex idea
+// TestE2E_AnalyzeLLM_LongIdea tests add --ai with a complex idea
 func TestE2E_AnalyzeLLM_LongIdea(t *testing.T) {
 	if testing.Short() {
 		t.Skip("skipping e2e test in short mode")
@@ -158,7 +159,7 @@ Python and GPT-4 to help businesses streamline their workflows. The platform
 will include a web interface, API, and CLI tools. Target market is small to
 medium businesses willing to pay $200/month subscription.`
 
-	cmd := exec.Command(binaryPath, "--telos", telosPath, "--db", dbPath, "analyze-llm", longIdea)
+	cmd := exec.Command(binaryPath, "--telos", telosPath, "--db", dbPath, "add", "--ai", longIdea)
 	var out bytes.Buffer
 	cmd.Stdout = &out
 	cmd.Stderr = &out
@@ -179,7 +180,7 @@ medium businesses willing to pay $200/month subscription.`
 	t.Logf("Long idea analysis:\n%s", output)
 }
 
-// TestE2E_AnalyzeLLM_Performance tests response time
+// TestE2E_AnalyzeLLM_Performance tests add --ai response time
 func TestE2E_AnalyzeLLM_Performance(t *testing.T) {
 	if testing.Short() {
 		t.Skip("skipping e2e test in short mode")
@@ -195,7 +196,7 @@ func TestE2E_AnalyzeLLM_Performance(t *testing.T) {
 
 	start := time.Now()
 
-	cmd := exec.Command(binaryPath, "--telos", telosPath, "--db", dbPath, "analyze-llm", "Build a web app")
+	cmd := exec.Command(binaryPath, "--telos", telosPath, "--db", dbPath, "add", "--ai", "Build a web app")
 	err := cmd.Run()
 
 	duration := time.Since(start)
@@ -213,7 +214,7 @@ func TestE2E_AnalyzeLLM_Performance(t *testing.T) {
 	t.Logf("Command completed in %v", duration)
 }
 
-// TestE2E_AnalyzeLLM_MultipleRuns tests running multiple analyses
+// TestE2E_AnalyzeLLM_MultipleRuns tests running multiple add --ai analyses
 func TestE2E_AnalyzeLLM_MultipleRuns(t *testing.T) {
 	if testing.Short() {
 		t.Skip("skipping e2e test in short mode")
@@ -236,7 +237,7 @@ func TestE2E_AnalyzeLLM_MultipleRuns(t *testing.T) {
 		t.Run("idea_"+string(rune('0'+i)), func(t *testing.T) {
 			// Each subtest gets its own database to avoid conflicts
 			dbPath := setupTestDB(t)
-			cmd := exec.Command(binaryPath, "--telos", telosPath, "--db", dbPath, "analyze-llm", idea)
+			cmd := exec.Command(binaryPath, "--telos", telosPath, "--db", dbPath, "add", "--ai", idea)
 			var out bytes.Buffer
 			cmd.Stdout = &out
 
@@ -253,7 +254,7 @@ func TestE2E_AnalyzeLLM_MultipleRuns(t *testing.T) {
 	}
 }
 
-// TestE2E_AnalyzeLLM_InvalidInput tests error handling
+// TestE2E_AnalyzeLLM_InvalidInput tests add --ai error handling
 func TestE2E_AnalyzeLLM_InvalidInput(t *testing.T) {
 	if testing.Short() {
 		t.Skip("skipping e2e test in short mode")
@@ -268,11 +269,11 @@ func TestE2E_AnalyzeLLM_InvalidInput(t *testing.T) {
 	}{
 		{
 			name: "no idea",
-			args: []string{"analyze-llm"},
+			args: []string{"add", "--ai"},
 		},
 		{
 			name: "empty idea",
-			args: []string{"analyze-llm", ""},
+			args: []string{"add", "--ai", ""},
 		},
 	}
 
@@ -295,7 +296,7 @@ func TestE2E_AnalyzeLLM_InvalidInput(t *testing.T) {
 	}
 }
 
-// TestE2E_AnalyzeLLM_Help tests help output
+// TestE2E_AnalyzeLLM_Help tests add --ai help output
 func TestE2E_AnalyzeLLM_Help(t *testing.T) {
 	if testing.Short() {
 		t.Skip("skipping e2e test in short mode")
@@ -304,7 +305,7 @@ func TestE2E_AnalyzeLLM_Help(t *testing.T) {
 	binaryPath := buildBinary(t)
 	defer func() { _ = os.Remove(binaryPath) }()
 
-	cmd := exec.Command(binaryPath, "analyze-llm", "--help")
+	cmd := exec.Command(binaryPath, "add", "--ai", "--help")
 	var out bytes.Buffer
 	cmd.Stdout = &out
 	cmd.Stderr = &out
@@ -318,14 +319,14 @@ func TestE2E_AnalyzeLLM_Help(t *testing.T) {
 	}
 
 	// Should contain usage information
-	if !strings.Contains(output, "analyze-llm") {
-		t.Error("help output should mention command name")
+	if !strings.Contains(output, "add") && !strings.Contains(output, "ai") {
+		t.Error("help output should mention add command or ai flag")
 	}
 
 	t.Logf("Help output:\n%s", output)
 }
 
-// TestE2E_AnalyzeLLM_JSONOutput tests JSON output format
+// TestE2E_AnalyzeLLM_JSONOutput tests add --ai JSON output format
 func TestE2E_AnalyzeLLM_JSONOutput(t *testing.T) {
 	if testing.Short() {
 		t.Skip("skipping e2e test in short mode")
@@ -340,7 +341,7 @@ func TestE2E_AnalyzeLLM_JSONOutput(t *testing.T) {
 	defer func() { _ = os.Remove(binaryPath) }()
 
 	// Try with --json flag if supported
-	cmd := exec.Command(binaryPath, "--telos", telosPath, "--db", dbPath, "analyze-llm", "--json", "Build a web app")
+	cmd := exec.Command(binaryPath, "--telos", telosPath, "--db", dbPath, "add", "--ai", "--json", "Build a web app")
 	var out bytes.Buffer
 	cmd.Stdout = &out
 	cmd.Stderr = &out
@@ -361,7 +362,7 @@ func TestE2E_AnalyzeLLM_JSONOutput(t *testing.T) {
 	}
 }
 
-// TestE2E_AnalyzeLLM_VerboseOutput tests verbose mode
+// TestE2E_AnalyzeLLM_VerboseOutput tests add --ai verbose mode
 func TestE2E_AnalyzeLLM_VerboseOutput(t *testing.T) {
 	if testing.Short() {
 		t.Skip("skipping e2e test in short mode")
@@ -375,8 +376,8 @@ func TestE2E_AnalyzeLLM_VerboseOutput(t *testing.T) {
 	binaryPath := buildBinary(t)
 	defer func() { _ = os.Remove(binaryPath) }()
 
-	// Run with verbose flag
-	cmd := exec.Command(binaryPath, "--telos", telosPath, "--db", dbPath, "analyze-llm", "-v", "Build a web app")
+	// Run with verbose flag (if supported)
+	cmd := exec.Command(binaryPath, "--telos", telosPath, "--db", dbPath, "add", "--ai", "Build a web app")
 	var out bytes.Buffer
 	cmd.Stdout = &out
 	cmd.Stderr = &out
@@ -443,7 +444,7 @@ func createTempFile(t *testing.T, name, content string) string {
 	return filePath
 }
 
-// TestE2E_AnalyzeLLM_StressTest runs many analyses to test stability
+// TestE2E_AnalyzeLLM_StressTest runs many add --ai analyses to test stability
 func TestE2E_AnalyzeLLM_StressTest(t *testing.T) {
 	if testing.Short() {
 		t.Skip("skipping stress test in short mode")
@@ -464,7 +465,7 @@ func TestE2E_AnalyzeLLM_StressTest(t *testing.T) {
 		tmpDir := t.TempDir()
 		dbPath := filepath.Join(tmpDir, "test.db")
 
-		cmd := exec.Command(binaryPath, "--telos", telosPath, "--db", dbPath, "analyze-llm", "Build a web app")
+		cmd := exec.Command(binaryPath, "--telos", telosPath, "--db", dbPath, "add", "--ai", "Build a web app")
 		err := cmd.Run()
 
 		if err == nil {

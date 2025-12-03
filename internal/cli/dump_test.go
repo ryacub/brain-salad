@@ -73,16 +73,16 @@ func setupTestCLI(t *testing.T) (*CLIContext, func()) {
 	return cliCtx, cleanup
 }
 
-func TestDumpCommand_WithIdeaText_SavesAndDisplays(t *testing.T) {
+func TestAddCommand_WithIdeaText_SavesAndDisplays(t *testing.T) {
 	cliCtx, cleanup := setupTestCLI(t)
 	defer cleanup()
 
-	// Execute dump command with test telos and db paths
+	// Execute add command with test telos and db paths
 	cmd := GetRootCmd()
 	cmd.SetArgs([]string{
 		"--telos", cliCtx.TelosPath,
 		"--db", cliCtx.DBPath,
-		"dump", "Build a SaaS product using Go and AI agents",
+		"add", "Build a SaaS product using Go and AI agents",
 	})
 
 	err := cmd.Execute()
@@ -104,7 +104,7 @@ func TestDumpCommand_WithIdeaText_SavesAndDisplays(t *testing.T) {
 	assert.NotEmpty(t, idea.Recommendation)
 }
 
-func TestDumpCommand_HighScoreIdea_GetsCorrectRecommendation(t *testing.T) {
+func TestAddCommand_HighScoreIdea_GetsCorrectRecommendation(t *testing.T) {
 	cliCtx, cleanup := setupTestCLI(t)
 	defer cleanup()
 
@@ -113,7 +113,7 @@ func TestDumpCommand_HighScoreIdea_GetsCorrectRecommendation(t *testing.T) {
 	cmd.SetArgs([]string{
 		"--telos", cliCtx.TelosPath,
 		"--db", cliCtx.DBPath,
-		"dump", "Build an AI agent using Go and LangChain with $2000/month SaaS subscription model, MVP in 30 days",
+		"add", "Build an AI agent using Go and LangChain with $2000/month SaaS subscription model, MVP in 30 days",
 	})
 
 	err := cmd.Execute()
@@ -135,7 +135,7 @@ func TestDumpCommand_HighScoreIdea_GetsCorrectRecommendation(t *testing.T) {
 		"Expected PRIORITIZE NOW or GOOD ALIGNMENT recommendation, got: %s", idea.Recommendation)
 }
 
-func TestDumpCommand_LowScoreIdea_GetsCorrectRecommendation(t *testing.T) {
+func TestAddCommand_LowScoreIdea_GetsCorrectRecommendation(t *testing.T) {
 	cliCtx, cleanup := setupTestCLI(t)
 	defer cleanup()
 
@@ -144,7 +144,7 @@ func TestDumpCommand_LowScoreIdea_GetsCorrectRecommendation(t *testing.T) {
 	cmd.SetArgs([]string{
 		"--telos", cliCtx.TelosPath,
 		"--db", cliCtx.DBPath,
-		"dump", "Learn Rust and build a comprehensive framework from scratch",
+		"add", "Learn Rust and build a comprehensive framework from scratch",
 	})
 
 	err := cmd.Execute()
@@ -165,7 +165,7 @@ func TestDumpCommand_LowScoreIdea_GetsCorrectRecommendation(t *testing.T) {
 		"Expected AVOID or CONSIDER LATER recommendation")
 }
 
-func TestDumpCommand_DetectsPatterns(t *testing.T) {
+func TestAddCommand_DetectsPatterns(t *testing.T) {
 	cliCtx, cleanup := setupTestCLI(t)
 	defer cleanup()
 
@@ -174,7 +174,7 @@ func TestDumpCommand_DetectsPatterns(t *testing.T) {
 	cmd.SetArgs([]string{
 		"--telos", cliCtx.TelosPath,
 		"--db", cliCtx.DBPath,
-		"dump", "Learn Rust and Flutter before building anything",
+		"add", "Learn Rust and Flutter before building anything",
 	})
 
 	err := cmd.Execute()
@@ -192,7 +192,7 @@ func TestDumpCommand_DetectsPatterns(t *testing.T) {
 	assert.NotEmpty(t, idea.Patterns, "Expected patterns to be detected")
 }
 
-func TestDumpCommand_NoArgs_ReturnsError(t *testing.T) {
+func TestAddCommand_NoArgs_ReturnsError(t *testing.T) {
 	cliCtx, cleanup := setupTestCLI(t)
 	defer cleanup()
 
@@ -200,7 +200,7 @@ func TestDumpCommand_NoArgs_ReturnsError(t *testing.T) {
 	cmd.SetArgs([]string{
 		"--telos", cliCtx.TelosPath,
 		"--db", cliCtx.DBPath,
-		"dump",
+		"add",
 	})
 
 	err := cmd.Execute()
