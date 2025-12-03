@@ -413,7 +413,7 @@ Example:
 
 **Steps to Reproduce**:
 1. Create empty telos.md file
-2. Run `tm dump "test idea"`
+2. Run `tm add "test idea"`
 
 **Expected**: Helpful error message
 **Actual**: Panic with stack trace

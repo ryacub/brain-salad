@@ -36,8 +36,8 @@ The telos-idea-matrix includes several scripts to manage your LLM setup:
 
 Once your LLM is running, the telos-idea-matrix will automatically use AI analysis when:
 
-1. You run `tm dump` (without the `--no-ai` flag)
-2. You run `tm analyze-llm` for detailed analysis
+1. You run `tm add --ai` for detailed analysis with AI
+2. You run `tm add` without flags for basic rule-based scoring
 
 ## Troubleshooting
 

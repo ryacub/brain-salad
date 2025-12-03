@@ -30,7 +30,7 @@ tm init
 tm score "Sell pottery at the farmer's market"
 
 # Save and analyze an idea
-tm dump "Build a mobile app for tracking inventory"
+tm add "Build a mobile app for tracking inventory"
 ```
 
 ### What the wizard asks
@@ -121,9 +121,8 @@ source ~/.zshrc  # or source ~/.bashrc
 
 **Available aliases:**
 - `tm` - Main application
-- `tmd "idea"` - Quick idea dump (shortcut for `tm dump`)
-- `tma` - Analyze last idea
-- `tmr` - Review all ideas (shortcut for `tm review`)
+- `tma "idea"` - Quick idea add (shortcut for `tm add`)
+- `tml` - List all ideas (shortcut for `tm list`)
 - `tmb` - Build project
   - `tmb -d` - Development build
   - `tmb -r` - Release build
@@ -135,14 +134,14 @@ source ~/.zshrc  # or source ~/.bashrc
 **Example workflow with aliases:**
 ```bash
 # Capture ideas quickly
-tmd "Build a tool that helps analyze hotel review sentiment"
+tma "Build a tool that helps analyze hotel review sentiment"
 
-# Review your ideas
-tmr
+# List your ideas
+tml
 
 # Start LLM service for AI analysis
 tms
-tm dump "idea with AI analysis"
+tm add "idea with AI analysis" --ai
 ```
 
 ## Commands
@@ -155,13 +154,13 @@ tm profile reset            # Re-run the wizard
 
 # Scoring
 tm score <idea>             # Score without saving
-tm dump <idea>              # Score and save to database
-tm dump --quick             # Fast capture, minimal output
-tm dump --use-ai            # Use LLM for deeper analysis
+tm add <idea>               # Score and save to database
+tm add --quick              # Fast capture, minimal output
+tm add --ai                 # Use LLM for deeper analysis
 
 # Review
-tm review                   # Browse saved ideas
-tm review --min-score 7.0   # Filter by score
+tm list                     # Browse saved ideas
+tm show <id>                # View idea details
 
 # Management
 tm prune                    # Clean up low-scoring ideas
@@ -200,15 +199,15 @@ For deeper analysis, Brain-Salad supports multiple LLM providers:
 ```bash
 # Ollama (local, private)
 ollama serve
-tm dump "idea" --use-ai --provider ollama
+tm add "idea" --ai --provider ollama
 
 # OpenAI
 export OPENAI_API_KEY=sk-...
-tm dump "idea" --use-ai --provider openai
+tm add "idea" --ai --provider openai
 
 # Claude
 export CLAUDE_API_KEY=sk-ant-...
-tm dump "idea" --use-ai --provider claude
+tm add "idea" --ai --provider claude
 ```
 
 LLM is optional — the rule-based scoring works great without it.
