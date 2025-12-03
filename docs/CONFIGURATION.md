@@ -14,7 +14,7 @@ Brain-Salad is personalized per user via a Telos configuration file. This file d
 
 ```bash
 export TELOS_FILE=/path/to/your/telos.md
-tm dump "Your idea"
+tm add "Your idea"
 ```
 
 ### Option 2: Current Directory
@@ -24,7 +24,7 @@ Place your `telos.md` in your working directory:
 ```bash
 cd /my/project
 cp /path/to/my/telos.md .
-tm dump "Your idea"
+tm add "Your idea"
 ```
 
 ### Option 3: Configuration File
